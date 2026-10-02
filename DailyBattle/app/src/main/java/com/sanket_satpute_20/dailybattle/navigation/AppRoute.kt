@@ -8,6 +8,21 @@ package com.sanket_satpute_20.dailybattle.navigation
 sealed interface AppRoute {
     val route: String
 
+    // --- Graphs ---
+    data object StartupGraph : AppRoute {
+        override val route: String = "startup_graph"
+    }
+    
+    data object MainGraph : AppRoute {
+        override val route: String = "main_graph"
+    }
+
+    data object GameplayGraph : AppRoute {
+        override val route: String = "gameplay_graph"
+    }
+
+    // --- Screens ---
+
     data object Startup : AppRoute {
         override val route: String = "startup"
     }

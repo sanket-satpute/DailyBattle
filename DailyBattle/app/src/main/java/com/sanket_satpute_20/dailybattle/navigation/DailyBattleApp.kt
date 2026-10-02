@@ -69,9 +69,9 @@ fun DailyBattleApp() {
                     onNavigate = { destination ->
                         val route = tabDestinationRouteMap[destination] ?: return@DBBottomNavigation
                         navController.navigate(route) {
-                            // Pop up to the start destination to avoid building up a large
-                            // back stack of tab destinations
-                            popUpTo(navController.graph.findStartDestination().id) {
+                            // Pop up to the start destination of the Main graph (Home)
+                            // to avoid building up a large back stack of tab destinations
+                            popUpTo(AppRoute.Home.route) {
                                 saveState = true
                             }
                             // Avoid multiple copies of the same destination
