@@ -2,6 +2,7 @@ package com.sanket_satpute_20.dailybattle
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import dagger.hilt.android.testing.HiltTestApplication
 
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -23,9 +24,12 @@ class ExampleInstrumentedTest {
     }
 
     @Test
-    fun appUsesHiltApplicationCompositionRoot() {
+    fun appUsesHiltTestApplicationCompositionRoot() {
+        // Sprint 2.4's HiltTestRunner swaps the instrumentation application for
+        // HiltTestApplication so @HiltAndroidTest classes can bind fakes; this is the standard
+        // Hilt testing composition root, not DailyBattleApplication.
         val application = InstrumentationRegistry.getInstrumentation().targetContext.applicationContext
 
-        assertTrue(application is DailyBattleApplication)
+        assertTrue(application is HiltTestApplication)
     }
 }
