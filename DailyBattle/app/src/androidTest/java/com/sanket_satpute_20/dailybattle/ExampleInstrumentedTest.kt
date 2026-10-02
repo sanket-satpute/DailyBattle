@@ -21,4 +21,11 @@ class ExampleInstrumentedTest {
         val appContext = InstrumentationRegistry.getInstrumentation().targetContext
         assertEquals("com.sanket_satpute_20.dailybattle", appContext.packageName)
     }
+
+    @Test
+    fun appUsesHiltApplicationCompositionRoot() {
+        val application = InstrumentationRegistry.getInstrumentation().targetContext.applicationContext
+
+        assertTrue(application is DailyBattleApplication)
+    }
 }
