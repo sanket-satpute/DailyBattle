@@ -18,11 +18,10 @@ import com.sanket_satpute_20.dailybattle.domain.identifier.UserId
  * - [startedAt]         — epoch ms when the session began; null if not yet started
  * - [completedAt]       — epoch ms when the session completed; null if not yet complete
  *
+ * - [challengeSessions]   — list of associated ChallengeSession models
+ *
  * Official session uniqueness constraint: (userId, battleId, OFFICIAL)
  * must identify exactly one official attempt (§18).
- *
- * [challengeSessions] is omitted from this model; it will be included once
- * ChallengeSession is defined in a subsequent sprint.
  */
 data class BattleSession(
     val sessionId: BattleSessionId,
@@ -33,4 +32,5 @@ data class BattleSession(
     val currentChallenge: Int?,
     val startedAt: Long?,
     val completedAt: Long?,
+    val challengeSessions: List<ChallengeSession> = emptyList(),
 )
