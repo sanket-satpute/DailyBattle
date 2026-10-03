@@ -19,4 +19,12 @@ object DomainModule {
     ): GetOrStartOfficialBattleUseCase {
         return GetOrStartOfficialBattleUseCase(repository)
     }
+
+    @Provides
+    @Singleton
+    fun provideActiveBattleSessionManager(
+        repository: BattleSessionRepository
+    ): com.sanket_satpute_20.dailybattle.domain.battle.ActiveBattleSessionManager {
+        return com.sanket_satpute_20.dailybattle.domain.battle.ActiveBattleSessionManager(repository)
+    }
 }

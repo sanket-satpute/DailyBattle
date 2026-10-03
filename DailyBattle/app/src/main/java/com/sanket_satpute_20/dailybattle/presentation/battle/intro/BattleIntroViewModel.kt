@@ -6,6 +6,7 @@ import com.sanket_satpute_20.dailybattle.domain.battle.GetOrStartOfficialBattleU
 import com.sanket_satpute_20.dailybattle.domain.identifier.BattleId
 import com.sanket_satpute_20.dailybattle.domain.identifier.UserId
 import com.sanket_satpute_20.dailybattle.domain.result.DomainResult
+import com.sanket_satpute_20.dailybattle.domain.battle.ActiveBattleSessionManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -32,7 +33,8 @@ sealed interface BattleIntroEvent {
 
 @HiltViewModel
 class BattleIntroViewModel @Inject constructor(
-    private val getOrStartOfficialBattleUseCase: GetOrStartOfficialBattleUseCase
+    private val getOrStartOfficialBattleUseCase: GetOrStartOfficialBattleUseCase,
+    private val activeBattleSessionManager: ActiveBattleSessionManager
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(BattleIntroState())
@@ -53,6 +55,7 @@ class BattleIntroViewModel @Inject constructor(
             
             when (result) {
                 is DomainResult.Success -> {
+                    activeBattleSessionManager.bindSession(result.value.session)
                     _state.update { it.copy(isLoading = false) }
                     _uiEvent.emit(BattleIntroEvent.NavigateToBattle)
                 }

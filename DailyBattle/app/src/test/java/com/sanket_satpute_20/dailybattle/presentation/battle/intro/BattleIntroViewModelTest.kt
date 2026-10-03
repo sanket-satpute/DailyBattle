@@ -5,6 +5,7 @@ import com.sanket_satpute_20.dailybattle.domain.battle.BattleMode
 import com.sanket_satpute_20.dailybattle.domain.battle.BattleSession
 import com.sanket_satpute_20.dailybattle.domain.battle.BattleSessionStatus
 import com.sanket_satpute_20.dailybattle.domain.battle.GetOrStartOfficialBattleUseCase
+import com.sanket_satpute_20.dailybattle.domain.battle.ActiveBattleSessionManager
 import com.sanket_satpute_20.dailybattle.domain.identifier.BattleId
 import com.sanket_satpute_20.dailybattle.domain.identifier.BattleSessionId
 import com.sanket_satpute_20.dailybattle.domain.identifier.UserId
@@ -31,6 +32,7 @@ class BattleIntroViewModelTest {
     private val testDispatcher = StandardTestDispatcher()
     private lateinit var repository: InMemoryBattleSessionRepository
     private lateinit var useCase: GetOrStartOfficialBattleUseCase
+    private lateinit var activeBattleSessionManager: ActiveBattleSessionManager
     private lateinit var viewModel: BattleIntroViewModel
 
     @Before
@@ -38,7 +40,8 @@ class BattleIntroViewModelTest {
         Dispatchers.setMain(testDispatcher)
         repository = InMemoryBattleSessionRepository()
         useCase = GetOrStartOfficialBattleUseCase(repository)
-        viewModel = BattleIntroViewModel(useCase)
+        activeBattleSessionManager = ActiveBattleSessionManager(repository)
+        viewModel = BattleIntroViewModel(useCase, activeBattleSessionManager)
     }
 
     @After

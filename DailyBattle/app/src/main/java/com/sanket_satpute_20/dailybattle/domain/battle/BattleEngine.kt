@@ -26,6 +26,9 @@ class BattleEngine(
     private val battleStateMachine = BattleStateMachine(reconstructBattleState(initialSession))
     private var challengeStateMachine: ChallengeStateMachine? = reconstructChallengeState(initialSession)
 
+    val currentBattleState: BattleState
+        get() = battleStateMachine.currentState
+
     fun processBattleEvent(event: BattleEvent): DomainResult<BattleSession> = synchronized(lock) {
         val result = battleStateMachine.transition(event)
         if (result is DomainResult.Failure) return result
