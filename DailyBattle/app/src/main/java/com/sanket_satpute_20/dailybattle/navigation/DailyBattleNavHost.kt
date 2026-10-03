@@ -14,6 +14,7 @@ import androidx.navigation.compose.rememberNavController
 import com.sanket_satpute_20.dailybattle.design.color.DBColor
 import com.sanket_satpute_20.dailybattle.design.typography.DBTypography
 import com.sanket_satpute_20.dailybattle.presentation.startup.StartupRoute
+import com.sanket_satpute_20.dailybattle.presentation.startup.WelcomeRoute
 
 /**
  * Application navigation host.
@@ -39,7 +40,11 @@ fun DailyBattleNavHost(
                 StartupRoute()
             }
             composable(AppRoute.Welcome.route) {
-                ScreenPlaceholder(label = "Welcome (SCR-001)")
+                WelcomeRoute(
+                    onGetStarted = {
+                        navController.navigate(AppRoute.BattleName.route)
+                    }
+                )
             }
             composable(AppRoute.BattleName.route) {
                 ScreenPlaceholder(label = "Battle Name (SCR-002)")
