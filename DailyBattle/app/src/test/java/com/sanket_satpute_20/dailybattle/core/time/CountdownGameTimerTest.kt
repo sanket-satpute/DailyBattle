@@ -3,7 +3,7 @@ package com.sanket_satpute_20.dailybattle.core.time
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
-import kotlinx.coroutines.test.advanceTimeBy
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -44,7 +44,7 @@ class CountdownGameTimerTest {
 
         // Advance 2 seconds
         timeProvider.advance(2000L)
-        advanceTimeBy(2000L)
+        delay(2000L)
 
         state = timer.state.value
         assertTrue(state.isRunning)
@@ -58,7 +58,7 @@ class CountdownGameTimerTest {
         timer.start(1000L)
 
         timeProvider.advance(1000L)
-        advanceTimeBy(1000L)
+        delay(1000L)
 
         val state = timer.state.value
         assertFalse(state.isRunning)
@@ -73,7 +73,7 @@ class CountdownGameTimerTest {
 
         // Run for 2 seconds
         timeProvider.advance(2000L)
-        advanceTimeBy(2000L)
+        delay(2000L)
 
         timer.pause()
         
@@ -83,7 +83,7 @@ class CountdownGameTimerTest {
 
         // Time passes while paused (e.g. 5 seconds)
         timeProvider.advance(5000L)
-        advanceTimeBy(5000L)
+        delay(5000L)
 
         // State shouldn't change
         state = timer.state.value
@@ -93,7 +93,7 @@ class CountdownGameTimerTest {
         // Resume and run for 1 second
         timer.resume()
         timeProvider.advance(1000L)
-        advanceTimeBy(1000L)
+        delay(1000L)
 
         state = timer.state.value
         assertTrue(state.isRunning)
@@ -112,7 +112,7 @@ class CountdownGameTimerTest {
 
         // Run for 1 second
         timeProvider.advance(1000L)
-        advanceTimeBy(1000L)
+        delay(1000L)
 
         state = timer.state.value
         assertEquals(2000L, state.remainingMillis)
@@ -129,7 +129,7 @@ class CountdownGameTimerTest {
 
         // Time passes
         timeProvider.advance(2000L)
-        advanceTimeBy(2000L)
+        delay(2000L)
 
         state = timer.state.value
         assertFalse(state.isRunning)
