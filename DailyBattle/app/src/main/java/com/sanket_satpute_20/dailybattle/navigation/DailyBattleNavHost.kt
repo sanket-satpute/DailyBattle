@@ -13,6 +13,7 @@ import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import com.sanket_satpute_20.dailybattle.design.color.DBColor
 import com.sanket_satpute_20.dailybattle.design.typography.DBTypography
+import com.sanket_satpute_20.dailybattle.presentation.startup.BattleNameRoute
 import com.sanket_satpute_20.dailybattle.presentation.startup.StartupRoute
 import com.sanket_satpute_20.dailybattle.presentation.startup.WelcomeRoute
 
@@ -47,7 +48,13 @@ fun DailyBattleNavHost(
                 )
             }
             composable(AppRoute.BattleName.route) {
-                ScreenPlaceholder(label = "Battle Name (SCR-002)")
+                BattleNameRoute(
+                    onContinue = {
+                        navController.navigate(AppRoute.Home.route) {
+                            popUpTo(AppRoute.StartupGraph.route) { inclusive = true }
+                        }
+                    }
+                )
             }
         }
 
