@@ -89,7 +89,7 @@ class HomeScreenTest {
 
         composeTestRule.setContent {
             HomeScreen(
-                state = HomeState(isError = true),
+                state = HomeState(isError = true, errorMessage = "NO BATTLE AVAILABLE"),
                 onPlayBattle = {},
                 onBeatRival = {},
                 onAddFriend = {},
@@ -98,7 +98,54 @@ class HomeScreenTest {
         }
 
         // Verify error element
+        composeTestRule.onNodeWithText("NO BATTLE AVAILABLE").assertExists()
         composeTestRule.onNodeWithText("RETRY").performClick()
         assertTrue(retryClicked)
+    }
+
+    @Test
+    fun verify_home_screen_completed_state() {
+        composeTestRule.setContent {
+            HomeScreen(
+                state = HomeState(
+                    isLoading = false,
+                    isError = false,
+                    battleState = DBBattleCardState.Completed,
+                    score = 901,
+                    percentileText = "TOP 9%",
+                    nextBattleTime = "TOMORROW"
+                ),
+                onPlayBattle = {},
+                onBeatRival = {},
+                onAddFriend = {},
+                onRetry = {}
+            )
+        }
+
+        // Verify completed elements
+        composeTestRule.onNodeWithText("TODAY'S BATTLE ✓").assertExists()
+        composeTestRule.onNodeWithText("901").assertExists()
+        composeTestRule.onNodeWithText("TOP 9%").assertExists()
+        composeTestRule.onNodeWithText("NEXT BATTLE").assertExists()
+        composeTestRule.onNodeWithText("TOMORROW").assertExists()
+        
+        // Verify action is hidden
+        composeTestRule.onNodeWithText("PLAY BATTLE").assertDoesNotExist()
+    }
+
+    @Test
+    fun verify_home_screen_offline_state() {
+        composeTestRule.setContent {
+            HomeScreen(
+                state = HomeState(isError = true, isOffline = true),
+                onPlayBattle = {},
+                onBeatRival = {},
+                onAddFriend = {},
+                onRetry = {}
+            )
+        }
+
+        // Verify offline description
+        composeTestRule.onNodeWithText("You are currently offline.").assertExists()
     }
 }

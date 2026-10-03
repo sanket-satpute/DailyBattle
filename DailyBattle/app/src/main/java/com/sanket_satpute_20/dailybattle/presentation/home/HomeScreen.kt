@@ -62,9 +62,11 @@ internal fun HomeScreen(
     modifier: Modifier = Modifier
 ) {
     if (state.isError) {
+        val title = state.errorMessage ?: "COULDN'T LOAD TODAY'S BATTLE"
+        val description = if (state.isOffline) "You are currently offline." else "Check your connection and try again."
         DBErrorState(
-            title = "COULDN'T LOAD TODAY'S BATTLE",
-            description = "Check your connection and try again.",
+            title = title,
+            description = description,
             onRetry = onRetry,
             modifier = modifier
         )
@@ -127,22 +129,37 @@ internal fun HomeScreen(
         } else {
             DBBattleCard(
                 state = state.battleState,
-                title = "TODAY'S BATTLE",
-                subtitle = "${state.challengesCount} challenges · ~${state.estimatedMinutes} minutes",
+                title = if (state.battleState == DBBattleCardState.Completed) "TODAY'S BATTLE ✓" else "TODAY'S BATTLE",
+                subtitle = if (state.battleState == DBBattleCardState.Completed) "" else "${state.challengesCount} challenges · ~${state.estimatedMinutes} minutes",
                 content = {
-                    // Placeholder for ● ● ●
-                    Row(horizontalArrangement = Arrangement.spacedBy(DBSpacing.XS)) {
-                        repeat(state.challengesCount) {
-                            Text("●", color = DBColor.TextSecondary) // Snap/Shift colors are hidden per SCR-003
+                    if (state.battleState == DBBattleCardState.Completed) {
+                        Column(
+                            horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(DBSpacing.XS)
+                        ) {
+                            Text(text = state.score?.toString() ?: "", style = DBTypography.H1, color = DBColor.TextPrimary)
+                            Text(text = state.percentileText ?: "", style = DBTypography.Body, color = DBColor.BrandPrimary)
+                            Spacer(modifier = Modifier.height(DBSpacing.MD))
+                            Text(text = "NEXT BATTLE", style = DBTypography.Caption, color = DBColor.TextSecondary)
+                            Text(text = state.nextBattleTime ?: "TOMORROW", style = DBTypography.Body, color = DBColor.TextPrimary)
+                        }
+                    } else {
+                        // Placeholder for ● ● ●
+                        Row(horizontalArrangement = Arrangement.spacedBy(DBSpacing.XS)) {
+                            repeat(state.challengesCount) {
+                                Text("●", color = DBColor.TextSecondary) // Snap/Shift colors are hidden per SCR-003
+                            }
                         }
                     }
                 },
                 action = {
-                    DBButton(
-                        text = "PLAY BATTLE",
-                        onClick = onPlayBattle,
-                        modifier = Modifier.fillMaxWidth()
-                    )
+                    if (state.battleState != DBBattleCardState.Completed) {
+                        DBButton(
+                            text = "PLAY BATTLE",
+                            onClick = onPlayBattle,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
                 }
             )
         }
