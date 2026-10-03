@@ -103,7 +103,16 @@ fun DailyBattleNavHost(
             startDestination = AppRoute.BattleIntro.route
         ) {
             composable(AppRoute.BattleIntro.route) {
-                ScreenPlaceholder(label = "Battle Intro (SCR-004)")
+                com.sanket_satpute_20.dailybattle.presentation.battle.intro.BattleIntroRoute(
+                    onNavigateToBattle = {
+                        navController.navigate(AppRoute.Snap.route) {
+                            popUpTo(AppRoute.BattleIntro.route) { inclusive = true }
+                        }
+                    },
+                    onNavigateBack = {
+                        navController.popBackStack()
+                    }
+                )
             }
             composable(AppRoute.Snap.route) {
                 ScreenPlaceholder(label = "Snap (SCR-005)")
