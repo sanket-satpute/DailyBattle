@@ -13,6 +13,7 @@ import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import com.sanket_satpute_20.dailybattle.design.color.DBColor
 import com.sanket_satpute_20.dailybattle.design.typography.DBTypography
+import com.sanket_satpute_20.dailybattle.presentation.home.HomeRoute
 import com.sanket_satpute_20.dailybattle.presentation.startup.BattleNameRoute
 import com.sanket_satpute_20.dailybattle.presentation.startup.StartupRoute
 import com.sanket_satpute_20.dailybattle.presentation.startup.WelcomeRoute
@@ -64,7 +65,17 @@ fun DailyBattleNavHost(
             startDestination = AppRoute.Home.route
         ) {
             composable(AppRoute.Home.route) {
-                ScreenPlaceholder(label = "Home (SCR-003)")
+                HomeRoute(
+                    onPlayBattle = {
+                        navController.navigate(AppRoute.BattleIntro.route)
+                    },
+                    onBeatRival = {
+                        navController.navigate(AppRoute.Rival.route)
+                    },
+                    onAddFriend = {
+                        navController.navigate(AppRoute.AddFriend.route)
+                    }
+                )
             }
             composable(AppRoute.Battle.route) {
                 ScreenPlaceholder(label = "Battle")
