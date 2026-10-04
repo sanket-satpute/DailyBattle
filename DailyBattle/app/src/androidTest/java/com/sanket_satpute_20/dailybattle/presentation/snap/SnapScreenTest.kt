@@ -23,7 +23,8 @@ class SnapScreenTest {
                     timerText = "--:--",
                     scoreText = "Score --"
                 ),
-                onElementTap = {}
+                onElementTap = {},
+                onComplete = {}
             )
         }
 

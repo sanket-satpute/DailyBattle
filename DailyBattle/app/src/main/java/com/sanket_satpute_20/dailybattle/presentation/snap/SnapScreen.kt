@@ -14,9 +14,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.sanket_satpute_20.dailybattle.design.color.DBColor
+import com.sanket_satpute_20.dailybattle.design.animation.pulse
+import com.sanket_satpute_20.dailybattle.design.animation.shake
 import com.sanket_satpute_20.dailybattle.domain.snap.SnapState
 
 /**
@@ -27,7 +31,12 @@ data class SnapUiState(
     // Note: Timer values, progress (1/3), score values are blocked by DEC-GAME-001.
     val progressText: String = "1 / ?", // Blocked
     val timerText: String = "--:--",   // Blocked
-    val scoreText: String = "Score --" // Blocked
+    val scoreText: String = "Score --", // Blocked
+    
+    // Feedback states
+    val isCorrect: Boolean = false,
+    val isIncorrect: Boolean = false,
+    val isComplete: Boolean = false
 )
 
 /**
@@ -44,7 +53,8 @@ data class SnapUiState(
 @Composable
 fun SnapScreen(
     uiState: SnapUiState,
-    onElementTap: (String) -> Unit
+    onElementTap: (String) -> Unit,
+    onComplete: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -82,11 +92,45 @@ fun SnapScreen(
 
         Spacer(modifier = Modifier.size(24.dp))
 
+        val haptic = LocalHapticFeedback.current
+
+        // Trigger haptics and sound hooks based on state changes
+        LaunchedEffect(uiState.isCorrect) {
+            if (uiState.isCorrect) {
+                // Short success sound hook (blocked by actual sound assets)
+                // SoundManager.playSound("success")
+                
+                // Light/success haptic
+                // Fallback to text handle move if platform doesn't map confirm well in standard set
+                haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.TextHandleMove) 
+            }
+        }
+        
+        LaunchedEffect(uiState.isIncorrect) {
+            if (uiState.isIncorrect) {
+                // Short error sound hook (blocked by actual sound assets)
+                // SoundManager.playSound("error")
+                
+                // Short error haptic
+                haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
+            }
+        }
+
+        LaunchedEffect(uiState.isComplete) {
+            if (uiState.isComplete) {
+                // Short completion feedback delay (as per 10_ANIMATION_HAPTICS.md 20. Snap Completion)
+                kotlinx.coroutines.delay(1000)
+                onComplete()
+            }
+        }
+
         // GAME AREA SECTION (60-65% of viewport conceptually)
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f)
+                .pulse(isPulsing = uiState.isCorrect)
+                .shake(isShaking = uiState.isIncorrect)
                 .background(MaterialTheme.colorScheme.surfaceVariant),
             contentAlignment = Alignment.Center
         ) {
