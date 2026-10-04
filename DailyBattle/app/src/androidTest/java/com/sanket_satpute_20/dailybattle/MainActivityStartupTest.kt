@@ -17,22 +17,37 @@ import org.junit.runner.RunWith
 @HiltAndroidTest
 @RunWith(AndroidJUnit4::class)
 class MainActivityStartupTest {
-    @get:Rule
+    @get:Rule(order = 0)
     val hiltRule = HiltAndroidRule(this)
+
+    @get:Rule(order = 1)
+    val composeTestRule = androidx.compose.ui.test.junit4.createAndroidComposeRule<MainActivity>()
 
     @Test
     fun appStartsAndReachesResumedState() {
-        ActivityScenario.launch(MainActivity::class.java).use { scenario ->
-            assertEquals(Lifecycle.State.RESUMED, scenario.state)
-        }
+        assertEquals(Lifecycle.State.RESUMED, composeTestRule.activityRule.scenario.state)
     }
 
     @Test
     fun appSurvivesRecreationAfterStartup() {
-        ActivityScenario.launch(MainActivity::class.java).use { scenario ->
-            scenario.recreate()
+        composeTestRule.activityRule.scenario.recreate()
+        assertEquals(Lifecycle.State.RESUMED, composeTestRule.activityRule.scenario.state)
+    }
 
-            assertEquals(Lifecycle.State.RESUMED, scenario.state)
+    @Test
+    fun successfulStartupNavigatesToWelcomeScreen() {
+        // AppStartupViewModel completes initialization via init {}, transitioning to Success state.
+        // StartupRoute observes this and calls onStartupComplete.
+        // DailyBattleNavHost navigates to WelcomeRoute.
+        
+        // Wait for the "DAILY BATTLE" text to appear on the Welcome screen.
+        composeTestRule.waitUntil(timeoutMillis = 5000) {
+            composeTestRule.onAllNodes(
+                androidx.compose.ui.test.hasText("DAILY BATTLE")
+            ).fetchSemanticsNodes().isNotEmpty()
         }
+        
+        composeTestRule.onNode(androidx.compose.ui.test.hasText("DAILY BATTLE")).assertExists()
+        composeTestRule.onNode(androidx.compose.ui.test.hasText("GET STARTED")).assertExists()
     }
 }

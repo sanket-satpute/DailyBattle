@@ -16,8 +16,16 @@ import com.sanket_satpute_20.dailybattle.presentation.state.ScreenState
 fun StartupRoute(
     modifier: Modifier = Modifier,
     viewModel: AppStartupViewModel = hiltViewModel(),
+    onStartupComplete: () -> Unit
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+
+    androidx.compose.runtime.LaunchedEffect(state) {
+        if (state is ScreenState.Success) {
+            onStartupComplete()
+        }
+    }
+
     StartupScreen(state = state, modifier = modifier)
 }
 

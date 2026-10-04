@@ -39,7 +39,13 @@ fun DailyBattleNavHost(
             startDestination = AppRoute.Startup.route
         ) {
             composable(AppRoute.Startup.route) {
-                StartupRoute()
+                StartupRoute(
+                    onStartupComplete = {
+                        navController.navigate(AppRoute.Welcome.route) {
+                            popUpTo(AppRoute.Startup.route) { inclusive = true }
+                        }
+                    }
+                )
             }
             composable(AppRoute.Welcome.route) {
                 WelcomeRoute(
