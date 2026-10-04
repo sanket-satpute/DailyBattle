@@ -578,31 +578,28 @@ The Consistency component is therefore worth:
 
 100 points
 
-However, the existing product specification does not fully define what
-"Consistency" mathematically means.
+However, the product specification defines "Consistency" as a measure of performance balance across the three official Daily Battle challenges.
 
-Possible interpretations must NOT be selected by the implementation agent.
+Status: APPROVED
 
-Status:
+Definition:
+Consistency measures how evenly the player performed across Snap, Shift, and Crowd Call. It is a measure of performance balance, not an independent measure of accuracy, reaction time, memory, or social prediction. Equal low performance can mathematically produce high Consistency.
 
-DECISION_REQUIRED
+Calculation:
+Given final official scores S (Snap), H (Shift), C (Crowd Call), each out of 300:
+1. Normalize: s = S / 300, h = H / 300, c = C / 300
+2. Mean: μ = (s + h + c) / 3
+3. Population standard deviation: σ = sqrt(((s - μ)^2 + (h - μ)^2 + (c - μ)^2) / 3)
+4. Max possible standard deviation for 3 values in [0,1]: σmax = sqrt(2) / 3
+5. Balance = 1 - (σ / σmax)
+6. ConsistencyRaw = 100 × Balance
+7. ConsistencyScore = round(clamp(ConsistencyRaw, 0, 100))
 
-The final definition must specify:
-
-input values
-calculation
-normalization
-minimum
-maximum
-rounding
-edge cases
-whether consistency is calculated across the three challenges
-whether it considers accuracy
-whether it considers variance
-whether it considers timing
-whether it considers performance balance
-
-Until defined, Antigravity must not invent a Consistency formula.
+Edge Cases & Properties:
+- Range is 0–100, integer result.
+- Missing/incomplete challenge scores must not produce a final Consistency score.
+- Practice scores must never affect Consistency.
+- Deterministic; no randomness or AI.
 
 12. TOTAL SCORE
 
