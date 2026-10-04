@@ -13,9 +13,16 @@ import com.sanket_satpute_20.dailybattle.domain.result.DomainResult
  * - State restoration from disk (via reconstruction)
  * - Simultaneous state events (via synchronization lock)
  * - Modifying completed results (rejected natively by terminal states)
+ *
+ * Sprint 7.4 additions:
+ * - Validates the official challenge sequence (Snap → Shift → Crowd Call) when
+ *   a [Battle] definition is provided.
+ * - Exposes [currentChallengeType] to identify the active challenge type via
+ *   [ChallengeSequence].
  */
 class BattleEngine(
     initialSession: BattleSession,
+    private val battle: Battle? = null,
     private val clock: () -> Long = { System.currentTimeMillis() }
 ) {
     private val lock = Any()
@@ -26,8 +33,38 @@ class BattleEngine(
     private val battleStateMachine = BattleStateMachine(reconstructBattleState(initialSession))
     private var challengeStateMachine: ChallengeStateMachine? = reconstructChallengeState(initialSession)
 
+    init {
+        // Sprint 7.4: Validate challenge sequence when a Battle definition is available
+        battle?.let { b ->
+            require(ChallengeSequence.isValidSequence(b.challenges)) {
+                "Battle challenges do not conform to the official sequence " +
+                    "(Snap → Shift → Crowd Call). Battle: ${b.battleId}"
+            }
+        }
+    }
+
     val currentBattleState: BattleState
         get() = battleStateMachine.currentState
+
+    /**
+     * Returns the [ChallengeType] for the currently active challenge,
+     * or `null` if no challenge is active (e.g., NotStarted, BattleComplete, Results).
+     *
+     * Uses [ChallengeSequence] as the authoritative source for index-to-type mapping
+     * (REQ-GAME-002, Invariant 7).
+     */
+    val currentChallengeType: ChallengeType?
+        get() {
+            val state = currentBattleState
+            val index = when (state) {
+                is BattleState.Ready -> state.challengeIndex
+                is BattleState.Active -> state.challengeIndex
+                is BattleState.ChallengeComplete -> state.challengeIndex
+                is BattleState.NextChallenge -> state.challengeIndex
+                else -> null
+            }
+            return index?.let { ChallengeSequence.typeForIndex(it) }
+        }
 
     fun processBattleEvent(event: BattleEvent): DomainResult<BattleSession> = synchronized(lock) {
         val result = battleStateMachine.transition(event)

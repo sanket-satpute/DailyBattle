@@ -192,4 +192,122 @@ class BattleEngineTest {
         val result = engine.processBattleEvent(BattleEvent.StartBattle)
         assertTrue(result is DomainResult.Failure)
     }
+
+    // ── Sprint 7.4: Challenge Sequencing ────────────────────────────
+
+    private fun createValidBattle() = Battle(
+        battleId = BattleId("b-1"),
+        battleDate = 19000L,
+        status = BattleStatus.AVAILABLE,
+        version = 1,
+        challenges = listOf(
+            Challenge(ChallengeId("c-1"), BattleId("b-1"), ChallengeType.SNAP, 1, 1),
+            Challenge(ChallengeId("c-2"), BattleId("b-1"), ChallengeType.SHIFT, 2, 1),
+            Challenge(ChallengeId("c-3"), BattleId("b-1"), ChallengeType.CROWD_CALL, 3, 1),
+        )
+    )
+
+    @Test
+    fun `currentChallengeType is null before battle starts`() {
+        val engine = BattleEngine(createInitialSession(), battle = createValidBattle())
+        assertEquals(null, engine.currentChallengeType)
+    }
+
+    @Test
+    fun `currentChallengeType is SNAP for challenge 1`() {
+        val engine = BattleEngine(createInitialSession(), battle = createValidBattle(), clock = { 1000L })
+        engine.processBattleEvent(BattleEvent.StartBattle)
+        assertEquals(ChallengeType.SNAP, engine.currentChallengeType)
+
+        engine.processBattleEvent(BattleEvent.BeginChallenge)
+        assertEquals(ChallengeType.SNAP, engine.currentChallengeType)
+    }
+
+    @Test
+    fun `currentChallengeType is SHIFT for challenge 2`() {
+        val engine = BattleEngine(createInitialSession(), battle = createValidBattle(), clock = { 1000L })
+        engine.processBattleEvent(BattleEvent.StartBattle)
+        engine.processBattleEvent(BattleEvent.BeginChallenge)
+        engine.processChallengeEvent(ChallengeEvent.Start)
+        engine.processChallengeEvent(ChallengeEvent.SubmitCorrect)
+        engine.processChallengeEvent(ChallengeEvent.Finish)
+        engine.processBattleEvent(BattleEvent.Continue)
+        assertEquals(ChallengeType.SHIFT, engine.currentChallengeType)
+
+        engine.processBattleEvent(BattleEvent.PrepareNext)
+        assertEquals(ChallengeType.SHIFT, engine.currentChallengeType)
+    }
+
+    @Test
+    fun `currentChallengeType is CROWD_CALL for challenge 3`() {
+        val engine = BattleEngine(createInitialSession(), battle = createValidBattle(), clock = { 1000L })
+        // Complete challenges 1 and 2
+        engine.processBattleEvent(BattleEvent.StartBattle)
+        engine.processBattleEvent(BattleEvent.BeginChallenge)
+        engine.processChallengeEvent(ChallengeEvent.Start)
+        engine.processChallengeEvent(ChallengeEvent.SubmitCorrect)
+        engine.processChallengeEvent(ChallengeEvent.Finish)
+        engine.processBattleEvent(BattleEvent.Continue)
+        engine.processBattleEvent(BattleEvent.PrepareNext)
+        engine.processBattleEvent(BattleEvent.BeginChallenge)
+        engine.processChallengeEvent(ChallengeEvent.Start)
+        engine.processChallengeEvent(ChallengeEvent.SubmitCorrect)
+        engine.processChallengeEvent(ChallengeEvent.Finish)
+        engine.processBattleEvent(BattleEvent.Continue)
+
+        assertEquals(ChallengeType.CROWD_CALL, engine.currentChallengeType)
+    }
+
+    @Test
+    fun `currentChallengeType is null after battle complete`() {
+        val engine = BattleEngine(createInitialSession(), battle = createValidBattle(), clock = { 1000L })
+        // Complete all 3 challenges
+        engine.processBattleEvent(BattleEvent.StartBattle)
+        for (i in 1..3) {
+            engine.processBattleEvent(BattleEvent.BeginChallenge)
+            engine.processChallengeEvent(ChallengeEvent.Start)
+            engine.processChallengeEvent(ChallengeEvent.SubmitCorrect)
+            engine.processChallengeEvent(ChallengeEvent.Finish)
+            if (i < 3) {
+                engine.processBattleEvent(BattleEvent.Continue)
+                engine.processBattleEvent(BattleEvent.PrepareNext)
+            }
+        }
+        engine.processBattleEvent(BattleEvent.Continue)
+        assertEquals(null, engine.currentChallengeType)
+
+        engine.processBattleEvent(BattleEvent.ShowResults)
+        assertEquals(null, engine.currentChallengeType)
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun `engine rejects battle with wrong challenge sequence`() {
+        val invalidBattle = Battle(
+            battleId = BattleId("b-1"),
+            battleDate = 19000L,
+            status = BattleStatus.AVAILABLE,
+            version = 1,
+            challenges = listOf(
+                Challenge(ChallengeId("c-1"), BattleId("b-1"), ChallengeType.SHIFT, 1, 1),
+                Challenge(ChallengeId("c-2"), BattleId("b-1"), ChallengeType.SNAP, 2, 1),
+                Challenge(ChallengeId("c-3"), BattleId("b-1"), ChallengeType.CROWD_CALL, 3, 1),
+            )
+        )
+        BattleEngine(createInitialSession(), battle = invalidBattle)
+    }
+
+    @Test
+    fun `engine accepts valid challenge sequence`() {
+        // Should not throw
+        val engine = BattleEngine(createInitialSession(), battle = createValidBattle())
+        assertEquals(BattleState.NotStarted, engine.currentBattleState)
+    }
+
+    @Test
+    fun `engine works without battle parameter for backward compatibility`() {
+        // No battle provided - should work exactly as before
+        val engine = BattleEngine(createInitialSession())
+        engine.processBattleEvent(BattleEvent.StartBattle)
+        assertEquals(ChallengeType.SNAP, engine.currentChallengeType)
+    }
 }

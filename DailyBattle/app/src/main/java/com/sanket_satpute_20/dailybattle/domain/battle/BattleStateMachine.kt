@@ -39,7 +39,7 @@ class BattleStateMachine(initialState: BattleState = BattleState.NotStarted) {
             is BattleState.ChallengeComplete -> {
                 val state = currentState as BattleState.ChallengeComplete
                 if (event is BattleEvent.Continue) {
-                    if (state.challengeIndex < 3) {
+                    if (state.challengeIndex < ChallengeSequence.TOTAL_CHALLENGES) {
                         BattleState.NextChallenge(state.challengeIndex + 1)
                     } else {
                         BattleState.BattleComplete
