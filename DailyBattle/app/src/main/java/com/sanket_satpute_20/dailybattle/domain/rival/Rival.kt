@@ -10,6 +10,7 @@ enum class RivalStatus {
 data class Rival(
     val userId: UserId,
     val rivalUserId: UserId,
+    val rivalName: String,
     val selectedAt: Long,
     val status: RivalStatus
 )

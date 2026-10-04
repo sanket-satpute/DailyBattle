@@ -133,7 +133,16 @@ fun DailyBattleNavHost(
                 ScreenPlaceholder(label = "Results (SCR-008)")
             }
             composable(AppRoute.Rival.route) {
-                ScreenPlaceholder(label = "Rival (SCR-009)")
+                com.sanket_satpute_20.dailybattle.presentation.rival.RivalRoute(
+                    onNavigateBack = { navController.popBackStack() },
+                    onNavigateToPractice = {
+                        // For now, Practice might just go to BattleIntro or somewhere else
+                        // The blueprint says "Rival can lead to Practice". Let's assume it leads to Home or somewhere similar, or just pop back for now until Practice screen exists.
+                        navController.navigate(AppRoute.Home.route) {
+                            popUpTo(AppRoute.MainGraph.route) { inclusive = true }
+                        }
+                    }
+                )
             }
         }
     }

@@ -36,6 +36,7 @@ class GetCurrentRivalUseCaseTest {
         val rival = Rival(
             userId = UserId("u-1"),
             rivalUserId = UserId("u-2"),
+            rivalName = "Rahul",
             selectedAt = 1000L,
             status = RivalStatus.ACTIVE
         )
