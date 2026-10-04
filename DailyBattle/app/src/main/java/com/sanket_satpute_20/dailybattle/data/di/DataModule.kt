@@ -23,4 +23,10 @@ abstract class DataModule {
     abstract fun bindBattleSessionRepository(
         inMemoryBattleSessionRepository: com.sanket_satpute_20.dailybattle.data.battle.InMemoryBattleSessionRepository
     ): com.sanket_satpute_20.dailybattle.domain.battle.BattleSessionRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindBattleResultRepository(
+        inMemoryBattleResultRepository: com.sanket_satpute_20.dailybattle.data.battle.InMemoryBattleResultRepository
+    ): com.sanket_satpute_20.dailybattle.domain.battle.BattleResultRepository
 }
