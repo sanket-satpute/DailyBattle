@@ -17,6 +17,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.runtime.setValue
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.sanket_satpute_20.dailybattle.design.color.DBColor
 import com.sanket_satpute_20.dailybattle.design.components.DBButton
@@ -79,6 +82,31 @@ private fun ResultsContent(
     onShareClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    var showPercentile by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
+    var showImprovement by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
+    var showBreakdown by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
+    var showRival by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
+
+    val animatedScore = androidx.compose.runtime.remember { androidx.compose.animation.core.Animatable(0f) }
+
+    androidx.compose.runtime.LaunchedEffect(summary.result.totalScore) {
+        animatedScore.animateTo(
+            targetValue = summary.result.totalScore.toFloat(),
+            animationSpec = androidx.compose.animation.core.tween(
+                durationMillis = 800,
+                easing = androidx.compose.animation.core.LinearOutSlowInEasing
+            )
+        )
+        kotlinx.coroutines.delay(200)
+        showPercentile = true
+        kotlinx.coroutines.delay(200)
+        showImprovement = true
+        kotlinx.coroutines.delay(200)
+        showBreakdown = true
+        kotlinx.coroutines.delay(200)
+        showRival = true
+    }
+
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -97,9 +125,13 @@ private fun ResultsContent(
 
         // 2. Score
         Text(
-            text = "${summary.result.totalScore}",
+            text = "${animatedScore.value.toInt()}",
             style = DBTypography.H1,
-            color = DBColor.BrandPrimary
+            color = DBColor.BrandPrimary,
+            modifier = Modifier.semantics {
+                // Ensure the final score is readable to TalkBack even during animation
+                contentDescription = "Score: ${summary.result.totalScore}"
+            }
         )
         Text(
             text = "/ 1000",
@@ -110,102 +142,126 @@ private fun ResultsContent(
         Spacer(modifier = Modifier.height(DBSpacing.MD))
 
         // 3. Percentile
-        val formattedPercentile = (summary.result.percentile * 100).toInt()
-        Text(
-            text = "TOP $formattedPercentile%",
-            style = DBTypography.H3,
-            color = DBColor.TextPrimary
-        )
-
-        Spacer(modifier = Modifier.height(DBSpacing.SM))
+        androidx.compose.animation.AnimatedVisibility(
+            visible = showPercentile,
+            enter = androidx.compose.animation.fadeIn() + androidx.compose.animation.expandVertically(expandFrom = Alignment.Top)
+        ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                val formattedPercentile = (summary.result.percentile * 100).toInt()
+                Text(
+                    text = "TOP $formattedPercentile%",
+                    style = DBTypography.H3,
+                    color = DBColor.TextPrimary
+                )
+                Spacer(modifier = Modifier.height(DBSpacing.SM))
+            }
+        }
 
         // 4. Improvement
-        summary.scoreImprovement?.let { improvement ->
-            val improvementText = if (improvement >= 0) "+$improvement" else "$improvement"
-            Text(
-                text = "$improvementText YESTERDAY",
-                style = DBTypography.Body,
-                color = if (improvement >= 0) DBColor.Success else DBColor.Error
-            )
-        }
-
-        Spacer(modifier = Modifier.height(DBSpacing.LG))
-
-        // 5. Breakdown Card
-        DBResultCard(
-            snapScore = summary.result.snapScore,
-            shiftScore = summary.result.shiftScore,
-            crowdCallScore = summary.result.crowdCallScore
-        )
-
-        Spacer(modifier = Modifier.height(DBSpacing.LG))
-
-        // 6. Personal Best and Average
-        if (summary.isNewPersonalBest) {
-            Text(
-                text = "NEW PERSONAL BEST",
-                style = DBTypography.Caption,
-                color = DBColor.BrandPrimary
-            )
-            Spacer(modifier = Modifier.height(DBSpacing.XS))
-        }
-
-        summary.personalBestScore?.let { pb ->
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(text = "PERSONAL BEST", style = DBTypography.Body, color = DBColor.TextSecondary)
-                Text(text = "$pb", style = DBTypography.Body, color = DBColor.TextPrimary)
-            }
-            Spacer(modifier = Modifier.height(DBSpacing.XS))
-        }
-
-        summary.averageScore?.let { avg ->
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(text = "AVERAGE", style = DBTypography.Body, color = DBColor.TextSecondary)
-                Text(text = "$avg", style = DBTypography.Body, color = DBColor.TextPrimary)
-            }
-        }
-
-        Spacer(modifier = Modifier.height(DBSpacing.LG))
-
-        // 7. Rival Comparison
-        summary.rivalComparison?.let { rival ->
-            DBRivalCard(
-                rivalName = rival.rivalName,
-                rivalScore = rival.rivalScore,
-                userScore = rival.userScore,
-                catchUpText = if (rival.scoreGap > 0) "${rival.scoreGap} points to catch" else "You are leading!",
-                action = {
-                    DBButton(
-                        text = "BEAT ${rival.rivalName.uppercase()}",
-                        type = DBButtonType.Secondary,
-                        onClick = onBeatRivalClick
+        androidx.compose.animation.AnimatedVisibility(
+            visible = showImprovement,
+            enter = androidx.compose.animation.fadeIn() + androidx.compose.animation.expandVertically(expandFrom = Alignment.Top)
+        ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                summary.scoreImprovement?.let { improvement ->
+                    val improvementText = if (improvement >= 0) "+$improvement" else "$improvement"
+                    Text(
+                        text = "$improvementText YESTERDAY",
+                        style = DBTypography.Body,
+                        color = if (improvement >= 0) DBColor.Success else DBColor.Error
                     )
                 }
-            )
-            Spacer(modifier = Modifier.height(DBSpacing.MD))
+                Spacer(modifier = Modifier.height(DBSpacing.LG))
+            }
         }
 
-        // 8. Share Action & Tomorrow's Battle
-        DBButton(
-            text = "SHARE RESULT",
-            type = DBButtonType.Primary,
-            onClick = onShareClick
-        )
-        
-        Spacer(modifier = Modifier.height(DBSpacing.LG))
+        // 5. Breakdown Card
+        androidx.compose.animation.AnimatedVisibility(
+            visible = showBreakdown,
+            enter = androidx.compose.animation.fadeIn() + androidx.compose.animation.expandVertically(expandFrom = Alignment.Top)
+        ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                DBResultCard(
+                    snapScore = summary.result.snapScore,
+                    shiftScore = summary.result.shiftScore,
+                    crowdCallScore = summary.result.crowdCallScore
+                )
+                Spacer(modifier = Modifier.height(DBSpacing.LG))
 
-        Text(
-            text = "Tomorrow's Battle awaits.",
-            style = DBTypography.Caption,
-            color = DBColor.TextSecondary
-        )
-        
-        Spacer(modifier = Modifier.height(DBSpacing.XL))
+                // 6. Personal Best and Average
+                if (summary.isNewPersonalBest) {
+                    Text(
+                        text = "NEW PERSONAL BEST",
+                        style = DBTypography.Caption,
+                        color = DBColor.BrandPrimary
+                    )
+                    Spacer(modifier = Modifier.height(DBSpacing.XS))
+                }
+
+                summary.personalBestScore?.let { pb ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(text = "PERSONAL BEST", style = DBTypography.Body, color = DBColor.TextSecondary)
+                        Text(text = "$pb", style = DBTypography.Body, color = DBColor.TextPrimary)
+                    }
+                    Spacer(modifier = Modifier.height(DBSpacing.XS))
+                }
+
+                summary.averageScore?.let { avg ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(text = "AVERAGE", style = DBTypography.Body, color = DBColor.TextSecondary)
+                        Text(text = "$avg", style = DBTypography.Body, color = DBColor.TextPrimary)
+                    }
+                }
+                Spacer(modifier = Modifier.height(DBSpacing.LG))
+            }
+        }
+
+        // 7. Rival Comparison & Bottom Actions
+        androidx.compose.animation.AnimatedVisibility(
+            visible = showRival,
+            enter = androidx.compose.animation.fadeIn() + androidx.compose.animation.expandVertically(expandFrom = Alignment.Top)
+        ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                summary.rivalComparison?.let { rival ->
+                    DBRivalCard(
+                        rivalName = rival.rivalName,
+                        rivalScore = rival.rivalScore,
+                        userScore = rival.userScore,
+                        catchUpText = if (rival.scoreGap > 0) "${rival.scoreGap} points to catch" else "You are leading!",
+                        action = {
+                            DBButton(
+                                text = "BEAT ${rival.rivalName.uppercase()}",
+                                type = DBButtonType.Secondary,
+                                onClick = onBeatRivalClick
+                            )
+                        }
+                    )
+                    Spacer(modifier = Modifier.height(DBSpacing.MD))
+                }
+
+                // 8. Share Action & Tomorrow's Battle
+                DBButton(
+                    text = "SHARE RESULT",
+                    type = DBButtonType.Primary,
+                    onClick = onShareClick
+                )
+                
+                Spacer(modifier = Modifier.height(DBSpacing.LG))
+
+                Text(
+                    text = "Tomorrow's Battle awaits.",
+                    style = DBTypography.Caption,
+                    color = DBColor.TextSecondary
+                )
+                
+                Spacer(modifier = Modifier.height(DBSpacing.XL))
+            }
+        }
     }
 }
