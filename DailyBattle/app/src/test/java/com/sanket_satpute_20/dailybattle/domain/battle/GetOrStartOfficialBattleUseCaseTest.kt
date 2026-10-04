@@ -22,6 +22,8 @@ class GetOrStartOfficialBattleUseCaseTest {
         override fun saveSession(session: BattleSession) {
             savedSession = session
         }
+
+        override fun getUnacknowledgedSessions(): List<BattleSession> = emptyList()
     }
 
     private val userId = UserId("u-1")

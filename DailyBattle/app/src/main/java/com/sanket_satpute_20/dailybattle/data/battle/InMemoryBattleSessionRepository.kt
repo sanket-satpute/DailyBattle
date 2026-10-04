@@ -16,4 +16,13 @@ class InMemoryBattleSessionRepository @Inject constructor() : BattleSessionRepos
     override fun saveSession(session: BattleSession) {
         sessions[Pair(session.userId.value, session.battleId.value)] = session
     }
+
+    override fun getUnacknowledgedSessions(): List<BattleSession> {
+        return sessions.values.filter { session ->
+            session.mode == com.sanket_satpute_20.dailybattle.domain.battle.BattleMode.OFFICIAL &&
+            session.status == com.sanket_satpute_20.dailybattle.domain.battle.BattleSessionStatus.IN_PROGRESS &&
+            session.challengeSessions.size == 3 &&
+            session.challengeSessions.all { it.status == com.sanket_satpute_20.dailybattle.domain.battle.ChallengeSessionStatus.COMPLETE }
+        }
+    }
 }

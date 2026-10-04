@@ -173,4 +173,6 @@ class FakeBattleSessionRepository : BattleSessionRepository {
     override fun saveSession(session: BattleSession) {
         sessions[Pair(session.userId.value, session.battleId.value)] = session
     }
+
+    override fun getUnacknowledgedSessions(): List<BattleSession> = emptyList()
 }

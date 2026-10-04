@@ -2,8 +2,6 @@ package com.sanket_satpute_20.dailybattle.domain.battle
 
 import com.sanket_satpute_20.dailybattle.core.error.AppError
 import com.sanket_satpute_20.dailybattle.domain.result.DomainResult
-import java.util.UUID
-
 import javax.inject.Inject
 
 /**
@@ -31,7 +29,9 @@ class CompleteBattleUseCase @Inject constructor(
         }
 
         // Finalize battle
-        val idempotencyKey = UUID.randomUUID().toString()
+        // Ensure the idempotency key is derived from the session to safely recover without
+        // creating duplicate official results on the backend if submission was interrupted.
+        val idempotencyKey = session.sessionId.value
         val result = resultRepository.completeBattle(session.sessionId, idempotencyKey)
 
         if (result is DomainResult.Success) {

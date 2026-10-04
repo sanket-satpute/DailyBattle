@@ -21,4 +21,10 @@ interface BattleSessionRepository {
      * Saves or updates a BattleSession in persistent storage.
      */
     fun saveSession(session: BattleSession)
+
+    /**
+     * Retrieves all official BattleSessions that have finished all challenges locally
+     * but have not yet been successfully acknowledged by the server (i.e. status != COMPLETED).
+     */
+    fun getUnacknowledgedSessions(): List<BattleSession>
 }
