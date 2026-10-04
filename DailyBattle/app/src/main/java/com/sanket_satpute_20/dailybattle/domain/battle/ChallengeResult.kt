@@ -30,4 +30,5 @@ data class ChallengeResult(
     val score: Int,
     val maxScore: Int,
     val completedAt: Long,
+    val metadata: Map<String, String>? = null
 )
