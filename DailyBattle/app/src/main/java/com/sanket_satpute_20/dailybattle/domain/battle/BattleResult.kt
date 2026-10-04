@@ -16,7 +16,7 @@ import com.sanket_satpute_20.dailybattle.domain.identifier.UserId
  * - [snapScore]         — score for the Snap challenge (0–300)
  * - [shiftScore]        — score for the Shift challenge (0–300)
  * - [crowdCallScore]    — score for the Crowd Call challenge (0–300)
- * - [consistencyScore]  — score for the consistency bonus (0–100); calculation is PENDING
+ * - [consistencyScore]  — score for the consistency bonus (0–100)
  * - [totalScore]        — aggregate score (0–1000); must not be recomputed by the client
  * - [percentile]        — competitive rank as a percentile (0.0–100.0); authority = backend
  * - [completedAt]       — epoch ms when the Battle was completed
@@ -27,8 +27,8 @@ import com.sanket_satpute_20.dailybattle.domain.identifier.UserId
  * Per §27, the client must not allow arbitrary modification of [totalScore],
  * [percentile], or [consistencyScore] after official completion.
  *
- * The exact Consistency calculation is PENDING. The [consistencyScore] value
- * is received from the authoritative backend; the client must not calculate it.
+ * Scores are generated via the scoring engine (BattleScoreAggregator) or received
+ * from the authoritative backend.
  */
 data class BattleResult(
     val resultId: BattleResultId,
