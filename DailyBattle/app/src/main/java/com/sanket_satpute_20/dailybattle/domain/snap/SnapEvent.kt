@@ -12,7 +12,7 @@ sealed interface SnapEvent {
     /**
      * The player tapped an element.
      */
-    data class Tap(val elementId: String) : SnapEvent
+    data class Tap(val elementId: String, val timestampMs: Long = 0L) : SnapEvent
 
     /**
      * The time window for reaction ended.

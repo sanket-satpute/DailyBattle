@@ -39,7 +39,7 @@ interface SnapEngine {
     /**
      * Returns the evaluated result of the challenge so far.
      */
-    fun evaluate(): Int?
+    fun evaluate(): RawSnapResult?
 
     /**
      * Finalizes the challenge and prevents further interaction.

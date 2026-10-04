@@ -34,6 +34,6 @@ sealed interface SnapState {
      * Scoring formulas are currently PENDING.
      */
     data class Completed(
-        val rawScore: Int
+        val result: RawSnapResult
     ) : SnapState
 }
