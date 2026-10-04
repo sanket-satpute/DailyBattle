@@ -1,5 +1,8 @@
 package com.sanket_satpute_20.dailybattle.presentation.crowd
 
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -18,9 +21,15 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -62,6 +71,19 @@ fun CrowdScreen(
     onAnswerSelected: (String) -> Unit,
     onComplete: () -> Unit
 ) {
+    val haptic = LocalHapticFeedback.current
+
+    // Feedback hooks (Sprint 10.4)
+    LaunchedEffect(uiState.isResultRevealed) {
+        if (uiState.isResultRevealed) {
+            // Sound hook
+            // SoundManager.playSound("reveal_distribution")
+            
+            // Haptic
+            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -135,6 +157,12 @@ fun CrowdScreen(
             }
         } else {
             // RESULT DISTRIBUTION
+            var startAnimation by remember { mutableStateOf(false) }
+            
+            LaunchedEffect(Unit) {
+                startAnimation = true
+            }
+
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -148,6 +176,11 @@ fun CrowdScreen(
                 uiState.choices.forEach { choice ->
                     val percentage = uiState.distribution?.percentages?.get(choice.id) ?: 0
                     val isUserPick = choice.id == uiState.selectedChoiceId
+                    val animatedFraction by animateFloatAsState(
+                        targetValue = if (startAnimation) percentage / 100f else 0f,
+                        animationSpec = tween(durationMillis = 800, easing = FastOutSlowInEasing),
+                        label = "DistributionAnimation"
+                    )
                     
                     Row(
                         modifier = Modifier
@@ -169,7 +202,7 @@ fun CrowdScreen(
                         ) {
                             Box(
                                 modifier = Modifier
-                                    .fillMaxWidth(percentage / 100f)
+                                    .fillMaxWidth(animatedFraction)
                                     .fillMaxSize()
                                     .background(if (isUserPick) DBColor.Crowd else DBColor.TextMuted)
                             )
@@ -204,6 +237,18 @@ fun CrowdScreen(
                     style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
                     color = if (uiState.isCorrect) DBColor.Success else DBColor.Error
                 )
+                
+                LaunchedEffect(uiState.isCorrect) {
+                    if (startAnimation) {
+                        if (uiState.isCorrect) {
+                            // SoundManager.playSound("success")
+                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                        } else {
+                            // SoundManager.playSound("error")
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        }
+                    }
+                }
             }
         }
 
