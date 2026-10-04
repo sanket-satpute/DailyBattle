@@ -29,4 +29,10 @@ abstract class DataModule {
     abstract fun bindBattleResultRepository(
         inMemoryBattleResultRepository: com.sanket_satpute_20.dailybattle.data.battle.InMemoryBattleResultRepository
     ): com.sanket_satpute_20.dailybattle.domain.battle.BattleResultRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindRivalRepository(
+        inMemoryRivalRepository: com.sanket_satpute_20.dailybattle.data.rival.InMemoryRivalRepository
+    ): com.sanket_satpute_20.dailybattle.domain.rival.RivalRepository
 }
