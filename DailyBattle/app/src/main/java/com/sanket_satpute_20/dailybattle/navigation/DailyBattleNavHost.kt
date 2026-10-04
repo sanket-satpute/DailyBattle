@@ -87,7 +87,11 @@ fun DailyBattleNavHost(
                 ScreenPlaceholder(label = "Battle")
             }
             composable(AppRoute.Friends.route) {
-                ScreenPlaceholder(label = "Friends (SCR-010)")
+                com.sanket_satpute_20.dailybattle.presentation.friend.FriendsRoute(
+                    onNavigateToAddFriend = {
+                        navController.navigate(AppRoute.AddFriend.route)
+                    }
+                )
             }
             composable(AppRoute.Me.route) {
                 ScreenPlaceholder(label = "Me")
