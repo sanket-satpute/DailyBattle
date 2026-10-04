@@ -24,6 +24,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.sanket_satpute_20.dailybattle.design.animation.pulse
+import com.sanket_satpute_20.dailybattle.design.animation.shake
 import com.sanket_satpute_20.dailybattle.design.color.DBColor
 import com.sanket_satpute_20.dailybattle.domain.shift.ShiftState
 
@@ -106,6 +108,26 @@ fun ShiftScreen(
         val haptic = LocalHapticFeedback.current
 
         // Feedback hooks (Sprint 9.3 stub)
+        LaunchedEffect(uiState.isCorrect) {
+            if (uiState.isCorrect) {
+                // Short success sound hook (blocked by actual sound assets)
+                // SoundManager.playSound("success")
+                
+                // Light/success haptic
+                haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.TextHandleMove)
+            }
+        }
+
+        LaunchedEffect(uiState.isIncorrect) {
+            if (uiState.isIncorrect) {
+                // Short error sound hook (blocked by actual sound assets)
+                // SoundManager.playSound("error")
+                
+                // Short error haptic
+                haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
+            }
+        }
+
         LaunchedEffect(uiState.isComplete) {
             if (uiState.isComplete) {
                 // Short completion feedback delay (as per 10_ANIMATION_HAPTICS.md)
@@ -119,6 +141,8 @@ fun ShiftScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f)
+                .pulse(isPulsing = uiState.isCorrect)
+                .shake(isShaking = uiState.isIncorrect)
                 .background(MaterialTheme.colorScheme.surfaceVariant),
             contentAlignment = Alignment.Center
         ) {
