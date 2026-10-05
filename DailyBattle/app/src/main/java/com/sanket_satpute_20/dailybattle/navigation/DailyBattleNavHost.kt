@@ -103,7 +103,9 @@ fun DailyBattleNavHost(
                 ScreenPlaceholder(label = "History (SCR-013)")
             }
             composable(AppRoute.AddFriend.route) {
-                ScreenPlaceholder(label = "Add Friend (SCR-011)")
+                com.sanket_satpute_20.dailybattle.presentation.addfriend.AddFriendRoute(
+                    onNavigateBack = { navController.popBackStack() }
+                )
             }
         }
 
