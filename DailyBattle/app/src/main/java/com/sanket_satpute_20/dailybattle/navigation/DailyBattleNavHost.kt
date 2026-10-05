@@ -97,7 +97,7 @@ fun DailyBattleNavHost(
                 ScreenPlaceholder(label = "Me")
             }
             composable(AppRoute.Profile.route) {
-                ScreenPlaceholder(label = "Profile (SCR-012)")
+                com.sanket_satpute_20.dailybattle.presentation.profile.ProfileRoute()
             }
             composable(AppRoute.History.route) {
                 ScreenPlaceholder(label = "History (SCR-013)")
