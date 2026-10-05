@@ -9,6 +9,7 @@ import com.sanket_satpute_20.dailybattle.domain.identifier.BattleSessionId
 import com.sanket_satpute_20.dailybattle.domain.identifier.UserId
 import com.sanket_satpute_20.dailybattle.domain.result.DomainResult
 import com.sanket_satpute_20.dailybattle.domain.user.UserRepository
+import com.sanket_satpute_20.dailybattle.domain.history.GetHistoryUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -21,6 +22,9 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
+import java.time.Clock
+import java.time.Instant
+import java.time.ZoneId
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class HistoryViewModelTest {
@@ -54,12 +58,15 @@ class HistoryViewModelTest {
 
     private lateinit var userRepository: FakeUserRepository
     private lateinit var battleRepository: FakeBattleResultRepository
+    private lateinit var getHistoryUseCase: GetHistoryUseCase
+    private val fixedClock = Clock.fixed(Instant.parse("2026-10-05T12:00:00Z"), ZoneId.of("UTC"))
 
     @Before
     fun setup() {
         Dispatchers.setMain(testDispatcher)
         userRepository = FakeUserRepository()
         battleRepository = FakeBattleResultRepository()
+        getHistoryUseCase = GetHistoryUseCase(battleRepository, fixedClock)
     }
 
     @After
@@ -70,7 +77,7 @@ class HistoryViewModelTest {
     @Test
     fun `initial state is Loading and then Empty if no battles`() = runTest {
         battleRepository.resultsToReturn = emptyList()
-        val viewModel = HistoryViewModel(battleRepository, userRepository)
+        val viewModel = HistoryViewModel(getHistoryUseCase, userRepository)
         
         assertEquals(HistoryUiState.Loading, viewModel.uiState.value)
         advanceUntilIdle()
@@ -95,7 +102,7 @@ class HistoryViewModelTest {
                 completedAt = 1000L
             )
         )
-        val viewModel = HistoryViewModel(battleRepository, userRepository)
+        val viewModel = HistoryViewModel(getHistoryUseCase, userRepository)
         
         assertEquals(HistoryUiState.Loading, viewModel.uiState.value)
         advanceUntilIdle()
@@ -106,7 +113,7 @@ class HistoryViewModelTest {
     @Test
     fun `initial state is Loading and then Error on failure`() = runTest {
         battleRepository.shouldFail = true
-        val viewModel = HistoryViewModel(battleRepository, userRepository)
+        val viewModel = HistoryViewModel(getHistoryUseCase, userRepository)
         
         assertEquals(HistoryUiState.Loading, viewModel.uiState.value)
         advanceUntilIdle()

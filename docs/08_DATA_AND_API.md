@@ -530,17 +530,18 @@ Do not invent these rules.
 
 Momentum is a product concept.
 
-The exact persistence and calculation model is pending.
+Momentum is the number of consecutive calendar days, ending on the current calendar day, on which the user completed the official Daily Battle.
 
-The data model should allow:
+FORMAL RULE:
+1. Consider only completed OFFICIAL Daily Battles.
+2. Extract their authoritative completion dates.
+3. Normalize dates to calendar dates in the application's authoritative user-local timezone.
+4. Multiple completed official battles on the same calendar date count as one qualifying day.
+5. Starting from the current calendar date, count consecutive qualifying dates backward.
+6. Stop at the first calendar date without a qualifying completed official Battle.
+7. The resulting count is Momentum.
 
-currentMomentum
-previousMomentum
-lastCompletedBattleDate
-
-if required by the finalized gameplay/product specification.
-
-Do not implement an arbitrary streak formula.
+Do NOT count Practice battles, Incomplete battles, Abandoned battles, or Invalid battles.
 
 33. Friend
 
@@ -1338,7 +1339,7 @@ DATA-PENDING-007	Exact challenge configuration schemas	Pending
 DATA-PENDING-008	Exact scoring formulas	Pending
 DATA-PENDING-009	Consistency calculation	Pending
 DATA-PENDING-010	Percentile calculation/source	Pending
-DATA-PENDING-011	Momentum/streak calculation	Pending
+DATA-PENDING-011	Momentum/streak calculation	Resolved
 DATA-PENDING-012	Battle DNA calculation	Resolved
 DATA-PENDING-013	Rival selection algorithm	Pending
 DATA-PENDING-014	Friend-code format	Pending

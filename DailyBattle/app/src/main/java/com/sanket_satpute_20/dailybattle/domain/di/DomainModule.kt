@@ -8,9 +8,16 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
+import java.time.Clock
+
 @Module
 @InstallIn(SingletonComponent::class)
 object DomainModule {
+
+    @Provides
+    fun provideClock(): Clock {
+        return Clock.systemDefaultZone()
+    }
 
     @Provides
     @Singleton

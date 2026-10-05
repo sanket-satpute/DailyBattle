@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sanket_satpute_20.dailybattle.domain.battle.BattleResultRepository
 import com.sanket_satpute_20.dailybattle.domain.identifier.UserId
+import com.sanket_satpute_20.dailybattle.domain.history.GetHistoryUseCase
 import com.sanket_satpute_20.dailybattle.domain.result.DomainResult
 import com.sanket_satpute_20.dailybattle.domain.user.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -12,7 +13,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-
 data class HistoryUiStateData(
     val best: Int = 0,
     val average: Int = 0,
@@ -30,7 +30,7 @@ sealed interface HistoryUiState {
 
 @HiltViewModel
 class HistoryViewModel @Inject constructor(
-    private val battleResultRepository: BattleResultRepository,
+    private val getHistoryUseCase: GetHistoryUseCase,
     private val userRepository: UserRepository
 ) : ViewModel() {
 
@@ -45,17 +45,25 @@ class HistoryViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.value = HistoryUiState.Loading
             
-            // Temporary logic for Sprint 14.3. Sprint 14.4 will calculate actual data.
             val userName = userRepository.getBattleName()
-            val userId = UserId(userName ?: "current-user") // Use battleName as temporary user ID or similar. Wait, how do we get UserId?
+            val userId = UserId(userName ?: "current-user")
             
-            val resultsResponse = battleResultRepository.getUserBattleResults(userId)
+            val result = getHistoryUseCase(userId)
             
-            if (resultsResponse is DomainResult.Success) {
-                if (resultsResponse.value.isEmpty()) {
+            if (result is DomainResult.Success) {
+                val history = result.value
+                if (history.recentBattles.isEmpty()) {
                     _uiState.value = HistoryUiState.Empty
                 } else {
-                    _uiState.value = HistoryUiState.Success(HistoryUiStateData())
+                    _uiState.value = HistoryUiState.Success(
+                        HistoryUiStateData(
+                            best = history.best,
+                            average = history.average,
+                            momentum = history.momentum,
+                            recentBattles = history.recentBattles,
+                            graphData = history.graphData
+                        )
+                    )
                 }
             } else {
                 _uiState.value = HistoryUiState.Error("Failed to load history.")
