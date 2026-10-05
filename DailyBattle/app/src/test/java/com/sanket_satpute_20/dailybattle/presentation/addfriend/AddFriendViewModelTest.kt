@@ -6,6 +6,7 @@ import com.sanket_satpute_20.dailybattle.domain.friend.AddFriendByBattleCodeUseC
 import com.sanket_satpute_20.dailybattle.domain.friend.Friend
 import com.sanket_satpute_20.dailybattle.domain.friend.FriendRepository
 import com.sanket_satpute_20.dailybattle.domain.friend.FriendStatus
+import com.sanket_satpute_20.dailybattle.domain.friend.GetUserBattleCodeUseCase
 import com.sanket_satpute_20.dailybattle.domain.identifier.FriendshipId
 import com.sanket_satpute_20.dailybattle.domain.identifier.UserId
 import com.sanket_satpute_20.dailybattle.domain.result.DomainResult
@@ -56,18 +57,23 @@ class AddFriendViewModelTest {
         override suspend fun acceptFriendRequest(friendshipId: FriendshipId) = DomainResult.Failure(AppError.Domain)
         override suspend fun rejectFriendRequest(friendshipId: FriendshipId) = DomainResult.Failure(AppError.Domain)
         override suspend fun blockFriend(friendshipId: FriendshipId) = DomainResult.Failure(AppError.Domain)
+        override suspend fun getBattleCode(userId: UserId): DomainResult<String> {
+            return if (shouldFail) DomainResult.Failure(AppError.Domain) else DomainResult.Success("K4X8M9")
+        }
     }
 
     private lateinit var friendRepo: FakeFriendRepository
-    private lateinit var useCase: AddFriendByBattleCodeUseCase
+    private lateinit var addFriendUseCase: AddFriendByBattleCodeUseCase
+    private lateinit var getUserBattleCodeUseCase: GetUserBattleCodeUseCase
     private lateinit var viewModel: AddFriendViewModel
 
     @Before
     fun setup() {
         Dispatchers.setMain(testDispatcher)
         friendRepo = FakeFriendRepository()
-        useCase = AddFriendByBattleCodeUseCase(friendRepo)
-        viewModel = AddFriendViewModel(useCase)
+        addFriendUseCase = AddFriendByBattleCodeUseCase(friendRepo)
+        getUserBattleCodeUseCase = GetUserBattleCodeUseCase(friendRepo)
+        viewModel = AddFriendViewModel(addFriendUseCase, getUserBattleCodeUseCase)
     }
 
     @After
@@ -77,6 +83,7 @@ class AddFriendViewModelTest {
 
     @Test
     fun `initial state is correct`() = runTest {
+        advanceUntilIdle()
         assertEquals("", viewModel.enteredCode.value)
         assertEquals("K4X8M9", viewModel.userCode.value)
         assertEquals(DBInputState.Default, viewModel.inputState.value)
@@ -106,7 +113,7 @@ class AddFriendViewModelTest {
         viewModel.submitCode()
 
         assertEquals(DBInputState.Invalid, viewModel.inputState.value)
-        assertEquals("Code must be exactly 6 characters.", viewModel.feedbackMessage.value)
+        assertEquals("Battle Code must be exactly 6 uppercase letters and numbers.", viewModel.feedbackMessage.value)
     }
 
     @Test

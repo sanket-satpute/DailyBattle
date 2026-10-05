@@ -66,6 +66,7 @@ class FriendsViewModelTest {
         override suspend fun acceptFriendRequest(friendshipId: FriendshipId) = DomainResult.Failure(AppError.Domain)
         override suspend fun rejectFriendRequest(friendshipId: FriendshipId) = DomainResult.Failure(AppError.Domain)
         override suspend fun blockFriend(friendshipId: FriendshipId) = DomainResult.Failure(AppError.Domain)
+        override suspend fun getBattleCode(userId: UserId) = DomainResult.Success("K4X8M9")
     }
 
     private class FakeRivalRepository : RivalRepository {

@@ -44,4 +44,9 @@ interface FriendRepository {
      * Block a friend or user.
      */
     suspend fun blockFriend(friendshipId: FriendshipId): DomainResult<Friend>
+
+    /**
+     * Get the current user's battle code.
+     */
+    suspend fun getBattleCode(userId: UserId): DomainResult<String>
 }

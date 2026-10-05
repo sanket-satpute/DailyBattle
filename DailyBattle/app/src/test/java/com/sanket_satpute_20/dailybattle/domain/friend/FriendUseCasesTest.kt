@@ -27,6 +27,7 @@ class FriendUseCasesTest {
         override suspend fun acceptFriendRequest(friendshipId: FriendshipId) = acceptRequestResult
         override suspend fun rejectFriendRequest(friendshipId: FriendshipId) = rejectRequestResult
         override suspend fun blockFriend(friendshipId: FriendshipId) = blockFriendResult
+        override suspend fun getBattleCode(userId: UserId): DomainResult<String> = DomainResult.Success("K4X8M9")
     }
 
     @Test

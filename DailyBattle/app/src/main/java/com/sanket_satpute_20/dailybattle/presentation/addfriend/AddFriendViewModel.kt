@@ -4,9 +4,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sanket_satpute_20.dailybattle.design.components.DBInputState
 import com.sanket_satpute_20.dailybattle.domain.friend.AddFriendByBattleCodeUseCase
+import com.sanket_satpute_20.dailybattle.domain.friend.GetUserBattleCodeUseCase
 import com.sanket_satpute_20.dailybattle.domain.identifier.UserId
 import com.sanket_satpute_20.dailybattle.domain.result.DomainResult
 import com.sanket_satpute_20.dailybattle.domain.validation.InputValidator
+import com.sanket_satpute_20.dailybattle.domain.validation.ValidationResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,7 +26,8 @@ sealed interface AddFriendSubmitState {
 
 @HiltViewModel
 class AddFriendViewModel @Inject constructor(
-    private val addFriendByBattleCodeUseCase: AddFriendByBattleCodeUseCase
+    private val addFriendByBattleCodeUseCase: AddFriendByBattleCodeUseCase,
+    private val getUserBattleCodeUseCase: GetUserBattleCodeUseCase
 ) : ViewModel() {
 
     private val _userCode = MutableStateFlow<String?>(null)
@@ -43,42 +46,64 @@ class AddFriendViewModel @Inject constructor(
     val submitState: StateFlow<AddFriendSubmitState> = _submitState.asStateFlow()
 
     init {
-        // Placeholder for user code. Will be implemented fully in Sprint 13.6
-        _userCode.value = "K4X8M9"
+        loadUserCode()
+    }
+
+    private fun loadUserCode() {
+        viewModelScope.launch {
+            val result = getUserBattleCodeUseCase.execute(UserId("current-user"))
+            if (result is DomainResult.Success) {
+                _userCode.value = result.value
+            } else {
+                _userCode.value = "ERROR"
+            }
+        }
     }
 
     fun onCodeChanged(code: String) {
         _enteredCode.value = code
         _submitState.value = AddFriendSubmitState.Idle
         
-        // Basic length validation. Full logic belongs to Sprint 13.6
         if (code.isEmpty()) {
             _inputState.value = DBInputState.Default
             _feedbackMessage.value = null
-        } else if (code.length == 6) {
-            _inputState.value = DBInputState.Valid
-            _feedbackMessage.value = null
         } else {
-            _inputState.value = DBInputState.Default
-            _feedbackMessage.value = null
+            val normalized = InputValidator.normalizeBattleCode(code)
+            when (InputValidator.validateBattleCode(normalized)) {
+                is ValidationResult.Valid -> {
+                    _inputState.value = DBInputState.Valid
+                    _feedbackMessage.value = null
+                }
+                is ValidationResult.Invalid -> {
+                    // While typing, we just keep it default unless they attempt to submit
+                    if (code.length == 6) {
+                        _inputState.value = DBInputState.Invalid
+                        _feedbackMessage.value = "Invalid characters in code."
+                    } else {
+                        _inputState.value = DBInputState.Default
+                        _feedbackMessage.value = null
+                    }
+                }
+            }
         }
     }
 
     fun submitCode() {
-        val code = _enteredCode.value
-        if (code.length != 6) {
+        val normalized = InputValidator.normalizeBattleCode(_enteredCode.value)
+        val validation = InputValidator.validateBattleCode(normalized)
+        
+        if (validation is ValidationResult.Invalid) {
             _inputState.value = DBInputState.Invalid
-            _feedbackMessage.value = "Code must be exactly 6 characters."
+            _feedbackMessage.value = validation.reason
             return
         }
 
         viewModelScope.launch {
             _submitState.value = AddFriendSubmitState.Loading
             
-            // Note: Sprint 13.6 focuses on full submission logic. For Sprint 13.5 UI scaffolding,
-            // we will call the usecase we implemented in 13.3.
+            // Sprint 13.6: full submission logic
             val userId = UserId("current-user")
-            val result = addFriendByBattleCodeUseCase.execute(userId, code)
+            val result = addFriendByBattleCodeUseCase.execute(userId, normalized)
             
             when (result) {
                 is DomainResult.Success -> {

@@ -126,4 +126,8 @@ class InMemoryFriendRepository @Inject constructor() : FriendRepository {
         friends[friendshipId] = updated
         return DomainResult.Success(updated)
     }
+
+    override suspend fun getBattleCode(userId: UserId): DomainResult<String> {
+        return DomainResult.Success("K4X8M9")
+    }
 }
