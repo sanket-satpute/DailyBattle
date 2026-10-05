@@ -100,7 +100,7 @@ fun DailyBattleNavHost(
                 com.sanket_satpute_20.dailybattle.presentation.profile.ProfileRoute()
             }
             composable(AppRoute.History.route) {
-                ScreenPlaceholder(label = "History (SCR-013)")
+                com.sanket_satpute_20.dailybattle.presentation.history.HistoryRoute()
             }
             composable(AppRoute.AddFriend.route) {
                 com.sanket_satpute_20.dailybattle.presentation.addfriend.AddFriendRoute(
