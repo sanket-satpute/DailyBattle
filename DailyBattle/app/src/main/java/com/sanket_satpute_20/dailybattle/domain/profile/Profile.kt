@@ -13,9 +13,9 @@ data class Profile(
 )
 
 data class BattleDNA(
-    val speed: Int,
-    val memory: Int,
-    val people: Int
+    val speed: Int?,
+    val memory: Int?,
+    val people: Int?
 )
 
 data class PersonalRecords(

@@ -33,4 +33,11 @@ interface BattleResultRepository {
         userId: UserId, 
         battleId: BattleId
     ): DomainResult<BattleResult>
+
+    /**
+     * Retrieves all official BattleResults for a user.
+     */
+    suspend fun getUserBattleResults(
+        userId: UserId
+    ): DomainResult<List<BattleResult>>
 }

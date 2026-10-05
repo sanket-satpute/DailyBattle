@@ -23,6 +23,9 @@ class AppStartupViewModelTest {
             override suspend fun getBattleResult(userId: UserId, battleId: BattleId): DomainResult<BattleResult> {
                 return DomainResult.Failure(AppError.Domain)
             }
+            override suspend fun getUserBattleResults(userId: UserId): DomainResult<List<BattleResult>> {
+                return DomainResult.Success(emptyList())
+            }
         }
         val completeBattleUseCase = CompleteBattleUseCase(fakeResultRepository, fakeSessionRepository)
         val recoverUseCase = RecoverUnacknowledgedResultUseCase(fakeSessionRepository, completeBattleUseCase)

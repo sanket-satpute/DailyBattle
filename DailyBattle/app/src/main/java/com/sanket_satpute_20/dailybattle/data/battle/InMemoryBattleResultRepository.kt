@@ -62,4 +62,11 @@ class InMemoryBattleResultRepository @Inject constructor() : BattleResultReposit
             DomainResult.Failure(AppError.Domain)
         }
     }
+
+    override suspend fun getUserBattleResults(
+        userId: UserId
+    ): DomainResult<List<BattleResult>> {
+        val userResults = results.values.filter { it.userId == userId }
+        return DomainResult.Success(userResults)
+    }
 }

@@ -158,6 +158,11 @@ class FakeBattleResultRepository : BattleResultRepository {
         }
     }
 
+    override suspend fun getUserBattleResults(userId: UserId): DomainResult<List<BattleResult>> {
+        val userResults = results.values.filter { it.userId == userId }
+        return DomainResult.Success(userResults)
+    }
+
     fun saveResult(result: BattleResult) {
         results[Pair(result.userId.value, result.battleId.value)] = result
     }

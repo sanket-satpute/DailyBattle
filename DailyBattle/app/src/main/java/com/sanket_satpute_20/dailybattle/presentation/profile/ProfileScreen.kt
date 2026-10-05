@@ -155,7 +155,7 @@ private fun ProfileContent(
 }
 
 @Composable
-private fun DnaRow(label: String, value: Int) {
+private fun DnaRow(label: String, value: Int?) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -167,7 +167,7 @@ private fun DnaRow(label: String, value: Int) {
             color = DBColor.TextPrimary
         )
         Text(
-            text = value.toString(),
+            text = value?.toString() ?: "--",
             style = DBTypography.H3.copy(fontWeight = FontWeight.Bold),
             color = DBColor.TextPrimary
         )

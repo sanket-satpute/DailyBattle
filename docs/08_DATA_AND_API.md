@@ -654,7 +654,12 @@ medical metrics
 psychological diagnoses
 scientific intelligence measurements
 
-Exact calculation formulas are pending.
+Exact calculation formulas:
+Speed = average of all authoritative official Snap scores (sum(SnapScore) / N)
+Memory = average of all authoritative official Shift scores (sum(ShiftScore) / N)
+People = average of all authoritative official Crowd Call scores (sum(CrowdCallScore) / N)
+
+Only completed official battles are included. Exclude practice, incomplete, and abandoned battles. Ensure dimensions are calculated independently with equal weight. Initial state: unavailable.
 
 40. History
 
@@ -1334,7 +1339,7 @@ DATA-PENDING-008	Exact scoring formulas	Pending
 DATA-PENDING-009	Consistency calculation	Pending
 DATA-PENDING-010	Percentile calculation/source	Pending
 DATA-PENDING-011	Momentum/streak calculation	Pending
-DATA-PENDING-012	Battle DNA calculation	Pending
+DATA-PENDING-012	Battle DNA calculation	Resolved
 DATA-PENDING-013	Rival selection algorithm	Pending
 DATA-PENDING-014	Friend-code format	Pending
 DATA-PENDING-015	Offline result submission	Pending

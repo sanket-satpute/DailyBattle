@@ -58,6 +58,10 @@ class RecoverUnacknowledgedResultUseCaseTest {
         ): DomainResult<BattleResult> {
             return DomainResult.Failure(AppError.Domain)
         }
+
+        override suspend fun getUserBattleResults(userId: UserId): DomainResult<List<BattleResult>> {
+            return DomainResult.Success(emptyList())
+        }
     }
 
     private val completeBattleUseCase = CompleteBattleUseCase(fakeResultRepository, fakeSessionRepository)

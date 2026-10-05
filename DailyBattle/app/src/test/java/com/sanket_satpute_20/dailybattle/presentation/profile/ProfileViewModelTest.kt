@@ -6,6 +6,10 @@ import com.sanket_satpute_20.dailybattle.domain.profile.BattleDNA
 import com.sanket_satpute_20.dailybattle.domain.profile.GetProfileUseCase
 import com.sanket_satpute_20.dailybattle.domain.profile.PersonalRecords
 import com.sanket_satpute_20.dailybattle.domain.profile.Profile
+import com.sanket_satpute_20.dailybattle.domain.battle.BattleResult
+import com.sanket_satpute_20.dailybattle.domain.battle.BattleResultRepository
+import com.sanket_satpute_20.dailybattle.domain.identifier.BattleId
+import com.sanket_satpute_20.dailybattle.domain.identifier.BattleSessionId
 import com.sanket_satpute_20.dailybattle.domain.profile.ProfileRepository
 import com.sanket_satpute_20.dailybattle.domain.result.DomainResult
 import kotlinx.coroutines.Dispatchers
@@ -45,7 +49,26 @@ class ProfileViewModelTest {
         }
     }
 
+    private class FakeBattleResultRepository : BattleResultRepository {
+        var resultsToReturn: List<BattleResult> = emptyList()
+
+        override suspend fun completeBattle(
+            sessionId: BattleSessionId,
+            clientRequestId: String
+        ): DomainResult<BattleResult> = DomainResult.Failure(AppError.Domain)
+
+        override suspend fun getBattleResult(
+            userId: UserId,
+            battleId: BattleId
+        ): DomainResult<BattleResult> = DomainResult.Failure(AppError.Domain)
+
+        override suspend fun getUserBattleResults(userId: UserId): DomainResult<List<BattleResult>> {
+            return DomainResult.Success(resultsToReturn)
+        }
+    }
+
     private lateinit var repo: FakeProfileRepository
+    private lateinit var battleRepo: FakeBattleResultRepository
     private lateinit var useCase: GetProfileUseCase
     private lateinit var viewModel: ProfileViewModel
 
@@ -53,7 +76,8 @@ class ProfileViewModelTest {
     fun setup() {
         Dispatchers.setMain(testDispatcher)
         repo = FakeProfileRepository()
-        useCase = GetProfileUseCase(repo)
+        battleRepo = FakeBattleResultRepository()
+        useCase = GetProfileUseCase(repo, battleRepo)
     }
 
     @After

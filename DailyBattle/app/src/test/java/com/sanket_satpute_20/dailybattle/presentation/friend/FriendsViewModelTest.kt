@@ -82,6 +82,9 @@ class FriendsViewModelTest {
         override suspend fun getBattleResult(userId: UserId, battleId: BattleId): DomainResult<BattleResult> {
             return if (result != null) DomainResult.Success(result!!) else DomainResult.Failure(AppError.Domain)
         }
+        override suspend fun getUserBattleResults(userId: UserId): DomainResult<List<BattleResult>> {
+            return DomainResult.Success(result?.let { listOf(it) } ?: emptyList())
+        }
     }
 
     @Before
