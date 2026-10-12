@@ -61,4 +61,10 @@ object NetworkClientFactory {
         baseUrl: String,
     ): com.sanket_satpute_20.dailybattle.data.remote.api.SocialApiService =
         retrofitBuilder.baseUrl(baseUrl).build().create(com.sanket_satpute_20.dailybattle.data.remote.api.SocialApiService::class.java)
+
+    fun createProfileApiService(
+        retrofitBuilder: Retrofit.Builder,
+        baseUrl: String,
+    ): com.sanket_satpute_20.dailybattle.data.remote.api.ProfileApiService =
+        retrofitBuilder.baseUrl(baseUrl).build().create(com.sanket_satpute_20.dailybattle.data.remote.api.ProfileApiService::class.java)
 }
