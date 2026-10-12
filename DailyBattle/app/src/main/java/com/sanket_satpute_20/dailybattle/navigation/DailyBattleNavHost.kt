@@ -102,6 +102,16 @@ fun DailyBattleNavHost(
             composable(AppRoute.History.route) {
                 com.sanket_satpute_20.dailybattle.presentation.history.HistoryRoute()
             }
+            composable(AppRoute.Settings.route) {
+                com.sanket_satpute_20.dailybattle.presentation.settings.SettingsRoute(
+                    onNavigateBack = { navController.popBackStack() },
+                    onAccountDeleted = {
+                        navController.navigate(AppRoute.Welcome.route) {
+                            popUpTo(AppRoute.MainGraph.route) { inclusive = true }
+                        }
+                    }
+                )
+            }
             composable(AppRoute.AddFriend.route) {
                 com.sanket_satpute_20.dailybattle.presentation.addfriend.AddFriendRoute(
                     onNavigateBack = { navController.popBackStack() }

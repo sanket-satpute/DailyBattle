@@ -47,4 +47,10 @@ abstract class DataModule {
     abstract fun bindProfileRepository(
         inMemoryProfileRepository: com.sanket_satpute_20.dailybattle.data.profile.InMemoryProfileRepository
     ): com.sanket_satpute_20.dailybattle.domain.profile.ProfileRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindSettingsRepository(
+        inMemorySettingsRepository: com.sanket_satpute_20.dailybattle.data.settings.InMemorySettingsRepository
+    ): com.sanket_satpute_20.dailybattle.domain.settings.SettingsRepository
 }

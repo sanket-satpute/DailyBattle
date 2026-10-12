@@ -33,6 +33,7 @@ private val routeToTab: Map<String, DBBottomNavDestination> = mapOf(
     // Me children
     AppRoute.Profile.route to DBBottomNavDestination.Me,
     AppRoute.History.route to DBBottomNavDestination.Me,
+    AppRoute.Settings.route to DBBottomNavDestination.Me,
 )
 
 /**

@@ -83,6 +83,10 @@ sealed interface AppRoute {
         override val route: String = "history"
     }
 
+    data object Settings : AppRoute {
+        override val route: String = "settings"
+    }
+
     // Root Tab for Me (which might encapsulate Profile, History, etc. depending on Phase 6)
     data object Me : AppRoute {
         override val route: String = "me"
