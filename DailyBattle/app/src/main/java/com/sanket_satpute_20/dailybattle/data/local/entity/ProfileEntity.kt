@@ -1,5 +1,8 @@
 package com.sanket_satpute_20.dailybattle.data.local.entity
 
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+
 /**
  * Local persistence entity representing a cached user profile.
  *
@@ -19,7 +22,9 @@ package com.sanket_satpute_20.dailybattle.data.local.entity
  * - [battlesPlayedRecord]  — total official battles played count
  * - [updatedAt]            — cache update timestamp (epoch ms)
  */
+@Entity(tableName = "profiles")
 data class ProfileEntity(
+    @PrimaryKey
     val userId: String,
     val battleName: String,
     val momentum: Int,

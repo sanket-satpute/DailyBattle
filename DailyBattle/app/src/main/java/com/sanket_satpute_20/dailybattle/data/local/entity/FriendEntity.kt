@@ -1,5 +1,8 @@
 package com.sanket_satpute_20.dailybattle.data.local.entity
 
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+
 /**
  * Local persistence entity representing a Friend competition relationship.
  *
@@ -16,7 +19,9 @@ package com.sanket_satpute_20.dailybattle.data.local.entity
  * - [createdAt]    — relationship creation timestamp (epoch ms)
  * - [updatedAt]    — relationship update timestamp (epoch ms)
  */
+@Entity(tableName = "friends")
 data class FriendEntity(
+    @PrimaryKey
     val friendshipId: String,
     val userId: String,
     val friendUserId: String,

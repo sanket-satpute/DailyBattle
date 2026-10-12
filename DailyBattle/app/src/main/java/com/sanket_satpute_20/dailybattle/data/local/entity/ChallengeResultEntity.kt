@@ -1,5 +1,8 @@
 package com.sanket_satpute_20.dailybattle.data.local.entity
 
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+
 /**
  * Local persistence entity representing the outcome of one completed challenge within a Battle Session.
  *
@@ -15,7 +18,9 @@ package com.sanket_satpute_20.dailybattle.data.local.entity
  * - [completedAt]   — challenge completion epoch ms
  * - [metadataJson]  — optional serialized metadata payload
  */
+@Entity(tableName = "challenge_results")
 data class ChallengeResultEntity(
+    @PrimaryKey
     val resultId: String,
     val challengeId: String,
     val sessionId: String,

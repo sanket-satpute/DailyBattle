@@ -1,5 +1,8 @@
 package com.sanket_satpute_20.dailybattle.data.local.entity
 
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+
 /**
  * Local persistence entity representing a selected rival competition relationship.
  *
@@ -7,13 +10,15 @@ package com.sanket_satpute_20.dailybattle.data.local.entity
  * per `08_DATA_AND_API.md` §36.
  *
  * Fields:
- * - [userId]      — primary user ID
+ * - [userId]      — primary key / user ID
  * - [rivalUserId] — selected rival's user ID
  * - [rivalName]   — display name of the rival
  * - [selectedAt]  — selection timestamp (epoch ms)
  * - [status]      — serialized name of [com.sanket_satpute_20.dailybattle.domain.rival.RivalStatus]
  */
+@Entity(tableName = "rivals")
 data class RivalEntity(
+    @PrimaryKey
     val userId: String,
     val rivalUserId: String,
     val rivalName: String,

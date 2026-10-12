@@ -1,5 +1,7 @@
 package com.sanket_satpute_20.dailybattle.data.local.entity
 
+import androidx.room.Entity
+
 /**
  * Local persistence entity representing a user's interaction with a single challenge inside a Battle Session.
  *
@@ -13,6 +15,10 @@ package com.sanket_satpute_20.dailybattle.data.local.entity
  * - [startedAt]   — challenge start epoch ms (nullable)
  * - [completedAt] — challenge completion epoch ms (nullable)
  */
+@Entity(
+    tableName = "challenge_sessions",
+    primaryKeys = ["challengeId", "sessionId"],
+)
 data class ChallengeSessionEntity(
     val challengeId: String,
     val sessionId: String,

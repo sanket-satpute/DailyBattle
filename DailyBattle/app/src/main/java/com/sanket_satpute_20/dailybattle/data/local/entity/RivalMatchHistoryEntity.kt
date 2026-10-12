@@ -1,5 +1,7 @@
 package com.sanket_satpute_20.dailybattle.data.local.entity
 
+import androidx.room.Entity
+
 /**
  * Local persistence entity representing a historical match item against a rival.
  *
@@ -14,6 +16,10 @@ package com.sanket_satpute_20.dailybattle.data.local.entity
  * - [rivalScore] — rival's total score
  * - [outcome]    — serialized name of [com.sanket_satpute_20.dailybattle.domain.rival.MatchOutcome] (WIN, LOSS, TIE)
  */
+@Entity(
+    tableName = "rival_match_history",
+    primaryKeys = ["battleId", "userId"],
+)
 data class RivalMatchHistoryEntity(
     val battleId: String,
     val userId: String,

@@ -1,5 +1,7 @@
 package com.sanket_satpute_20.dailybattle.data.local.entity
 
+import androidx.room.Entity
+
 /**
  * Local persistence entity representing a cached item in the user's Battle History.
  *
@@ -15,6 +17,10 @@ package com.sanket_satpute_20.dailybattle.data.local.entity
  * - [personalBest] — whether this battle set a new personal best score
  * - [status]       — status string (e.g. COMPLETED)
  */
+@Entity(
+    tableName = "battle_history_items",
+    primaryKeys = ["battleId", "userId"],
+)
 data class BattleHistoryItemEntity(
     val battleId: String,
     val userId: String,

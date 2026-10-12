@@ -1,5 +1,8 @@
 package com.sanket_satpute_20.dailybattle.data.local.entity
 
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+
 /**
  * Local persistence entity representing the final official Battle result.
  *
@@ -22,7 +25,9 @@ package com.sanket_satpute_20.dailybattle.data.local.entity
  * - [percentile]       — competitive rank percentile (0.0–100.0)
  * - [completedAt]      — completion epoch ms
  */
+@Entity(tableName = "battle_results")
 data class BattleResultEntity(
+    @PrimaryKey
     val resultId: String,
     val userId: String,
     val battleId: String,

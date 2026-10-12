@@ -1,5 +1,9 @@
 package com.sanket_satpute_20.dailybattle.data.local.entity
 
+import androidx.room.ColumnInfo
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+
 /**
  * Local persistence entity representing one challenge definition within a Battle.
  *
@@ -13,10 +17,13 @@ package com.sanket_satpute_20.dailybattle.data.local.entity
  * - [order]       — official sequence position (1 = Snap, 2 = Shift, 3 = Crowd Call)
  * - [version]     — configuration version
  */
+@Entity(tableName = "challenges")
 data class ChallengeEntity(
+    @PrimaryKey
     val challengeId: String,
     val battleId: String,
     val type: String,
+    @ColumnInfo(name = "challenge_order")
     val order: Int,
     val version: Int,
 )

@@ -1,5 +1,8 @@
 package com.sanket_satpute_20.dailybattle.data.local.entity
 
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+
 /**
  * Local persistence entity representing a user's attempt at a Battle.
  *
@@ -16,7 +19,9 @@ package com.sanket_satpute_20.dailybattle.data.local.entity
  * - [startedAt]        — session start epoch ms (nullable)
  * - [completedAt]      — session completion epoch ms (nullable)
  */
+@Entity(tableName = "battle_sessions")
 data class BattleSessionEntity(
+    @PrimaryKey
     val sessionId: String,
     val userId: String,
     val battleId: String,

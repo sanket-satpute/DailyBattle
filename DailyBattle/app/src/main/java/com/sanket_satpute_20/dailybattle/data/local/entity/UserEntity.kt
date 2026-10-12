@@ -1,5 +1,8 @@
 package com.sanket_satpute_20.dailybattle.data.local.entity
 
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+
 /**
  * Local persistence entity representing the application user.
  *
@@ -13,7 +16,9 @@ package com.sanket_satpute_20.dailybattle.data.local.entity
  * - [updatedAt]     — last update timestamp (epoch ms)
  * - [accountStatus] — serialized name of [com.sanket_satpute_20.dailybattle.domain.user.AccountStatus]
  */
+@Entity(tableName = "users")
 data class UserEntity(
+    @PrimaryKey
     val userId: String,
     val battleName: String,
     val createdAt: Long,
