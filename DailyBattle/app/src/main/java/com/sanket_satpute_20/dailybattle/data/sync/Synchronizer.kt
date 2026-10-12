@@ -1,6 +1,9 @@
 package com.sanket_satpute_20.dailybattle.data.sync
 
 import com.sanket_satpute_20.dailybattle.core.error.AppError
+import com.sanket_satpute_20.dailybattle.data.conflict.ConflictResolutionAction
+import com.sanket_satpute_20.dailybattle.data.conflict.ConflictResolver
+import com.sanket_satpute_20.dailybattle.data.conflict.DefaultConflictResolver
 import com.sanket_satpute_20.dailybattle.data.retry.DefaultRetryPolicy
 import com.sanket_satpute_20.dailybattle.data.retry.RetryPolicy
 import com.sanket_satpute_20.dailybattle.domain.result.DomainResult
@@ -21,10 +24,11 @@ import javax.inject.Singleton
 /**
  * Coordinates synchronization of offline mutations with authoritative remote endpoints.
  *
- * Implements the lifecycle defined in Phase 17, Sprints 17.3 and 17.4:
+ * Implements the lifecycle defined in Phase 17, Sprints 17.3, 17.4, and 17.5:
  * Local change -> Pending operation -> Network available -> Sync -> Success.
  *
  * Conforms to:
+ * - 08_DATA_AND_API.md §74 (Backend is authoritative for conflict resolution)
  * - 09_OFFLINE_AND_ERROR_HANDLING.md §48 (Synchronization Queue)
  * - 09_OFFLINE_AND_ERROR_HANDLING.md §49 (Sync Ordering)
  * - 09_OFFLINE_AND_ERROR_HANDLING.md §50 (Synchronization Failure — local state preserved, operation recoverable)
@@ -71,6 +75,7 @@ class DefaultSynchronizer @Inject constructor(
     private val syncExecutor: SyncExecutor,
     private val clock: Clock,
     private val retryPolicy: RetryPolicy = DefaultRetryPolicy(),
+    private val conflictResolver: ConflictResolver = DefaultConflictResolver(),
 ) : Synchronizer {
 
     private val _syncState = MutableStateFlow<SyncState>(SyncState.Idle)
@@ -92,6 +97,15 @@ class DefaultSynchronizer @Inject constructor(
             status = SyncStatus.PENDING,
             lastError = null,
         )
+
+        val existingOps = queueStore.getPendingOperations()
+        val conflictAction = conflictResolver.resolveDuplicateMutation(existingOps, operation)
+        if (conflictAction is ConflictResolutionAction.DiscardMutation) {
+            val existing = existingOps.find { it.operationId == operationId }
+                ?: existingOps.firstOrNull { it.operationType == operationType }
+                ?: operation
+            return DomainResult.Success(existing)
+        }
 
         return when (val result = queueStore.enqueue(operation)) {
             is DomainResult.Success -> DomainResult.Success(operation)
