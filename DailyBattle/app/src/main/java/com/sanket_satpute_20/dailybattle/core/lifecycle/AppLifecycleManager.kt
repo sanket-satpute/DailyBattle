@@ -43,6 +43,15 @@ interface AppLifecycleManager {
         timestamp: Long? = null,
     )
 
+    /**
+     * Dispatches a recreation event when an Activity is recreated following
+     * configuration changes or system process restoration.
+     */
+    fun onRecreation(
+        isProcessRecreation: Boolean,
+        timestamp: Long? = null,
+    )
+
     fun addListener(listener: AppLifecycleListener)
     fun removeListener(listener: AppLifecycleListener)
 }
@@ -100,6 +109,15 @@ class DefaultAppLifecycleManager @Inject constructor(
         _lastForegroundAtMillis = now
 
         val event = AppLifecycleEvent.Foreground(now, backgroundDuration)
+        _events.tryEmit(event)
+        for (listener in listeners) {
+            listener.onLifecycleEvent(event)
+        }
+    }
+
+    override fun onRecreation(isProcessRecreation: Boolean, timestamp: Long?) {
+        val now = timestamp ?: clock.millis()
+        val event = AppLifecycleEvent.Recreated(now, isProcessRecreation)
         _events.tryEmit(event)
         for (listener in listeners) {
             listener.onLifecycleEvent(event)

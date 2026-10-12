@@ -30,6 +30,18 @@ sealed interface AppLifecycleEvent {
         val timestamp: Long,
         val reason: BackgroundReason,
     ) : AppLifecycleEvent
+
+    /**
+     * Application component recreated due to configuration changes (e.g. rotation, theme, locale)
+     * or system process restoration.
+     *
+     * @param timestamp Epoch milliseconds when recreation occurred.
+     * @param isProcessRecreation True if this recreation follows process death; false if configuration change.
+     */
+    data class Recreated(
+        val timestamp: Long,
+        val isProcessRecreation: Boolean,
+    ) : AppLifecycleEvent
 }
 
 /**

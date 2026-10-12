@@ -20,11 +20,20 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        if (savedInstanceState != null) {
+            val isProcessRecreation = savedInstanceState.getBoolean(KEY_IS_PROCESS_RECREATION, false)
+            lifecycleManager.onRecreation(isProcessRecreation)
+        }
         setContent {
             DailyBattleTheme {
                 DailyBattleApp()
             }
         }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putBoolean(KEY_IS_PROCESS_RECREATION, true)
     }
 
     override fun onStart() {
@@ -35,6 +44,10 @@ class MainActivity : ComponentActivity() {
     override fun onStop() {
         super.onStop()
         lifecycleManager.onBackground(BackgroundReason.USER_NAVIGATION)
+    }
+
+    companion object {
+        private const val KEY_IS_PROCESS_RECREATION = "key_is_process_recreation"
     }
 }
 

@@ -94,6 +94,17 @@ class DefaultLifecycleBattlePreserver @Inject constructor(
                     }
                 }
             }
+            is AppLifecycleEvent.Recreated -> {
+                // When Activity is recreated (configuration change or process restoration):
+                // Ensure active session remains attached and synchronized with persistent storage (§19, §47)
+                val current = _activeSession.value
+                if (current != null) {
+                    val persisted = sessionRepository.getOfficialSession(current.userId, current.battleId)
+                    if (persisted != null) {
+                        _activeSession.value = persisted
+                    }
+                }
+            }
         }
     }
 }

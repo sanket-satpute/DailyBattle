@@ -4,6 +4,8 @@ import com.sanket_satpute_20.dailybattle.core.lifecycle.AppLifecycleManager
 import com.sanket_satpute_20.dailybattle.core.lifecycle.DefaultAppLifecycleManager
 import com.sanket_satpute_20.dailybattle.core.lifecycle.DefaultLifecycleBattlePreserver
 import com.sanket_satpute_20.dailybattle.core.lifecycle.LifecycleBattlePreserver
+import com.sanket_satpute_20.dailybattle.core.lifecycle.DefaultGameplayStateRestorer
+import com.sanket_satpute_20.dailybattle.core.lifecycle.GameplayStateRestorer
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -28,4 +30,10 @@ abstract class LifecycleModule {
     abstract fun bindLifecycleBattlePreserver(
         impl: DefaultLifecycleBattlePreserver,
     ): LifecycleBattlePreserver
+
+    @Binds
+    @Singleton
+    abstract fun bindGameplayStateRestorer(
+        impl: DefaultGameplayStateRestorer,
+    ): GameplayStateRestorer
 }

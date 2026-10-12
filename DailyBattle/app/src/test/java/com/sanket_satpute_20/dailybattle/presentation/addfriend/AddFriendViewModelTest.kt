@@ -1,5 +1,6 @@
 package com.sanket_satpute_20.dailybattle.presentation.addfriend
 
+import androidx.lifecycle.SavedStateHandle
 import com.sanket_satpute_20.dailybattle.core.error.AppError
 import com.sanket_satpute_20.dailybattle.design.components.DBInputState
 import com.sanket_satpute_20.dailybattle.domain.friend.AddFriendByBattleCodeUseCase
@@ -73,7 +74,7 @@ class AddFriendViewModelTest {
         friendRepo = FakeFriendRepository()
         addFriendUseCase = AddFriendByBattleCodeUseCase(friendRepo)
         getUserBattleCodeUseCase = GetUserBattleCodeUseCase(friendRepo)
-        viewModel = AddFriendViewModel(addFriendUseCase, getUserBattleCodeUseCase)
+        viewModel = AddFriendViewModel(addFriendUseCase, getUserBattleCodeUseCase, SavedStateHandle())
     }
 
     @After

@@ -1,5 +1,6 @@
 package com.sanket_satpute_20.dailybattle.presentation.addfriend
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sanket_satpute_20.dailybattle.design.components.DBInputState
@@ -27,16 +28,30 @@ sealed interface AddFriendSubmitState {
 @HiltViewModel
 class AddFriendViewModel @Inject constructor(
     private val addFriendByBattleCodeUseCase: AddFriendByBattleCodeUseCase,
-    private val getUserBattleCodeUseCase: GetUserBattleCodeUseCase
+    private val getUserBattleCodeUseCase: GetUserBattleCodeUseCase,
+    private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
+
+    companion object {
+        const val KEY_ENTERED_CODE = "key_entered_code"
+    }
+
+    private val initialCode: String = savedStateHandle.get<String>(KEY_ENTERED_CODE) ?: ""
 
     private val _userCode = MutableStateFlow<String?>(null)
     val userCode: StateFlow<String?> = _userCode.asStateFlow()
 
-    private val _enteredCode = MutableStateFlow("")
+    private val _enteredCode = MutableStateFlow(initialCode)
     val enteredCode: StateFlow<String> = _enteredCode.asStateFlow()
 
-    private val _inputState = MutableStateFlow(DBInputState.Default)
+    private val _inputState = MutableStateFlow(
+        if (initialCode.isEmpty()) DBInputState.Default
+        else {
+            val normalized = InputValidator.normalizeBattleCode(initialCode)
+            if (InputValidator.validateBattleCode(normalized) is ValidationResult.Valid) DBInputState.Valid
+            else DBInputState.Invalid
+        }
+    )
     val inputState: StateFlow<DBInputState> = _inputState.asStateFlow()
 
     private val _feedbackMessage = MutableStateFlow<String?>(null)
@@ -61,6 +76,7 @@ class AddFriendViewModel @Inject constructor(
     }
 
     fun onCodeChanged(code: String) {
+        savedStateHandle[KEY_ENTERED_CODE] = code
         _enteredCode.value = code
         _submitState.value = AddFriendSubmitState.Idle
         

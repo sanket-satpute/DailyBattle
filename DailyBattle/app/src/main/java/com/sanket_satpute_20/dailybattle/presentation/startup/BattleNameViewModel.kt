@@ -1,5 +1,6 @@
 package com.sanket_satpute_20.dailybattle.presentation.startup
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sanket_satpute_20.dailybattle.domain.user.UserRepository
@@ -24,13 +25,29 @@ data class BattleNameState(
 
 @HiltViewModel
 class BattleNameViewModel @Inject constructor(
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(BattleNameState())
+    companion object {
+        const val KEY_BATTLE_NAME = "key_battle_name"
+    }
+
+    private val initialName: String = savedStateHandle.get<String>(KEY_BATTLE_NAME) ?: ""
+    private val initialValidation = if (initialName.isNotBlank()) InputValidator.validateBattleName(initialName) else null
+
+    private val _state = MutableStateFlow(
+        BattleNameState(
+            name = initialName,
+            isValid = initialValidation is ValidationResult.Valid,
+            isError = initialValidation is ValidationResult.Invalid,
+            errorMessage = (initialValidation as? ValidationResult.Invalid)?.reason
+        )
+    )
     val state: StateFlow<BattleNameState> = _state.asStateFlow()
 
     fun onNameChanged(newName: String) {
+        savedStateHandle[KEY_BATTLE_NAME] = newName
         val validation = InputValidator.validateBattleName(newName)
         _state.update {
             it.copy(

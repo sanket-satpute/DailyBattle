@@ -1,5 +1,6 @@
 package com.sanket_satpute_20.dailybattle.presentation.startup
 
+import androidx.lifecycle.SavedStateHandle
 import com.sanket_satpute_20.dailybattle.domain.user.UserRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -36,7 +37,7 @@ class BattleNameViewModelTest {
     fun setup() {
         Dispatchers.setMain(testDispatcher)
         userRepository = FakeUserRepository()
-        viewModel = BattleNameViewModel(userRepository)
+        viewModel = BattleNameViewModel(userRepository, SavedStateHandle())
     }
 
     @After
