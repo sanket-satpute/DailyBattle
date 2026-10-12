@@ -15,6 +15,7 @@ import com.sanket_satpute_20.dailybattle.data.local.dao.RivalDao
 import com.sanket_satpute_20.dailybattle.data.local.dao.RivalMatchHistoryDao
 import com.sanket_satpute_20.dailybattle.data.local.dao.UserDao
 import com.sanket_satpute_20.dailybattle.data.local.database.DailyBattleDatabase
+import com.sanket_satpute_20.dailybattle.data.local.migration.DatabaseMigrations
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -34,7 +35,9 @@ object DatabaseModule {
         context,
         DailyBattleDatabase::class.java,
         DailyBattleDatabase.DATABASE_NAME,
-    ).build()
+    )
+        .addMigrations(*DatabaseMigrations.ALL_MIGRATIONS)
+        .build()
 
     @Provides
     fun provideUserDao(database: DailyBattleDatabase): UserDao = database.userDao()

@@ -25,6 +25,11 @@ class DailyBattleDatabaseTest {
     }
 
     @Test
+    fun databaseVersionConstantMatchesSpecification() {
+        assertEquals(1, DailyBattleDatabase.DATABASE_VERSION)
+    }
+
+    @Test
     fun roomCompilerGeneratesDatabaseImplementation() {
         val implClass = Class.forName("com.sanket_satpute_20.dailybattle.data.local.database.DailyBattleDatabase_Impl")
         assertNotNull("Room must generate DailyBattleDatabase_Impl", implClass)

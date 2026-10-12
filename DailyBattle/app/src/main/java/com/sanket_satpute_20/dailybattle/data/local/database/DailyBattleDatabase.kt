@@ -47,8 +47,8 @@ import com.sanket_satpute_20.dailybattle.data.local.entity.UserEntity
         ProfileEntity::class,
         BattleHistoryItemEntity::class,
     ],
-    version = 1,
-    exportSchema = false,
+    version = DailyBattleDatabase.DATABASE_VERSION,
+    exportSchema = true,
 )
 abstract class DailyBattleDatabase : RoomDatabase() {
 
@@ -67,5 +67,6 @@ abstract class DailyBattleDatabase : RoomDatabase() {
 
     companion object {
         const val DATABASE_NAME = "daily_battle.db"
+        const val DATABASE_VERSION = 1
     }
 }
