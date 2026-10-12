@@ -34,4 +34,13 @@ object DomainModule {
     ): com.sanket_satpute_20.dailybattle.domain.battle.ActiveBattleSessionManager {
         return com.sanket_satpute_20.dailybattle.domain.battle.ActiveBattleSessionManager(repository)
     }
+
+    @Provides
+    @Singleton
+    fun provideDomainAuthorityRegistry(
+        registry: com.sanket_satpute_20.dailybattle.domain.authority.DefaultDomainAuthorityRegistry
+    ): com.sanket_satpute_20.dailybattle.domain.authority.DomainAuthorityRegistry {
+        return registry
+    }
 }
+
