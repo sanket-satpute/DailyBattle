@@ -49,4 +49,10 @@ object NetworkClientFactory {
 
         return builder
     }
+
+    fun createBattleApiService(
+        retrofitBuilder: Retrofit.Builder,
+        baseUrl: String,
+    ): com.sanket_satpute_20.dailybattle.data.remote.api.BattleApiService =
+        retrofitBuilder.baseUrl(baseUrl).build().create(com.sanket_satpute_20.dailybattle.data.remote.api.BattleApiService::class.java)
 }
