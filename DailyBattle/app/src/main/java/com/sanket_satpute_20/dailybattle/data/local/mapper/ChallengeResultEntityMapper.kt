@@ -13,9 +13,9 @@ fun ChallengeResultEntity.toDomain(): ChallengeResult = ChallengeResult(
     resultId = ChallengeResultId(resultId),
     challengeId = ChallengeId(challengeId),
     sessionId = BattleSessionId(sessionId),
-    score = score,
-    maxScore = maxScore,
-    completedAt = completedAt,
+    score = maxOf(0, score),
+    maxScore = maxOf(0, maxScore),
+    completedAt = maxOf(0L, completedAt),
     metadata = null,
 )
 

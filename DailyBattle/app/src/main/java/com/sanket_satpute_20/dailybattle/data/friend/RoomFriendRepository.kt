@@ -26,33 +26,45 @@ class RoomFriendRepository @Inject constructor(
 ) : FriendRepository {
 
     override suspend fun getFriends(userId: UserId): DomainResult<List<Friend>> {
-        val entities = friendDao.getFriendsForUser(userId.value)
-        return DomainResult.Success(entities.map { it.toDomain() })
+        return try {
+            val entities = friendDao.getFriendsForUser(userId.value)
+            DomainResult.Success(entities.map { it.toDomain() })
+        } catch (e: Exception) {
+            DomainResult.Failure(AppError.Persistence)
+        }
     }
 
     override suspend fun getFriend(userId: UserId, friendUserId: UserId): DomainResult<Friend?> {
-        val entity = friendDao.getFriend(userId.value, friendUserId.value)
-        return DomainResult.Success(entity?.toDomain())
+        return try {
+            val entity = friendDao.getFriend(userId.value, friendUserId.value)
+            DomainResult.Success(entity?.toDomain())
+        } catch (e: Exception) {
+            DomainResult.Failure(AppError.Persistence)
+        }
     }
 
     override suspend fun sendFriendRequest(userId: UserId, friendUserId: UserId): DomainResult<Friend> {
-        val existing = friendDao.getFriend(userId.value, friendUserId.value)
-        if (existing != null) {
-            return DomainResult.Failure(AppError.Domain)
-        }
+        return try {
+            val existing = friendDao.getFriend(userId.value, friendUserId.value)
+            if (existing != null) {
+                return DomainResult.Failure(AppError.Domain)
+            }
 
-        val newFriend = Friend(
-            friendshipId = FriendshipId(UUID.randomUUID().toString()),
-            userId = userId,
-            friendUserId = friendUserId,
-            friendName = "User ${friendUserId.value}",
-            status = FriendStatus.PENDING,
-            todayScore = null,
-            createdAt = System.currentTimeMillis(),
-            updatedAt = System.currentTimeMillis(),
-        )
-        friendDao.insertFriend(newFriend.toEntity())
-        return DomainResult.Success(newFriend)
+            val newFriend = Friend(
+                friendshipId = FriendshipId(UUID.randomUUID().toString()),
+                userId = userId,
+                friendUserId = friendUserId,
+                friendName = "User ${friendUserId.value}",
+                status = FriendStatus.PENDING,
+                todayScore = null,
+                createdAt = System.currentTimeMillis(),
+                updatedAt = System.currentTimeMillis(),
+            )
+            friendDao.insertFriend(newFriend.toEntity())
+            DomainResult.Success(newFriend)
+        } catch (e: Exception) {
+            DomainResult.Failure(AppError.Persistence)
+        }
     }
 
     override suspend fun addFriendByBattleCode(userId: UserId, battleCode: String): DomainResult<Friend> {
@@ -64,43 +76,55 @@ class RoomFriendRepository @Inject constructor(
     }
 
     override suspend fun acceptFriendRequest(friendshipId: FriendshipId): DomainResult<Friend> {
-        val existing = friendDao.getFriendById(friendshipId.value)
-            ?: return DomainResult.Failure(AppError.Domain)
+        return try {
+            val existing = friendDao.getFriendById(friendshipId.value)
+                ?: return DomainResult.Failure(AppError.Domain)
 
-        if (existing.status != FriendStatus.PENDING.name) {
-            return DomainResult.Failure(AppError.Domain)
+            if (existing.status != FriendStatus.PENDING.name) {
+                return DomainResult.Failure(AppError.Domain)
+            }
+
+            val updated = existing.copy(
+                status = FriendStatus.ACCEPTED.name,
+                updatedAt = System.currentTimeMillis(),
+            )
+            friendDao.insertFriend(updated)
+            DomainResult.Success(updated.toDomain())
+        } catch (e: Exception) {
+            DomainResult.Failure(AppError.Persistence)
         }
-
-        val updated = existing.copy(
-            status = FriendStatus.ACCEPTED.name,
-            updatedAt = System.currentTimeMillis(),
-        )
-        friendDao.insertFriend(updated)
-        return DomainResult.Success(updated.toDomain())
     }
 
     override suspend fun rejectFriendRequest(friendshipId: FriendshipId): DomainResult<Unit> {
-        val existing = friendDao.getFriendById(friendshipId.value)
-            ?: return DomainResult.Failure(AppError.Domain)
+        return try {
+            val existing = friendDao.getFriendById(friendshipId.value)
+                ?: return DomainResult.Failure(AppError.Domain)
 
-        if (existing.status != FriendStatus.PENDING.name) {
-            return DomainResult.Failure(AppError.Domain)
+            if (existing.status != FriendStatus.PENDING.name) {
+                return DomainResult.Failure(AppError.Domain)
+            }
+
+            friendDao.deleteFriendById(friendshipId.value)
+            DomainResult.Success(Unit)
+        } catch (e: Exception) {
+            DomainResult.Failure(AppError.Persistence)
         }
-
-        friendDao.deleteFriendById(friendshipId.value)
-        return DomainResult.Success(Unit)
     }
 
     override suspend fun blockFriend(friendshipId: FriendshipId): DomainResult<Friend> {
-        val existing = friendDao.getFriendById(friendshipId.value)
-            ?: return DomainResult.Failure(AppError.Domain)
+        return try {
+            val existing = friendDao.getFriendById(friendshipId.value)
+                ?: return DomainResult.Failure(AppError.Domain)
 
-        val updated = existing.copy(
-            status = FriendStatus.BLOCKED.name,
-            updatedAt = System.currentTimeMillis(),
-        )
-        friendDao.insertFriend(updated)
-        return DomainResult.Success(updated.toDomain())
+            val updated = existing.copy(
+                status = FriendStatus.BLOCKED.name,
+                updatedAt = System.currentTimeMillis(),
+            )
+            friendDao.insertFriend(updated)
+            DomainResult.Success(updated.toDomain())
+        } catch (e: Exception) {
+            DomainResult.Failure(AppError.Persistence)
+        }
     }
 
     override suspend fun getBattleCode(userId: UserId): DomainResult<String> {
@@ -108,6 +132,8 @@ class RoomFriendRepository @Inject constructor(
     }
 
     suspend fun saveFriends(friends: List<Friend>) {
-        friendDao.insertFriends(friends.map { it.toEntity() })
+        runCatching {
+            friendDao.insertFriends(friends.map { it.toEntity() })
+        }
     }
 }

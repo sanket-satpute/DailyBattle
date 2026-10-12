@@ -16,7 +16,7 @@ fun ChallengeEntity.toDomain(): Challenge {
         challengeId = ChallengeId(challengeId),
         battleId = BattleId(battleId),
         type = challengeType,
-        order = order,
+        order = maxOf(1, order),
         version = version,
     )
 }

@@ -69,6 +69,12 @@ class DatabaseModuleTest {
         assertSame(dummyBattleHistoryDao, DatabaseModule.provideBattleHistoryDao(fakeDb))
     }
 
+    @Test
+    fun databaseModuleProvidesDatabaseCorruptionHandler() {
+        val handler = DatabaseModule.provideDatabaseCorruptionHandler()
+        org.junit.Assert.assertNotNull(handler)
+    }
+
     @Suppress("UNCHECKED_CAST")
     private inline fun <reified T> createDummyDao(): T {
         return Proxy.newProxyInstance(

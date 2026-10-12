@@ -30,8 +30,12 @@ class RoomRivalRepository @Inject constructor(
 ) : RivalRepository {
 
     override suspend fun getCurrentRival(userId: UserId): DomainResult<Rival?> {
-        val entity = rivalDao.getRivalForUser(userId.value)
-        return DomainResult.Success(entity?.toDomain())
+        return try {
+            val entity = rivalDao.getRivalForUser(userId.value)
+            DomainResult.Success(entity?.toDomain())
+        } catch (e: Exception) {
+            DomainResult.Failure(AppError.Persistence)
+        }
     }
 
     override suspend fun getRivalComparison(
@@ -39,25 +43,29 @@ class RoomRivalRepository @Inject constructor(
         rivalId: UserId,
         battleId: BattleId,
     ): DomainResult<RivalScoreComparison> {
-        val historyEntities = rivalMatchHistoryDao.getMatchHistoryForUser(userId.value)
-        val matchItem = historyEntities.find { it.battleId == battleId.value }
+        return try {
+            val historyEntities = rivalMatchHistoryDao.getMatchHistoryForUser(userId.value)
+            val matchItem = historyEntities.find { it.battleId == battleId.value }
 
-        return if (matchItem != null) {
-            val direction = when {
-                matchItem.userScore > matchItem.rivalScore -> ScoreDirection.AHEAD
-                matchItem.userScore < matchItem.rivalScore -> ScoreDirection.BEHIND
-                else -> ScoreDirection.TIED
+            if (matchItem != null) {
+                val direction = when {
+                    matchItem.userScore > matchItem.rivalScore -> ScoreDirection.AHEAD
+                    matchItem.userScore < matchItem.rivalScore -> ScoreDirection.BEHIND
+                    else -> ScoreDirection.TIED
+                }
+                val comparison = RivalScoreComparison(
+                    userScore = matchItem.userScore,
+                    rivalScore = matchItem.rivalScore,
+                    scoreGap = abs(matchItem.userScore - matchItem.rivalScore),
+                    battleId = battleId,
+                    direction = direction,
+                )
+                DomainResult.Success(comparison)
+            } else {
+                DomainResult.Failure(AppError.Domain)
             }
-            val comparison = RivalScoreComparison(
-                userScore = matchItem.userScore,
-                rivalScore = matchItem.rivalScore,
-                scoreGap = abs(matchItem.userScore - matchItem.rivalScore),
-                battleId = battleId,
-                direction = direction,
-            )
-            DomainResult.Success(comparison)
-        } else {
-            DomainResult.Failure(AppError.Domain)
+        } catch (e: Exception) {
+            DomainResult.Failure(AppError.Persistence)
         }
     }
 
@@ -65,15 +73,23 @@ class RoomRivalRepository @Inject constructor(
         userId: UserId,
         rivalId: UserId,
     ): DomainResult<List<RivalMatchHistoryItem>> {
-        val entities = rivalMatchHistoryDao.getMatchHistoryForUser(userId.value)
-        return DomainResult.Success(entities.map { it.toDomain() })
+        return try {
+            val entities = rivalMatchHistoryDao.getMatchHistoryForUser(userId.value)
+            DomainResult.Success(entities.map { it.toDomain() })
+        } catch (e: Exception) {
+            DomainResult.Failure(AppError.Persistence)
+        }
     }
 
     suspend fun saveRival(rival: Rival) {
-        rivalDao.insertRival(rival.toEntity())
+        runCatching {
+            rivalDao.insertRival(rival.toEntity())
+        }
     }
 
     suspend fun saveRivalMatchHistory(userId: UserId, items: List<RivalMatchHistoryItem>) {
-        rivalMatchHistoryDao.insertMatchHistory(items.map { it.toEntity(userId.value) })
+        runCatching {
+            rivalMatchHistoryDao.insertMatchHistory(items.map { it.toEntity(userId.value) })
+        }
     }
 }

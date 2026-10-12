@@ -74,4 +74,9 @@ object DatabaseModule {
 
     @Provides
     fun provideBattleHistoryDao(database: DailyBattleDatabase): BattleHistoryDao = database.battleHistoryDao()
+
+    @Provides
+    @Singleton
+    fun provideDatabaseCorruptionHandler(): com.sanket_satpute_20.dailybattle.data.local.corruption.DatabaseCorruptionHandler =
+        com.sanket_satpute_20.dailybattle.data.local.corruption.DatabaseCorruptionHandler()
 }

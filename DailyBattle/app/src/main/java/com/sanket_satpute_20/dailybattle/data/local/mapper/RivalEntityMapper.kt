@@ -37,9 +37,9 @@ fun RivalMatchHistoryEntity.toDomain(): RivalMatchHistoryItem {
         .getOrDefault(MatchOutcome.TIE)
     return RivalMatchHistoryItem(
         battleId = BattleId(battleId),
-        date = date,
-        userScore = userScore,
-        rivalScore = rivalScore,
+        date = maxOf(0L, date),
+        userScore = maxOf(0, userScore),
+        rivalScore = maxOf(0, rivalScore),
         outcome = matchOutcome,
     )
 }

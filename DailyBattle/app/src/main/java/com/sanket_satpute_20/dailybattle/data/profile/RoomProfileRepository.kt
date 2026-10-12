@@ -23,15 +23,21 @@ class RoomProfileRepository @Inject constructor(
 ) : ProfileRepository {
 
     override suspend fun getProfile(userId: UserId): DomainResult<Profile> {
-        val entity = profileDao.getProfileForUser(userId.value)
-        return if (entity != null) {
-            DomainResult.Success(entity.toDomain())
-        } else {
-            DomainResult.Failure(AppError.Domain)
+        return try {
+            val entity = profileDao.getProfileForUser(userId.value)
+            if (entity != null) {
+                DomainResult.Success(entity.toDomain())
+            } else {
+                DomainResult.Failure(AppError.Domain)
+            }
+        } catch (e: Exception) {
+            DomainResult.Failure(AppError.Persistence)
         }
     }
 
     suspend fun saveProfile(profile: Profile) {
-        profileDao.insertProfile(profile.toEntity(updatedAt = System.currentTimeMillis()))
+        runCatching {
+            profileDao.insertProfile(profile.toEntity(updatedAt = System.currentTimeMillis()))
+        }
     }
 }

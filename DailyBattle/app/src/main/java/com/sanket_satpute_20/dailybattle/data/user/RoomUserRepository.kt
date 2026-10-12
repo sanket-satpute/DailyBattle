@@ -18,26 +18,30 @@ class RoomUserRepository @Inject constructor(
 ) : UserRepository {
 
     override suspend fun saveBattleName(name: String) {
-        val existing = userDao.getUserById(LOCAL_USER_ID)
-        val updated = if (existing != null) {
-            existing.copy(
-                battleName = name,
-                updatedAt = System.currentTimeMillis(),
-            )
-        } else {
-            UserEntity(
-                userId = LOCAL_USER_ID,
-                battleName = name,
-                createdAt = System.currentTimeMillis(),
-                updatedAt = System.currentTimeMillis(),
-                accountStatus = "ACTIVE",
-            )
+        runCatching {
+            val existing = userDao.getUserById(LOCAL_USER_ID)
+            val updated = if (existing != null) {
+                existing.copy(
+                    battleName = name,
+                    updatedAt = System.currentTimeMillis(),
+                )
+            } else {
+                UserEntity(
+                    userId = LOCAL_USER_ID,
+                    battleName = name,
+                    createdAt = System.currentTimeMillis(),
+                    updatedAt = System.currentTimeMillis(),
+                    accountStatus = "ACTIVE",
+                )
+            }
+            userDao.insertUser(updated)
         }
-        userDao.insertUser(updated)
     }
 
     override suspend fun getBattleName(): String? {
-        return userDao.getUserById(LOCAL_USER_ID)?.battleName
+        return runCatching {
+            userDao.getUserById(LOCAL_USER_ID)?.battleName
+        }.getOrNull()
     }
 
     companion object {

@@ -65,6 +65,21 @@ abstract class DailyBattleDatabase : RoomDatabase() {
     abstract fun profileDao(): ProfileDao
     abstract fun battleHistoryDao(): BattleHistoryDao
 
+    /**
+     * Executes a transactional block within this Room database.
+     * Open for override in test doubles to verify transactional atomicity.
+     */
+    open suspend fun <R> withSafeTransaction(block: suspend () -> R): R {
+        beginTransaction()
+        return try {
+            val result = block()
+            setTransactionSuccessful()
+            result
+        } finally {
+            endTransaction()
+        }
+    }
+
     companion object {
         const val DATABASE_NAME = "daily_battle.db"
         const val DATABASE_VERSION = 1

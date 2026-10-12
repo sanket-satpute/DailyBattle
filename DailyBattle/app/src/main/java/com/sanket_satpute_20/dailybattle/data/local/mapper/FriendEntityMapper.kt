@@ -18,7 +18,7 @@ fun FriendEntity.toDomain(): Friend {
         friendUserId = UserId(friendUserId),
         friendName = friendName,
         status = friendStatus,
-        todayScore = todayScore,
+        todayScore = todayScore?.let { maxOf(0, it) },
         createdAt = createdAt,
         updatedAt = updatedAt,
     )

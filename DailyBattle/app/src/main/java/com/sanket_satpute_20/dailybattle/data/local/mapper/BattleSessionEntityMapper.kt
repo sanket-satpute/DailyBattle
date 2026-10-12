@@ -19,15 +19,18 @@ fun BattleSessionEntity.toDomain(
         .getOrDefault(BattleMode.OFFICIAL)
     val sessionStatus = runCatching { BattleSessionStatus.valueOf(status) }
         .getOrDefault(BattleSessionStatus.NOT_STARTED)
+    val sanitizedCurrentChallenge = currentChallenge?.takeIf { it in 1..3 }
+    val sanitizedStartedAt = startedAt?.takeIf { it >= 0L }
+    val sanitizedCompletedAt = completedAt?.takeIf { it >= 0L }
     return BattleSession(
         sessionId = BattleSessionId(sessionId),
         userId = UserId(userId),
         battleId = BattleId(battleId),
         mode = battleMode,
         status = sessionStatus,
-        currentChallenge = currentChallenge,
-        startedAt = startedAt,
-        completedAt = completedAt,
+        currentChallenge = sanitizedCurrentChallenge,
+        startedAt = sanitizedStartedAt,
+        completedAt = sanitizedCompletedAt,
         challengeSessions = challengeSessions,
     )
 }

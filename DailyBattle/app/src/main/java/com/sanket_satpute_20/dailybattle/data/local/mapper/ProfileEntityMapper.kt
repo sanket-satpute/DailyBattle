@@ -12,18 +12,18 @@ import com.sanket_satpute_20.dailybattle.domain.profile.Profile
 fun ProfileEntity.toDomain(): Profile = Profile(
     userId = UserId(userId),
     battleName = battleName,
-    momentum = momentum,
-    bestScore = bestScore,
-    averageScore = averageScore,
+    momentum = maxOf(0, momentum),
+    bestScore = maxOf(0, bestScore),
+    averageScore = maxOf(0, averageScore),
     battleDNA = BattleDNA(
-        speed = speedDna,
-        memory = memoryDna,
-        people = peopleDna,
+        speed = speedDna?.coerceAtLeast(0),
+        memory = memoryDna?.coerceAtLeast(0),
+        people = peopleDna?.coerceAtLeast(0),
     ),
     records = PersonalRecords(
-        bestScore = bestScore,
-        bestMomentum = bestMomentumRecord,
-        battlesPlayed = battlesPlayedRecord,
+        bestScore = maxOf(0, bestScore),
+        bestMomentum = maxOf(0, bestMomentumRecord),
+        battlesPlayed = maxOf(0, battlesPlayedRecord),
     ),
 )
 
