@@ -21,6 +21,9 @@ interface BattleSessionDao {
     @Query("SELECT * FROM battle_sessions WHERE userId = :userId AND mode = :mode AND status = 'IN_PROGRESS' LIMIT 1")
     suspend fun getActiveSession(userId: String, mode: String): BattleSessionEntity?
 
+    @Query("SELECT * FROM battle_sessions WHERE mode = :mode AND status = :status")
+    suspend fun getSessionsByModeAndStatus(mode: String, status: String): List<BattleSessionEntity>
+
     @Query("DELETE FROM battle_sessions WHERE sessionId = :sessionId")
     suspend fun deleteSessionById(sessionId: String): Int
 }

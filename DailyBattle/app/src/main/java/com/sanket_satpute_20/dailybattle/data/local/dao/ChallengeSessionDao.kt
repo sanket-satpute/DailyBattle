@@ -12,6 +12,9 @@ interface ChallengeSessionDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertChallengeSession(session: ChallengeSessionEntity)
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertChallengeSessions(sessions: List<ChallengeSessionEntity>)
+
     @Query("SELECT * FROM challenge_sessions WHERE sessionId = :sessionId")
     suspend fun getChallengeSessionsForSession(sessionId: String): List<ChallengeSessionEntity>
 

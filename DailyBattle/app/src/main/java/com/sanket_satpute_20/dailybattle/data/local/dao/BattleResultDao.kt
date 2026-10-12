@@ -16,6 +16,9 @@ interface BattleResultDao {
     @Query("SELECT * FROM battle_results WHERE resultId = :resultId LIMIT 1")
     suspend fun getResultById(resultId: String): BattleResultEntity?
 
+    @Query("SELECT * FROM battle_results WHERE sessionId = :sessionId LIMIT 1")
+    suspend fun getResultBySessionId(sessionId: String): BattleResultEntity?
+
     @Query("SELECT * FROM battle_results WHERE userId = :userId AND battleId = :battleId LIMIT 1")
     suspend fun getResultForBattle(userId: String, battleId: String): BattleResultEntity?
 

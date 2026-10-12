@@ -1,6 +1,18 @@
 package com.sanket_satpute_20.dailybattle.data.di
 
-import com.sanket_satpute_20.dailybattle.data.user.InMemoryUserRepository
+import com.sanket_satpute_20.dailybattle.data.battle.RoomBattleResultRepository
+import com.sanket_satpute_20.dailybattle.data.battle.RoomBattleSessionRepository
+import com.sanket_satpute_20.dailybattle.data.friend.RoomFriendRepository
+import com.sanket_satpute_20.dailybattle.data.profile.RoomProfileRepository
+import com.sanket_satpute_20.dailybattle.data.rival.RoomRivalRepository
+import com.sanket_satpute_20.dailybattle.data.settings.DataStoreSettingsRepository
+import com.sanket_satpute_20.dailybattle.data.user.RoomUserRepository
+import com.sanket_satpute_20.dailybattle.domain.battle.BattleResultRepository
+import com.sanket_satpute_20.dailybattle.domain.battle.BattleSessionRepository
+import com.sanket_satpute_20.dailybattle.domain.friend.FriendRepository
+import com.sanket_satpute_20.dailybattle.domain.profile.ProfileRepository
+import com.sanket_satpute_20.dailybattle.domain.rival.RivalRepository
+import com.sanket_satpute_20.dailybattle.domain.settings.SettingsRepository
 import com.sanket_satpute_20.dailybattle.domain.user.UserRepository
 import dagger.Binds
 import dagger.Module
@@ -15,42 +27,42 @@ abstract class DataModule {
     @Binds
     @Singleton
     abstract fun bindUserRepository(
-        inMemoryUserRepository: InMemoryUserRepository
+        roomUserRepository: RoomUserRepository,
     ): UserRepository
 
     @Binds
     @Singleton
     abstract fun bindBattleSessionRepository(
-        inMemoryBattleSessionRepository: com.sanket_satpute_20.dailybattle.data.battle.InMemoryBattleSessionRepository
-    ): com.sanket_satpute_20.dailybattle.domain.battle.BattleSessionRepository
+        roomBattleSessionRepository: RoomBattleSessionRepository,
+    ): BattleSessionRepository
 
     @Binds
     @Singleton
     abstract fun bindBattleResultRepository(
-        inMemoryBattleResultRepository: com.sanket_satpute_20.dailybattle.data.battle.InMemoryBattleResultRepository
-    ): com.sanket_satpute_20.dailybattle.domain.battle.BattleResultRepository
+        roomBattleResultRepository: RoomBattleResultRepository,
+    ): BattleResultRepository
 
     @Binds
     @Singleton
     abstract fun bindRivalRepository(
-        inMemoryRivalRepository: com.sanket_satpute_20.dailybattle.data.rival.InMemoryRivalRepository
-    ): com.sanket_satpute_20.dailybattle.domain.rival.RivalRepository
+        roomRivalRepository: RoomRivalRepository,
+    ): RivalRepository
 
     @Binds
     @Singleton
     abstract fun bindFriendRepository(
-        inMemoryFriendRepository: com.sanket_satpute_20.dailybattle.data.friend.InMemoryFriendRepository
-    ): com.sanket_satpute_20.dailybattle.domain.friend.FriendRepository
+        roomFriendRepository: RoomFriendRepository,
+    ): FriendRepository
 
     @Binds
     @Singleton
     abstract fun bindProfileRepository(
-        inMemoryProfileRepository: com.sanket_satpute_20.dailybattle.data.profile.InMemoryProfileRepository
-    ): com.sanket_satpute_20.dailybattle.domain.profile.ProfileRepository
+        roomProfileRepository: RoomProfileRepository,
+    ): ProfileRepository
 
     @Binds
     @Singleton
     abstract fun bindSettingsRepository(
-        inMemorySettingsRepository: com.sanket_satpute_20.dailybattle.data.settings.InMemorySettingsRepository
-    ): com.sanket_satpute_20.dailybattle.domain.settings.SettingsRepository
+        dataStoreSettingsRepository: DataStoreSettingsRepository,
+    ): SettingsRepository
 }
