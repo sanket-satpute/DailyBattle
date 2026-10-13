@@ -41,6 +41,12 @@ interface GameplayStateRestorer {
     fun restoreGameplayState(userId: UserId, battleId: BattleId): GameplayRestorationResult
 
     /**
+     * Inspects persistent storage for any in-progress official BattleSession for the given user,
+     * and restores it into memory without creating a new session or resetting state (§16, §17).
+     */
+    fun restoreActiveGameplayState(userId: UserId): GameplayRestorationResult
+
+    /**
      * Determines the authoritative target navigation route based on the reconstructed
      * session state (§19, §20, §55).
      *
@@ -81,6 +87,25 @@ class DefaultGameplayStateRestorer @Inject constructor(
             ?: return GameplayRestorationResult.NoSession
 
         // Reconstruct engine and in-memory holders without creating a duplicate session or resetting scores
+        activeBattleSessionManager.bindSession(session)
+        lifecycleBattlePreserver.attachActiveSession(session)
+
+        val recoveryState = evaluateRecoveryState(session)
+        val targetRoute = determineRestoredRoute(session)
+
+        return GameplayRestorationResult.Restored(
+            session = session,
+            recoveryState = recoveryState,
+            targetRoute = targetRoute,
+            isDuplicateSubmissionPrevented = true,
+        )
+    }
+
+    override fun restoreActiveGameplayState(userId: UserId): GameplayRestorationResult {
+        val session = sessionRepository.getActiveOfficialSession(userId)
+            ?: lifecycleBattlePreserver.activeSession.value?.takeIf { it.userId == userId && it.status == BattleSessionStatus.IN_PROGRESS }
+            ?: return GameplayRestorationResult.NoSession
+
         activeBattleSessionManager.bindSession(session)
         lifecycleBattlePreserver.attachActiveSession(session)
 

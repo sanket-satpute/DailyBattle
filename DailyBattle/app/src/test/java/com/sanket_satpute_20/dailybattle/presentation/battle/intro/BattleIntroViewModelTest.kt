@@ -18,12 +18,19 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import com.sanket_satpute_20.dailybattle.core.lifecycle.DefaultAppLifecycleManager
+import com.sanket_satpute_20.dailybattle.core.lifecycle.DefaultGameplayStateRestorer
+import com.sanket_satpute_20.dailybattle.core.lifecycle.DefaultLifecycleBattlePreserver
+import com.sanket_satpute_20.dailybattle.core.lifecycle.GameplayStateRestorer
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
+import java.time.Clock
+import java.time.Instant
+import java.time.ZoneId
 import java.util.UUID
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -33,6 +40,7 @@ class BattleIntroViewModelTest {
     private lateinit var repository: InMemoryBattleSessionRepository
     private lateinit var useCase: GetOrStartOfficialBattleUseCase
     private lateinit var activeBattleSessionManager: ActiveBattleSessionManager
+    private lateinit var gameplayStateRestorer: GameplayStateRestorer
     private lateinit var viewModel: BattleIntroViewModel
 
     @Before
@@ -41,7 +49,16 @@ class BattleIntroViewModelTest {
         repository = InMemoryBattleSessionRepository()
         useCase = GetOrStartOfficialBattleUseCase(repository)
         activeBattleSessionManager = ActiveBattleSessionManager(repository)
-        viewModel = BattleIntroViewModel(useCase, activeBattleSessionManager)
+        val clock = Clock.fixed(Instant.ofEpochMilli(1000L), ZoneId.of("UTC"))
+        val lifecycleManager = DefaultAppLifecycleManager(clock)
+        val lifecycleBattlePreserver = DefaultLifecycleBattlePreserver(repository, lifecycleManager)
+        gameplayStateRestorer = DefaultGameplayStateRestorer(
+            sessionRepository = repository,
+            activeBattleSessionManager = activeBattleSessionManager,
+            lifecycleBattlePreserver = lifecycleBattlePreserver,
+            lifecycleManager = lifecycleManager
+        )
+        viewModel = BattleIntroViewModel(useCase, activeBattleSessionManager, gameplayStateRestorer)
     }
 
     @After

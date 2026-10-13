@@ -49,6 +49,20 @@ class RoomBattleSessionRepository @Inject constructor(
         }
     }
 
+    override fun getActiveOfficialSession(userId: UserId): BattleSession? = runBlocking(ioDispatcher) {
+        try {
+            val sessionEntity = battleSessionDao.getActiveSession(
+                userId = userId.value,
+                mode = BattleMode.OFFICIAL.name,
+            ) ?: return@runBlocking null
+
+            val challengeEntities = challengeSessionDao.getChallengeSessionsForSession(sessionEntity.sessionId)
+            sessionEntity.toDomain(challengeEntities.map { it.toDomain() })
+        } catch (e: Exception) {
+            null
+        }
+    }
+
     override fun saveSession(session: BattleSession) = runBlocking(ioDispatcher) {
         try {
             val performWrite: suspend () -> Unit = {

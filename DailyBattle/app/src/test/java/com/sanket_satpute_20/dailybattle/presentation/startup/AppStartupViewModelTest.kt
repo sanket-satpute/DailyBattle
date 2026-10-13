@@ -29,7 +29,15 @@ class AppStartupViewModelTest {
         }
         val completeBattleUseCase = CompleteBattleUseCase(fakeResultRepository, fakeSessionRepository)
         val recoverUseCase = RecoverUnacknowledgedResultUseCase(fakeSessionRepository, completeBattleUseCase)
-        val viewModel = AppStartupViewModel(recoverUseCase)
+        val fakeProcessDeathRecoverer = object : com.sanket_satpute_20.dailybattle.core.lifecycle.ProcessDeathRecoverer {
+            override fun recoverBattleAfterProcessDeath(
+                userId: UserId,
+                battleId: BattleId?,
+            ): com.sanket_satpute_20.dailybattle.core.lifecycle.ProcessDeathRecoveryResult {
+                return com.sanket_satpute_20.dailybattle.core.lifecycle.ProcessDeathRecoveryResult.NoActiveBattle
+            }
+        }
+        val viewModel = AppStartupViewModel(recoverUseCase, fakeProcessDeathRecoverer)
 
         assertEquals(ScreenState.Success(Unit), viewModel.state.value)
     }

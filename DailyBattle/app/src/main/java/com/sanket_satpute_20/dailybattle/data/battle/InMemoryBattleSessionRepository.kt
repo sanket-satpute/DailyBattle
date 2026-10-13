@@ -25,4 +25,12 @@ class InMemoryBattleSessionRepository @Inject constructor() : BattleSessionRepos
             session.challengeSessions.all { it.status == com.sanket_satpute_20.dailybattle.domain.battle.ChallengeSessionStatus.COMPLETE }
         }
     }
+
+    override fun getActiveOfficialSession(userId: UserId): BattleSession? {
+        return sessions.values.firstOrNull { session ->
+            session.userId == userId &&
+            session.mode == com.sanket_satpute_20.dailybattle.domain.battle.BattleMode.OFFICIAL &&
+            session.status == com.sanket_satpute_20.dailybattle.domain.battle.BattleSessionStatus.IN_PROGRESS
+        }
+    }
 }

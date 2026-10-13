@@ -126,8 +126,8 @@ fun DailyBattleNavHost(
         ) {
             composable(AppRoute.BattleIntro.route) {
                 com.sanket_satpute_20.dailybattle.presentation.battle.intro.BattleIntroRoute(
-                    onNavigateToBattle = {
-                        navController.navigate(AppRoute.Snap.route) {
+                    onNavigateToBattle = { targetRoute ->
+                        navController.navigate(targetRoute) {
                             popUpTo(AppRoute.BattleIntro.route) { inclusive = true }
                         }
                     },

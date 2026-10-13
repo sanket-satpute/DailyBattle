@@ -9,7 +9,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 
 import androidx.lifecycle.viewModelScope
+import com.sanket_satpute_20.dailybattle.core.lifecycle.ProcessDeathRecoverer
 import com.sanket_satpute_20.dailybattle.domain.battle.RecoverUnacknowledgedResultUseCase
+import com.sanket_satpute_20.dailybattle.domain.identifier.UserId
 import kotlinx.coroutines.launch
 
 /**
@@ -17,11 +19,13 @@ import kotlinx.coroutines.launch
  * to await, so the initial state resolves directly to [ScreenState.Success] once Hilt constructs
  * this view model.
  *
- * Dispatches background tasks such as recovering interrupted results on cold start.
+ * Dispatches background tasks such as recovering interrupted results and restoring active
+ * battle state following process death on cold start (§16, §17).
  */
 @HiltViewModel
 class AppStartupViewModel @Inject constructor(
-    private val recoverUnacknowledgedResultUseCase: RecoverUnacknowledgedResultUseCase
+    private val recoverUnacknowledgedResultUseCase: RecoverUnacknowledgedResultUseCase,
+    private val processDeathRecoverer: ProcessDeathRecoverer,
 ) : ViewModel() {
     private val _state = MutableStateFlow<ScreenState<Unit>>(ScreenState.Success(Unit))
     val state: StateFlow<ScreenState<Unit>> = _state.asStateFlow()
@@ -29,6 +33,7 @@ class AppStartupViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             recoverUnacknowledgedResultUseCase.execute()
+            processDeathRecoverer.recoverBattleAfterProcessDeath(UserId("mock_user_id"))
         }
     }
 }

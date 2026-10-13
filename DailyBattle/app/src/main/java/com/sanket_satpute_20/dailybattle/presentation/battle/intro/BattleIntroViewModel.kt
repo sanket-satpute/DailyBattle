@@ -7,6 +7,8 @@ import com.sanket_satpute_20.dailybattle.domain.identifier.BattleId
 import com.sanket_satpute_20.dailybattle.domain.identifier.UserId
 import com.sanket_satpute_20.dailybattle.domain.result.DomainResult
 import com.sanket_satpute_20.dailybattle.domain.battle.ActiveBattleSessionManager
+import com.sanket_satpute_20.dailybattle.core.lifecycle.GameplayStateRestorer
+import com.sanket_satpute_20.dailybattle.navigation.AppRoute
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -27,14 +29,15 @@ data class BattleIntroState(
 )
 
 sealed interface BattleIntroEvent {
-    object NavigateToBattle : BattleIntroEvent
-    object NavigateBack : BattleIntroEvent
+    data class NavigateToBattle(val targetRoute: String = AppRoute.Snap.route) : BattleIntroEvent
+    data object NavigateBack : BattleIntroEvent
 }
 
 @HiltViewModel
 class BattleIntroViewModel @Inject constructor(
     private val getOrStartOfficialBattleUseCase: GetOrStartOfficialBattleUseCase,
-    private val activeBattleSessionManager: ActiveBattleSessionManager
+    private val activeBattleSessionManager: ActiveBattleSessionManager,
+    private val gameplayStateRestorer: GameplayStateRestorer,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(BattleIntroState())
@@ -55,9 +58,11 @@ class BattleIntroViewModel @Inject constructor(
             
             when (result) {
                 is DomainResult.Success -> {
-                    activeBattleSessionManager.bindSession(result.value.session)
+                    val session = result.value.session
+                    activeBattleSessionManager.bindSession(session)
                     _state.update { it.copy(isLoading = false) }
-                    _uiEvent.emit(BattleIntroEvent.NavigateToBattle)
+                    val targetRoute = gameplayStateRestorer.determineRestoredRoute(session)
+                    _uiEvent.emit(BattleIntroEvent.NavigateToBattle(targetRoute))
                 }
                 is DomainResult.Failure -> {
                     _state.update { 

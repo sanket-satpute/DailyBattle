@@ -8,7 +8,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 @Composable
 fun BattleIntroRoute(
-    onNavigateToBattle: () -> Unit,
+    onNavigateToBattle: (String) -> Unit,
     onNavigateBack: () -> Unit,
     viewModel: BattleIntroViewModel = hiltViewModel()
 ) {
@@ -17,7 +17,7 @@ fun BattleIntroRoute(
     LaunchedEffect(viewModel.uiEvent) {
         viewModel.uiEvent.collect { event ->
             when (event) {
-                is BattleIntroEvent.NavigateToBattle -> onNavigateToBattle()
+                is BattleIntroEvent.NavigateToBattle -> onNavigateToBattle(event.targetRoute)
                 is BattleIntroEvent.NavigateBack -> onNavigateBack()
             }
         }

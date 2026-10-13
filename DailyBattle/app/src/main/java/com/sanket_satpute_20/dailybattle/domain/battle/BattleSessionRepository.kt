@@ -27,4 +27,10 @@ interface BattleSessionRepository {
      * but have not yet been successfully acknowledged by the server (i.e. status != COMPLETED).
      */
     fun getUnacknowledgedSessions(): List<BattleSession>
+
+    /**
+     * Retrieves any currently active (IN_PROGRESS) official BattleSession for the given user, if one exists.
+     * Used for process death recovery and app re-entry (§16, §17, §57).
+     */
+    fun getActiveOfficialSession(userId: UserId): BattleSession? = null
 }
