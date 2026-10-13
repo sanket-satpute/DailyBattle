@@ -18,4 +18,20 @@ class CompletePracticeSessionUseCase @Inject constructor(
     fun execute(now: Long = System.currentTimeMillis()): DomainResult<PracticeSession> {
         return activePracticeManager.completePractice(now)
     }
+
+    /**
+     * Finalizes the practice session and returns the validated [PracticeResult].
+     */
+    fun completeAndGetResult(now: Long = System.currentTimeMillis()): DomainResult<PracticeResult> {
+        val sessionResult = activePracticeManager.completePractice(now)
+        if (sessionResult is DomainResult.Failure) {
+            return sessionResult
+        }
+        val latest = activePracticeManager.getLatestPracticeResult()
+        if (latest != null) {
+            return DomainResult.Success(latest)
+        }
+        val session = (sessionResult as DomainResult.Success).value
+        return session.toPracticeResult(completedAt = now)
+    }
 }

@@ -46,9 +46,10 @@ object DomainModule {
     @Provides
     @Singleton
     fun provideActivePracticeSessionManager(
-        repository: com.sanket_satpute_20.dailybattle.domain.practice.PracticeSessionRepository
+        repository: com.sanket_satpute_20.dailybattle.domain.practice.PracticeSessionRepository,
+        resultRepository: com.sanket_satpute_20.dailybattle.domain.practice.PracticeResultRepository,
     ): com.sanket_satpute_20.dailybattle.domain.practice.ActivePracticeSessionManager {
-        return com.sanket_satpute_20.dailybattle.domain.practice.ActivePracticeSessionManager(repository)
+        return com.sanket_satpute_20.dailybattle.domain.practice.ActivePracticeSessionManager(repository, resultRepository)
     }
 }
 

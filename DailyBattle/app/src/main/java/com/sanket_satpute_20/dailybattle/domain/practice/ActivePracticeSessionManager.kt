@@ -26,7 +26,8 @@ import javax.inject.Singleton
  */
 @Singleton
 class ActivePracticeSessionManager @Inject constructor(
-    private val repository: PracticeSessionRepository
+    private val repository: PracticeSessionRepository,
+    private val resultRepository: PracticeResultRepository? = null
 ) {
     private var engine: PracticeEngine? = null
 
@@ -47,6 +48,9 @@ class ActivePracticeSessionManager @Inject constructor(
 
     private val _aggregatedScore = MutableStateFlow<AggregatedBattleScore?>(null)
     val aggregatedScore: StateFlow<AggregatedBattleScore?> = _aggregatedScore.asStateFlow()
+
+    private val _latestPracticeResult = MutableStateFlow<PracticeResult?>(null)
+    val latestPracticeResult: StateFlow<PracticeResult?> = _latestPracticeResult.asStateFlow()
 
     fun bindSession(session: PracticeSession) {
         val newEngine = PracticeEngine(session)
@@ -166,6 +170,7 @@ class ActivePracticeSessionManager @Inject constructor(
         val currentEngine = engine ?: return DomainResult.Failure(AppError.Domain)
         val result = currentEngine.processEvent(PracticeEvent.RepeatPractice(now))
         if (result is DomainResult.Success) {
+            _latestPracticeResult.value = null
             updateStateFromEngine(currentEngine, result.value)
             repository.savePracticeSession(result.value)
         }
@@ -178,6 +183,11 @@ class ActivePracticeSessionManager @Inject constructor(
         if (result is DomainResult.Success) {
             updateStateFromEngine(currentEngine, result.value)
             repository.savePracticeSession(result.value)
+            val pr = result.value.toPracticeResult(completedAt = now)
+            if (pr is DomainResult.Success) {
+                _latestPracticeResult.value = pr.value
+                resultRepository?.savePracticeResult(pr.value)
+            }
         }
         return result
     }
@@ -185,6 +195,8 @@ class ActivePracticeSessionManager @Inject constructor(
     fun getAggregatedPracticeScore(): AggregatedBattleScore? {
         return engine?.getAggregatedScore()
     }
+
+    fun getLatestPracticeResult(): PracticeResult? = _latestPracticeResult.value
 
     fun clearActivePractice() {
         val currentSession = _activeSession.value
@@ -198,6 +210,7 @@ class ActivePracticeSessionManager @Inject constructor(
         _currentChallengeType.value = null
         _challengeResults.value = emptyMap()
         _aggregatedScore.value = null
+        _latestPracticeResult.value = null
     }
 
     private fun updateStateFromEngine(currentEngine: PracticeEngine, session: PracticeSession) {

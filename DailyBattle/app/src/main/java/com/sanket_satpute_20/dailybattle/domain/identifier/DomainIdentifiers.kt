@@ -12,3 +12,4 @@ package com.sanket_satpute_20.dailybattle.domain.identifier
 @JvmInline value class BattleResultId(val value: String)
 @JvmInline value class FriendshipId(val value: String)
 @JvmInline value class PracticeSessionId(val value: String)
+@JvmInline value class PracticeResultId(val value: String)

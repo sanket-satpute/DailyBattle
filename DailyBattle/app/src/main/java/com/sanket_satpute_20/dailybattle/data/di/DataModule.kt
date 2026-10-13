@@ -71,4 +71,10 @@ abstract class DataModule {
     abstract fun bindPracticeSessionRepository(
         inMemoryPracticeSessionRepository: com.sanket_satpute_20.dailybattle.data.practice.InMemoryPracticeSessionRepository,
     ): com.sanket_satpute_20.dailybattle.domain.practice.PracticeSessionRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindPracticeResultRepository(
+        inMemoryPracticeResultRepository: com.sanket_satpute_20.dailybattle.data.practice.InMemoryPracticeResultRepository,
+    ): com.sanket_satpute_20.dailybattle.domain.practice.PracticeResultRepository
 }
