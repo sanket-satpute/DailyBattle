@@ -66,6 +66,12 @@ interface Synchronizer {
      * Cancels a pending or failed operation, moving it to [SyncStatus.CANCELLED].
      */
     suspend fun cancelOperation(operationId: String): DomainResult<Unit>
+
+    /**
+     * Inspects the queue for operations interrupted during synchronization (e.g. process death)
+     * and reconciles their unknown status without duplicating mutations (Sprint 18.4).
+     */
+    suspend fun recoverInterruptedOperations(): List<PendingOperation>
 }
 
 @Singleton
@@ -119,6 +125,20 @@ class DefaultSynchronizer @Inject constructor(
             return@withLock SyncResult.Offline
         }
 
+        // Recover any operations left orphaned in SYNCING from a previously killed process
+        val rawOperations = queueStore.getPendingOperations()
+        val orphaned = rawOperations.filter { it.status == SyncStatus.SYNCING || it.status == SyncStatus.UNKNOWN }
+        if (orphaned.isNotEmpty()) {
+            for (orphan in orphaned) {
+                val pendingOp = orphan.copy(
+                    status = SyncStatus.PENDING,
+                    retryCount = 0,
+                    lastError = "RecoveredFromInterruptedSubmission",
+                )
+                queueStore.updateOperation(pendingOp)
+            }
+        }
+
         val allOperations = queueStore.getPendingOperations()
         val pending = allOperations.filter { op ->
             when (op.status) {
@@ -129,7 +149,8 @@ class DefaultSynchronizer @Inject constructor(
                 }
                 SyncStatus.SYNCING,
                 SyncStatus.SUCCESS,
-                SyncStatus.CANCELLED -> false
+                SyncStatus.CANCELLED,
+                SyncStatus.UNKNOWN -> false
             }
         }
 
@@ -205,6 +226,33 @@ class DefaultSynchronizer @Inject constructor(
             status = SyncStatus.CANCELLED,
         )
         return queueStore.updateOperation(cancelledOp)
+    }
+
+    override suspend fun recoverInterruptedOperations(): List<PendingOperation> = syncMutex.withLock {
+        val allOperations = queueStore.getPendingOperations()
+        val interrupted = allOperations.filter {
+            it.status == SyncStatus.SYNCING || it.status == SyncStatus.UNKNOWN
+        }
+
+        val recoveredList = mutableListOf<PendingOperation>()
+
+        for (op in interrupted) {
+            // First mark as UNKNOWN status per §23 / Sprint 18.4
+            val unknownOp = op.copy(status = SyncStatus.UNKNOWN)
+            queueStore.updateOperation(unknownOp)
+
+            // Safely reset to PENDING for controlled retry using the EXACT SAME payload and clientRequestId
+            // to avoid duplicating the mutation (§57, Rule 42, Rule 46)
+            val pendingOp = unknownOp.copy(
+                status = SyncStatus.PENDING,
+                retryCount = 0,
+                lastError = "RecoveredFromInterruptedSubmission",
+            )
+            queueStore.updateOperation(pendingOp)
+            recoveredList.add(pendingOp)
+        }
+
+        recoveredList
     }
 
     private fun mapErrorNameToAppError(name: String): AppError? = when (name) {

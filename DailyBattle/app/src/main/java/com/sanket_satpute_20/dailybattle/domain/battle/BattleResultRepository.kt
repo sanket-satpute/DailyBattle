@@ -40,4 +40,11 @@ interface BattleResultRepository {
     suspend fun getUserBattleResults(
         userId: UserId
     ): DomainResult<List<BattleResult>>
+
+    /**
+     * Retrieves a BattleResult by its sessionId if one exists (§24).
+     */
+    suspend fun getBattleResultBySessionId(
+        sessionId: BattleSessionId
+    ): DomainResult<BattleResult> = DomainResult.Failure(com.sanket_satpute_20.dailybattle.core.error.AppError.Domain)
 }

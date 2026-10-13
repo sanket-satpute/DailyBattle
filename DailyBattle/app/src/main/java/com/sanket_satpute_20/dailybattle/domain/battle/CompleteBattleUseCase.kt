@@ -28,6 +28,18 @@ class CompleteBattleUseCase @Inject constructor(
             return resultRepository.getBattleResult(session.userId, session.battleId)
         }
 
+        // Check if BattleResult already exists before submitting completion (§24)
+        val existingBySession = resultRepository.getBattleResultBySessionId(session.sessionId)
+        if (existingBySession is DomainResult.Success) {
+            val updatedSession = session.copy(
+                status = BattleSessionStatus.COMPLETED,
+                completedAt = existingBySession.value.completedAt,
+                currentChallenge = null
+            )
+            sessionRepository.saveSession(updatedSession)
+            return existingBySession
+        }
+
         // Finalize battle
         // Ensure the idempotency key is derived from the session to safely recover without
         // creating duplicate official results on the backend if submission was interrupted.

@@ -3,6 +3,7 @@ package com.sanket_satpute_20.dailybattle.data.battle
 import com.sanket_satpute_20.dailybattle.domain.battle.BattleSession
 import com.sanket_satpute_20.dailybattle.domain.battle.BattleSessionRepository
 import com.sanket_satpute_20.dailybattle.domain.identifier.BattleId
+import com.sanket_satpute_20.dailybattle.domain.identifier.BattleSessionId
 import com.sanket_satpute_20.dailybattle.domain.identifier.UserId
 import javax.inject.Inject
 
@@ -32,5 +33,9 @@ class InMemoryBattleSessionRepository @Inject constructor() : BattleSessionRepos
             session.mode == com.sanket_satpute_20.dailybattle.domain.battle.BattleMode.OFFICIAL &&
             session.status == com.sanket_satpute_20.dailybattle.domain.battle.BattleSessionStatus.IN_PROGRESS
         }
+    }
+
+    override fun getSessionById(sessionId: BattleSessionId): BattleSession? {
+        return sessions.values.firstOrNull { it.sessionId == sessionId }
     }
 }

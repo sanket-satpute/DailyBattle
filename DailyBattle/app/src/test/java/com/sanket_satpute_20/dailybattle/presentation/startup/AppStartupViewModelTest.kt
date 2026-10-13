@@ -37,7 +37,20 @@ class AppStartupViewModelTest {
                 return com.sanket_satpute_20.dailybattle.core.lifecycle.ProcessDeathRecoveryResult.NoActiveBattle
             }
         }
-        val viewModel = AppStartupViewModel(recoverUseCase, fakeProcessDeathRecoverer)
+        val fakeInterruptedSubmissionRecoverer = object : com.sanket_satpute_20.dailybattle.core.lifecycle.InterruptedSubmissionRecoverer {
+            override suspend fun recoverInterruptedSubmissions(
+                userId: UserId
+            ): DomainResult<com.sanket_satpute_20.dailybattle.core.lifecycle.InterruptedSubmissionRecoveryReport> {
+                return DomainResult.Success(
+                    com.sanket_satpute_20.dailybattle.core.lifecycle.InterruptedSubmissionRecoveryReport(
+                        recoveredSessions = emptyList(),
+                        reconciledResults = emptyList(),
+                        recoveredQueueOperations = emptyList(),
+                    )
+                )
+            }
+        }
+        val viewModel = AppStartupViewModel(recoverUseCase, fakeProcessDeathRecoverer, fakeInterruptedSubmissionRecoverer)
 
         assertEquals(ScreenState.Success(Unit), viewModel.state.value)
     }

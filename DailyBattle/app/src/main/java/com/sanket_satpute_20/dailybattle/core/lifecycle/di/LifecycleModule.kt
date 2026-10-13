@@ -8,6 +8,8 @@ import com.sanket_satpute_20.dailybattle.core.lifecycle.DefaultGameplayStateRest
 import com.sanket_satpute_20.dailybattle.core.lifecycle.GameplayStateRestorer
 import com.sanket_satpute_20.dailybattle.core.lifecycle.DefaultProcessDeathRecoverer
 import com.sanket_satpute_20.dailybattle.core.lifecycle.ProcessDeathRecoverer
+import com.sanket_satpute_20.dailybattle.core.lifecycle.DefaultInterruptedSubmissionRecoverer
+import com.sanket_satpute_20.dailybattle.core.lifecycle.InterruptedSubmissionRecoverer
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -44,4 +46,10 @@ abstract class LifecycleModule {
     abstract fun bindProcessDeathRecoverer(
         impl: DefaultProcessDeathRecoverer,
     ): ProcessDeathRecoverer
+
+    @Binds
+    @Singleton
+    abstract fun bindInterruptedSubmissionRecoverer(
+        impl: DefaultInterruptedSubmissionRecoverer,
+    ): InterruptedSubmissionRecoverer
 }

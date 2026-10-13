@@ -29,4 +29,5 @@ data class PendingOperation(
     val isSuccess: Boolean get() = status == SyncStatus.SUCCESS
     val isFailed: Boolean get() = status == SyncStatus.FAILED
     val isCancelled: Boolean get() = status == SyncStatus.CANCELLED
+    val isUnknown: Boolean get() = status == SyncStatus.UNKNOWN
 }

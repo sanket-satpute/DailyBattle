@@ -37,6 +37,11 @@ class PendingOperationTest {
 
         val cancelledOp = pendingOp.copy(status = SyncStatus.CANCELLED)
         assertTrue(cancelledOp.isCancelled)
+
+        val unknownOp = pendingOp.copy(status = SyncStatus.UNKNOWN)
+        assertTrue(unknownOp.isUnknown)
+        assertFalse(unknownOp.isPending)
+        assertFalse(unknownOp.isSyncing)
     }
 
     @Test

@@ -10,6 +10,7 @@ import com.sanket_satpute_20.dailybattle.domain.battle.BattleSessionRepository
 import com.sanket_satpute_20.dailybattle.domain.battle.BattleSessionStatus
 import com.sanket_satpute_20.dailybattle.domain.battle.ChallengeSessionStatus
 import com.sanket_satpute_20.dailybattle.domain.identifier.BattleId
+import com.sanket_satpute_20.dailybattle.domain.identifier.BattleSessionId
 import com.sanket_satpute_20.dailybattle.domain.identifier.UserId
 import com.sanket_satpute_20.dailybattle.data.local.database.DailyBattleDatabase
 import kotlinx.coroutines.CoroutineDispatcher
@@ -56,6 +57,16 @@ class RoomBattleSessionRepository @Inject constructor(
                 mode = BattleMode.OFFICIAL.name,
             ) ?: return@runBlocking null
 
+            val challengeEntities = challengeSessionDao.getChallengeSessionsForSession(sessionEntity.sessionId)
+            sessionEntity.toDomain(challengeEntities.map { it.toDomain() })
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    override fun getSessionById(sessionId: BattleSessionId): BattleSession? = runBlocking(ioDispatcher) {
+        try {
+            val sessionEntity = battleSessionDao.getSessionById(sessionId.value) ?: return@runBlocking null
             val challengeEntities = challengeSessionDao.getChallengeSessionsForSession(sessionEntity.sessionId)
             sessionEntity.toDomain(challengeEntities.map { it.toDomain() })
         } catch (e: Exception) {

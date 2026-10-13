@@ -15,5 +15,6 @@ enum class SyncStatus {
     SYNCING,
     SUCCESS,
     FAILED,
-    CANCELLED
+    CANCELLED,
+    UNKNOWN
 }

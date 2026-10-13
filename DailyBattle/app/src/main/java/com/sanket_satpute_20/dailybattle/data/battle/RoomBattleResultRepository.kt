@@ -61,6 +61,14 @@ class RoomBattleResultRepository @Inject constructor(
             val userId = sessionEntity?.let { UserId(it.userId) } ?: UserId("simulated-user")
             val battleId = sessionEntity?.let { BattleId(it.battleId) } ?: BattleId("simulated-battle")
 
+            // Idempotency in database: check if already completed for this (userId, battleId) (§24, §25)
+            val existingBattleResult = battleResultDao.getResultForBattle(userId.value, battleId.value)
+            if (existingBattleResult != null) {
+                val domainResult = existingBattleResult.toDomain()
+                requestCache[clientRequestId] = domainResult
+                return DomainResult.Success(domainResult)
+            }
+
             val result = BattleResult(
                 resultId = BattleResultId(UUID.randomUUID().toString()),
                 userId = userId,
@@ -115,6 +123,21 @@ class RoomBattleResultRepository @Inject constructor(
         return try {
             val entities = battleResultDao.getAllResultsForUser(userId.value)
             DomainResult.Success(entities.map { it.toDomain() })
+        } catch (e: Exception) {
+            DomainResult.Failure(AppError.Persistence)
+        }
+    }
+
+    override suspend fun getBattleResultBySessionId(
+        sessionId: BattleSessionId,
+    ): DomainResult<BattleResult> {
+        return try {
+            val entity = battleResultDao.getResultBySessionId(sessionId.value)
+            if (entity != null) {
+                DomainResult.Success(entity.toDomain())
+            } else {
+                DomainResult.Failure(AppError.Domain)
+            }
         } catch (e: Exception) {
             DomainResult.Failure(AppError.Persistence)
         }

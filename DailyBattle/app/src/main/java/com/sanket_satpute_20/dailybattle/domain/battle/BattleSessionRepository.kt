@@ -1,6 +1,7 @@
 package com.sanket_satpute_20.dailybattle.domain.battle
 
 import com.sanket_satpute_20.dailybattle.domain.identifier.BattleId
+import com.sanket_satpute_20.dailybattle.domain.identifier.BattleSessionId
 import com.sanket_satpute_20.dailybattle.domain.identifier.UserId
 
 /**
@@ -33,4 +34,9 @@ interface BattleSessionRepository {
      * Used for process death recovery and app re-entry (§16, §17, §57).
      */
     fun getActiveOfficialSession(userId: UserId): BattleSession? = null
+
+    /**
+     * Retrieves a BattleSession by its unique sessionId if one exists.
+     */
+    fun getSessionById(sessionId: BattleSessionId): BattleSession? = null
 }
