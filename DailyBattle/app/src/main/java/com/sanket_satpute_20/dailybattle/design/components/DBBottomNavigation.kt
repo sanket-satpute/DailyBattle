@@ -24,6 +24,12 @@ import com.sanket_satpute_20.dailybattle.design.color.DBColor
 import com.sanket_satpute_20.dailybattle.design.spacing.DBSpacing
 import com.sanket_satpute_20.dailybattle.design.typography.DBTypography
 
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
+
 enum class DBBottomNavDestination(val label: String) {
     Home("Home"),
     Battle("Battle"),
@@ -98,8 +104,14 @@ private fun DBBottomNavItem(
             .clickable(
                 interactionSource = interactionSource,
                 indication = null, // Disable default ripple for cleaner custom feel
+                role = Role.Tab,
                 onClick = onClick
-            ),
+            )
+            .semantics {
+                role = Role.Tab
+                selected = isSelected
+                contentDescription = "${destination.label} tab"
+            },
         contentAlignment = Alignment.Center
     ) {
         Column(

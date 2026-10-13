@@ -12,6 +12,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.sanket_satpute_20.dailybattle.design.color.DBColor
 import com.sanket_satpute_20.dailybattle.design.radius.DBRadius
@@ -46,13 +48,27 @@ fun DBFriendRow(
         DBFriendRowState.Pending -> DBColor.TextMuted
         else -> DBColor.TextPrimary
     }
+
+    val semanticDesc = buildString {
+        append(name)
+        if (state == DBFriendRowState.You) append(" (You)")
+        if (state == DBFriendRowState.Rival) append(" (Rival)")
+        if (state == DBFriendRowState.Pending) {
+            append(", Pending")
+        } else if (score != null) {
+            append(", Score: $score")
+        }
+    }
     
     Row(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(DBRadius.Medium))
             .background(containerColor)
-            .padding(horizontal = DBSpacing.MD, vertical = DBSpacing.SM),
+            .padding(horizontal = DBSpacing.MD, vertical = DBSpacing.SM)
+            .semantics(mergeDescendants = true) {
+                contentDescription = semanticDesc
+            },
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {

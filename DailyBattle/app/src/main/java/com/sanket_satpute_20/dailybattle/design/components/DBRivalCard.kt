@@ -11,6 +11,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import com.sanket_satpute_20.dailybattle.design.color.DBColor
 import com.sanket_satpute_20.dailybattle.design.spacing.DBSpacing
 import com.sanket_satpute_20.dailybattle.design.typography.DBTypography
@@ -18,6 +20,7 @@ import com.sanket_satpute_20.dailybattle.design.typography.DBTypography
 /**
  * Rival Card per `05_DESIGN_SYSTEM.md` §25.
  * Used on Home, secondary to Today's Battle.
+ * Semantics support added per Sprint 22.1 / 11_ACCESSIBILITY.md §68.
  */
 @Composable
 fun DBRivalCard(
@@ -45,7 +48,11 @@ fun DBRivalCard(
             
             // Score rows
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .semantics(mergeDescendants = true) {
+                        contentDescription = "Rival $rivalName: $rivalScore points"
+                    },
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(text = rivalName, style = DBTypography.H3, color = DBColor.TextPrimary)
@@ -55,7 +62,11 @@ fun DBRivalCard(
             Spacer(modifier = Modifier.height(DBSpacing.XXS))
             
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .semantics(mergeDescendants = true) {
+                        contentDescription = "$userName: $userScore points"
+                    },
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(text = userName, style = DBTypography.Body, color = DBColor.TextSecondary)
@@ -67,7 +78,10 @@ fun DBRivalCard(
             Text(
                 text = catchUpText,
                 style = DBTypography.Caption,
-                color = DBColor.TextMuted
+                color = DBColor.TextMuted,
+                modifier = Modifier.semantics {
+                    contentDescription = "Difference: $catchUpText"
+                }
             )
             
             Spacer(modifier = Modifier.height(DBSpacing.MD))

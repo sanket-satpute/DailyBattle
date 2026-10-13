@@ -151,7 +151,8 @@ private fun ResultsContent(
                 Text(
                     text = "TOP $formattedPercentile%",
                     style = DBTypography.H3,
-                    color = DBColor.TextPrimary
+                    color = DBColor.TextPrimary,
+                    modifier = Modifier.semantics { contentDescription = "Top $formattedPercentile percent" }
                 )
                 Spacer(modifier = Modifier.height(DBSpacing.SM))
             }
@@ -165,10 +166,12 @@ private fun ResultsContent(
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 summary.scoreImprovement?.let { improvement ->
                     val improvementText = if (improvement >= 0) "+$improvement" else "$improvement"
+                    val desc = if (improvement >= 0) "$improvement points higher than yesterday" else "${-improvement} points lower than yesterday"
                     Text(
                         text = "$improvementText YESTERDAY",
                         style = DBTypography.Body,
-                        color = if (improvement >= 0) DBColor.Success else DBColor.Error
+                        color = if (improvement >= 0) DBColor.Success else DBColor.Error,
+                        modifier = Modifier.semantics { contentDescription = desc }
                     )
                 }
                 Spacer(modifier = Modifier.height(DBSpacing.LG))
@@ -200,7 +203,9 @@ private fun ResultsContent(
 
                 summary.personalBestScore?.let { pb ->
                     Row(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .semantics(mergeDescendants = true) { contentDescription = "Personal best: $pb" },
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Text(text = "PERSONAL BEST", style = DBTypography.Body, color = DBColor.TextSecondary)
@@ -211,7 +216,9 @@ private fun ResultsContent(
 
                 summary.averageScore?.let { avg ->
                     Row(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .semantics(mergeDescendants = true) { contentDescription = "Average: $avg" },
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Text(text = "AVERAGE", style = DBTypography.Body, color = DBColor.TextSecondary)
@@ -238,6 +245,7 @@ private fun ResultsContent(
                             DBButton(
                                 text = "BEAT ${rival.rivalName.uppercase()}",
                                 type = DBButtonType.Secondary,
+                                contentDescription = "Practice to beat ${rival.rivalName}",
                                 onClick = onBeatRivalClick
                             )
                         }
@@ -249,6 +257,7 @@ private fun ResultsContent(
                 DBButton(
                     text = "SHARE RESULT",
                     type = DBButtonType.Primary,
+                    contentDescription = "Share battle result",
                     onClick = onShareClick
                 )
                 

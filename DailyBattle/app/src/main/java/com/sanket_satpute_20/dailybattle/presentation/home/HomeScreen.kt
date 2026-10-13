@@ -19,6 +19,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sanket_satpute_20.dailybattle.design.color.DBColor
@@ -111,7 +113,10 @@ internal fun HomeScreen(
                     Text(
                         text = "🔥 ${state.momentumDays} days",
                         style = DBTypography.Body,
-                        color = DBColor.TextPrimary
+                        color = DBColor.TextPrimary,
+                        modifier = Modifier.semantics {
+                            contentDescription = "Momentum: ${state.momentumDays} days streak"
+                        }
                     )
                 }
             }
@@ -137,7 +142,14 @@ internal fun HomeScreen(
                             horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally,
                             verticalArrangement = Arrangement.spacedBy(DBSpacing.XS)
                         ) {
-                            Text(text = state.score?.toString() ?: "", style = DBTypography.H1, color = DBColor.TextPrimary)
+                            Text(
+                                text = state.score?.toString() ?: "",
+                                style = DBTypography.H1,
+                                color = DBColor.TextPrimary,
+                                modifier = Modifier.semantics {
+                                    contentDescription = "Today's score: ${state.score}"
+                                }
+                            )
                             Text(text = state.percentileText ?: "", style = DBTypography.Body, color = DBColor.BrandPrimary)
                             Spacer(modifier = Modifier.height(DBSpacing.MD))
                             Text(text = "NEXT BATTLE", style = DBTypography.Caption, color = DBColor.TextSecondary)
@@ -145,7 +157,12 @@ internal fun HomeScreen(
                         }
                     } else {
                         // Placeholder for ● ● ●
-                        Row(horizontalArrangement = Arrangement.spacedBy(DBSpacing.XS)) {
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(DBSpacing.XS),
+                            modifier = Modifier.semantics(mergeDescendants = true) {
+                                contentDescription = "${state.challengesCount} challenges scheduled"
+                            }
+                        ) {
                             repeat(state.challengesCount) {
                                 Text("●", color = DBColor.TextSecondary) // Snap/Shift colors are hidden per SCR-003
                             }

@@ -18,6 +18,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -106,8 +108,10 @@ fun AddFriendScreen(
 
                 DBButton(
                     text = if (submitState is AddFriendSubmitState.Loading) "ADDING..." else "ADD FRIEND",
+                    contentDescription = if (submitState is AddFriendSubmitState.Loading) "Adding friend" else "Add friend with entered code",
                     onClick = onSubmit,
                     enabled = enteredCode.length == 6 && submitState !is AddFriendSubmitState.Loading,
+                    isLoading = submitState is AddFriendSubmitState.Loading,
                     type = DBButtonType.Primary,
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -138,11 +142,15 @@ fun AddFriendScreen(
                             text = userCode,
                             style = DBTypography.H2,
                             color = DBColor.BrandPrimary,
-                            textAlign = TextAlign.Center
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.semantics {
+                                contentDescription = "Your battle code is $userCode"
+                            }
                         )
 
                         DBButton(
                             text = "COPY",
+                            contentDescription = "Copy your battle code: $userCode",
                             onClick = {
                                 clipboardManager.setText(AnnotatedString(userCode))
                             },

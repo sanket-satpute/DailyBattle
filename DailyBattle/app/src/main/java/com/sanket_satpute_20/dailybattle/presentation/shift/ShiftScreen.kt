@@ -22,6 +22,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.sanket_satpute_20.dailybattle.design.animation.pulse
@@ -88,7 +92,10 @@ fun ShiftScreen(
             Text(
                 text = uiState.progressText,
                 style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onBackground
+                color = MaterialTheme.colorScheme.onBackground,
+                modifier = Modifier.semantics {
+                    contentDescription = "Progress: ${uiState.progressText}"
+                }
             )
         }
         
@@ -99,7 +106,11 @@ fun ShiftScreen(
             text = uiState.timerText,
             style = MaterialTheme.typography.headlineMedium,
             color = MaterialTheme.colorScheme.onBackground,
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .semantics {
+                    contentDescription = "Time remaining: ${uiState.timerText}"
+                },
             textAlign = TextAlign.Center
         )
 
@@ -160,7 +171,11 @@ fun ShiftScreen(
             text = uiState.instructionText,
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onBackground,
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .semantics {
+                    contentDescription = "Instruction: ${uiState.instructionText}"
+                },
             textAlign = TextAlign.Center
         )
         
@@ -178,7 +193,14 @@ fun ShiftScreen(
                         .height(56.dp) // Minimum touch height requirement (52-56px)
                         .clip(RoundedCornerShape(8.dp))
                         .background(MaterialTheme.colorScheme.primaryContainer)
-                        .clickable { onAnswerSelected(option) },
+                        .clickable(
+                            role = Role.Button,
+                            onClick = { onAnswerSelected(option) }
+                        )
+                        .semantics {
+                            role = Role.Button
+                            contentDescription = "Option: $option"
+                        },
                     contentAlignment = Alignment.Center
                 ) {
                     Text(

@@ -14,6 +14,11 @@ import com.sanket_satpute_20.dailybattle.design.color.DBColor
 import com.sanket_satpute_20.dailybattle.design.sizing.DBSizing
 import com.sanket_satpute_20.dailybattle.design.spacing.DBSpacing
 
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
+
 /**
  * Reusable DB Icon Button component implementing Sprint 3.4 requirements and `05_DESIGN_SYSTEM.md`
  * section 19.
@@ -21,11 +26,13 @@ import com.sanket_satpute_20.dailybattle.design.spacing.DBSpacing
  * It enforces:
  * - Compact utility action usage
  * - Minimum touch target of 44x44px (DBSizing.TouchMinimum)
+ * - Accessible semantic role and optional content description (Sprint 22.1 / 11_ACCESSIBILITY.md §10)
  */
 @Composable
 fun DBIconButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    contentDescription: String? = null,
     enabled: Boolean = true,
     contentColor: Color = DBColor.TextPrimary,
     disabledContentColor: Color = DBColor.TextDisabled,
@@ -37,7 +44,13 @@ fun DBIconButton(
             .defaultMinSize(
                 minWidth = DBSizing.TouchMinimum,
                 minHeight = DBSizing.TouchMinimum
-            ),
+            )
+            .semantics {
+                role = Role.Button
+                if (contentDescription != null) {
+                    this.contentDescription = contentDescription
+                }
+            },
         enabled = enabled,
         colors = IconButtonDefaults.iconButtonColors(
             contentColor = contentColor,

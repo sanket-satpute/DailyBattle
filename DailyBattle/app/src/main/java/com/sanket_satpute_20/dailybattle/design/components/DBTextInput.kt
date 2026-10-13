@@ -14,6 +14,8 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.sanket_satpute_20.dailybattle.design.color.DBColor
 import com.sanket_satpute_20.dailybattle.design.sizing.DBSizing
@@ -87,14 +89,20 @@ fun DBTextInput(
                         Text(
                             text = "!",
                             color = DBColor.Error,
-                            style = DBTypography.H3
+                            style = DBTypography.H3,
+                            modifier = Modifier.semantics {
+                                contentDescription = "Invalid input"
+                            }
                         )
                     }
                     DBInputState.Valid -> {
                         Text(
                             text = "✓",
                             color = DBColor.Success,
-                            style = DBTypography.H3
+                            style = DBTypography.H3,
+                            modifier = Modifier.semantics {
+                                contentDescription = "Valid input"
+                            }
                         )
                     }
                     else -> {}
@@ -114,7 +122,15 @@ fun DBTextInput(
                 text = feedbackText,
                 style = DBTypography.Caption,
                 color = feedbackColor,
-                modifier = Modifier.padding(start = DBSpacing.XS)
+                modifier = Modifier
+                    .padding(start = DBSpacing.XS)
+                    .semantics {
+                        contentDescription = when (state) {
+                            DBInputState.Invalid -> "Error: $feedbackText"
+                            DBInputState.Valid -> "Success: $feedbackText"
+                            else -> feedbackText
+                        }
+                    }
             )
         }
     }

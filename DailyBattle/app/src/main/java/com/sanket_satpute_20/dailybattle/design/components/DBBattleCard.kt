@@ -14,6 +14,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import com.sanket_satpute_20.dailybattle.design.color.DBColor
 import com.sanket_satpute_20.dailybattle.design.radius.DBRadius
 import com.sanket_satpute_20.dailybattle.design.spacing.DBSpacing
@@ -65,7 +67,8 @@ fun DBBattleCard(
             Text(
                 text = title,
                 style = DBTypography.H2,
-                color = DBColor.TextPrimary
+                color = DBColor.TextPrimary,
+                modifier = Modifier.semantics { heading() }
             )
             
             Spacer(modifier = Modifier.height(DBSpacing.XS))

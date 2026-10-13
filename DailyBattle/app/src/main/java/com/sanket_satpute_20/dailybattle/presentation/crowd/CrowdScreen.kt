@@ -30,6 +30,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -105,7 +110,10 @@ fun CrowdScreen(
             Text(
                 text = uiState.progressText,
                 style = MaterialTheme.typography.titleMedium,
-                color = DBColor.TextPrimary
+                color = DBColor.TextPrimary,
+                modifier = Modifier.semantics {
+                    contentDescription = "Progress: ${uiState.progressText}"
+                }
             )
         }
 
@@ -142,8 +150,15 @@ fun CrowdScreen(
                                 color = if (isSelected) DBColor.Crowd else DBColor.Border,
                                 shape = RoundedCornerShape(12.dp)
                             )
-                            .clickable(enabled = uiState.selectedChoiceId == null) {
-                                onAnswerSelected(choice.id)
+                            .clickable(
+                                enabled = uiState.selectedChoiceId == null,
+                                role = Role.Button,
+                                onClick = { onAnswerSelected(choice.id) }
+                            )
+                            .semantics {
+                                role = Role.Button
+                                selected = isSelected
+                                contentDescription = "Option ${choice.text}${if (isSelected) ", selected" else ""}"
                             },
                         contentAlignment = Alignment.Center
                     ) {
@@ -185,7 +200,10 @@ fun CrowdScreen(
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(40.dp),
+                            .height(40.dp)
+                            .semantics(mergeDescendants = true) {
+                                contentDescription = "Option ${choice.text}: $percentage percent${if (isUserPick) ", your pick" else ""}"
+                            },
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
@@ -235,7 +253,10 @@ fun CrowdScreen(
                 Text(
                     text = if (uiState.isCorrect) "CORRECT" else "INCORRECT",
                     style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
-                    color = if (uiState.isCorrect) DBColor.Success else DBColor.Error
+                    color = if (uiState.isCorrect) DBColor.Success else DBColor.Error,
+                    modifier = Modifier.semantics {
+                        contentDescription = if (uiState.isCorrect) "Result: Correct, you matched the crowd" else "Result: Incorrect, did not match the crowd"
+                    }
                 )
                 
                 LaunchedEffect(uiState.isCorrect) {

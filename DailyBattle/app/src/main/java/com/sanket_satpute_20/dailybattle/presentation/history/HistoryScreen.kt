@@ -9,6 +9,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -106,7 +108,10 @@ private fun HistoryContent(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(150.dp)
-                .background(DBColor.Surface1),
+                .background(DBColor.Surface1)
+                .semantics(mergeDescendants = true) {
+                    contentDescription = "Score progression graph"
+                },
             contentAlignment = Alignment.Center
         ) {
             Text(
@@ -146,7 +151,11 @@ private fun HistoryContent(
 @Composable
 private fun StatRow(label: String, value: String) {
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .semantics(mergeDescendants = true) {
+                contentDescription = "$label: $value"
+            },
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Text(

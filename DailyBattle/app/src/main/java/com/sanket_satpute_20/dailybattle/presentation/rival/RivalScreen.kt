@@ -10,6 +10,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -53,7 +56,8 @@ fun RivalScreen(
                     Text(
                         text = "YOUR RIVAL",
                         style = DBTypography.H2,
-                        color = DBColor.TextPrimary
+                        color = DBColor.TextPrimary,
+                        modifier = Modifier.semantics { heading() }
                     ) 
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -72,7 +76,9 @@ fun RivalScreen(
             when (state) {
                 is RivalUiState.Loading -> {
                     CircularProgressIndicator(
-                        modifier = Modifier.align(Alignment.Center),
+                        modifier = Modifier
+                            .align(Alignment.Center)
+                            .semantics { contentDescription = "Loading rival data" },
                         color = DBColor.BrandPrimary
                     )
                 }
@@ -142,7 +148,8 @@ private fun RivalSuccessContent(
         Text(
             text = state.rivalScore.toString(),
             style = DBTypography.Display,
-            color = DBColor.TextPrimary
+            color = DBColor.TextPrimary,
+            modifier = Modifier.semantics { contentDescription = "Rival ${state.rivalName}'s score: ${state.rivalScore}" }
         )
         
         Spacer(modifier = Modifier.height(24.dp))
@@ -161,7 +168,8 @@ private fun RivalSuccessContent(
         Text(
             text = state.userScore.toString(),
             style = DBTypography.Display,
-            color = DBColor.TextPrimary
+            color = DBColor.TextPrimary,
+            modifier = Modifier.semantics { contentDescription = "Your score: ${state.userScore}" }
         )
         
         Spacer(modifier = Modifier.height(32.dp))
@@ -175,7 +183,8 @@ private fun RivalSuccessContent(
         Text(
             text = gapText,
             style = DBTypography.Label,
-            color = if (state.direction == ScoreDirection.BEHIND) DBColor.Error else DBColor.Success
+            color = if (state.direction == ScoreDirection.BEHIND) DBColor.Error else DBColor.Success,
+            modifier = Modifier.semantics { contentDescription = "Gap: $gapText" }
         )
         
         Spacer(modifier = Modifier.height(24.dp))
@@ -184,6 +193,7 @@ private fun RivalSuccessContent(
             text = "BEAT ${state.rivalName.uppercase()}",
             onClick = onBeatRival,
             type = DBButtonType.Primary,
+            contentDescription = "Practice to beat ${state.rivalName}",
             modifier = Modifier.fillMaxWidth()
         )
         
@@ -232,7 +242,10 @@ private fun HistoryItemRow(
         modifier = Modifier
             .fillMaxWidth()
             .background(backgroundColor, shape = MaterialTheme.shapes.small)
-            .padding(16.dp),
+            .padding(16.dp)
+            .semantics(mergeDescendants = true) {
+                contentDescription = "Match vs $rivalName: $outcomeText. $userName ${item.userScore}, $rivalName ${item.rivalScore}"
+            },
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {

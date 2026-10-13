@@ -7,6 +7,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -85,7 +87,10 @@ private fun ProfileContent(
         Text(
             text = "🔥 ${profile.momentum} DAY MOMENTUM",
             style = DBTypography.H3,
-            color = DBColor.BrandPrimary
+            color = DBColor.BrandPrimary,
+            modifier = Modifier.semantics {
+                contentDescription = "Momentum: ${profile.momentum} day streak"
+            }
         )
         
         Spacer(modifier = Modifier.height(32.dp))
@@ -100,7 +105,10 @@ private fun ProfileContent(
         Text(
             text = profile.bestScore.toString(),
             style = DBTypography.H1,
-            color = DBColor.TextPrimary
+            color = DBColor.TextPrimary,
+            modifier = Modifier.semantics {
+                contentDescription = "Best score: ${profile.bestScore}"
+            }
         )
         
         Spacer(modifier = Modifier.height(24.dp))
@@ -115,7 +123,10 @@ private fun ProfileContent(
         Text(
             text = profile.averageScore.toString(),
             style = DBTypography.H1,
-            color = DBColor.TextPrimary
+            color = DBColor.TextPrimary,
+            modifier = Modifier.semantics {
+                contentDescription = "Average score: ${profile.averageScore}"
+            }
         )
         
         Spacer(modifier = Modifier.height(48.dp))
@@ -157,7 +168,11 @@ private fun ProfileContent(
 @Composable
 private fun DnaRow(label: String, value: Int?) {
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .semantics(mergeDescendants = true) {
+                contentDescription = "Battle DNA $label: ${value?.toString() ?: "Not available"}"
+            },
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -177,7 +192,11 @@ private fun DnaRow(label: String, value: Int?) {
 @Composable
 private fun RecordRow(label: String, value: String) {
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .semantics(mergeDescendants = true) {
+                contentDescription = "$label: $value"
+            },
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {

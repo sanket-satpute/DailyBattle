@@ -103,6 +103,7 @@ internal fun BattleNameScreen(
             onClick = onSubmit,
             isLoading = state.isSubmitting,
             enabled = !state.isSubmitting,
+            contentDescription = "Continue",
             modifier = Modifier
                 .fillMaxWidth()
                 .align(Alignment.BottomCenter)

@@ -17,6 +17,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sanket_satpute_20.dailybattle.design.color.DBColor
@@ -86,7 +88,8 @@ fun FriendsScreen(
                                 DBButton(
                                     text = "ADD FRIEND",
                                     onClick = onAddFriendClick,
-                                    type = DBButtonType.Secondary
+                                    type = DBButtonType.Secondary,
+                                    contentDescription = "Add friend"
                                 )
                             },
                             modifier = Modifier.fillMaxSize()
@@ -118,6 +121,7 @@ private fun FriendsListContent(
                 text = "+ ADD FRIEND",
                 onClick = onAddFriendClick,
                 type = DBButtonType.Secondary,
+                contentDescription = "Add friend",
                 modifier = Modifier.fillMaxWidth()
             )
         }
@@ -128,7 +132,9 @@ private fun FriendsListContent(
                 text = "TODAY",
                 style = DBTypography.H3,
                 color = DBColor.TextSecondary,
-                modifier = Modifier.padding(bottom = DBSpacing.XS)
+                modifier = Modifier
+                    .padding(bottom = DBSpacing.XS)
+                    .semantics { heading() }
             )
         }
 

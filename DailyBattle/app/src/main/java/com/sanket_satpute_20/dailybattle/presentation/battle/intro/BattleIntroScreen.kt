@@ -14,6 +14,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import com.sanket_satpute_20.dailybattle.design.color.DBColor
 import com.sanket_satpute_20.dailybattle.design.components.DBButton
@@ -60,7 +63,8 @@ fun BattleIntroScreen(
             text = "TODAY'S BATTLE",
             style = DBTypography.H1,
             color = DBColor.TextPrimary,
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
+            modifier = Modifier.semantics { heading() }
         )
 
         Spacer(modifier = Modifier.height(DBSpacing.LG))
@@ -81,7 +85,12 @@ fun BattleIntroScreen(
 
         Spacer(modifier = Modifier.height(DBSpacing.XL))
 
-        Row(horizontalArrangement = Arrangement.spacedBy(DBSpacing.MD)) {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(DBSpacing.MD),
+            modifier = Modifier.semantics(mergeDescendants = true) {
+                contentDescription = "Sequence: Challenge 1 of ${state.challengesCount}"
+            }
+        ) {
             Text("●", color = DBColor.TextSecondary)
             Text("○", color = DBColor.TextSecondary)
             Text("○", color = DBColor.TextSecondary)
@@ -99,6 +108,7 @@ fun BattleIntroScreen(
 
         DBButton(
             text = "START BATTLE",
+            contentDescription = "Start today's official battle",
             onClick = onStartBattle,
             modifier = Modifier.fillMaxWidth()
         )

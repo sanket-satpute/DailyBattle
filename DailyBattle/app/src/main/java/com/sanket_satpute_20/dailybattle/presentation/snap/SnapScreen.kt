@@ -16,6 +16,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.sanket_satpute_20.dailybattle.design.color.DBColor
@@ -76,7 +78,10 @@ fun SnapScreen(
             Text(
                 text = uiState.progressText,
                 style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onBackground
+                color = MaterialTheme.colorScheme.onBackground,
+                modifier = Modifier.semantics {
+                    contentDescription = "Progress: ${uiState.progressText}"
+                }
             )
         }
         
@@ -86,7 +91,11 @@ fun SnapScreen(
             text = uiState.timerText,
             style = MaterialTheme.typography.headlineMedium,
             color = MaterialTheme.colorScheme.onBackground,
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .semantics {
+                    contentDescription = "Time remaining: ${uiState.timerText}"
+                },
             textAlign = TextAlign.Center
         )
 
@@ -149,7 +158,11 @@ fun SnapScreen(
             text = "TAP TARGET", // Exact instruction text is pending algorithm
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onBackground,
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .semantics {
+                    contentDescription = "Instruction: TAP TARGET"
+                },
             textAlign = TextAlign.Center
         )
         
@@ -159,7 +172,11 @@ fun SnapScreen(
             text = uiState.scoreText,
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onBackground,
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .semantics {
+                    contentDescription = "Current score: ${uiState.scoreText}"
+                },
             textAlign = TextAlign.Center
         )
         

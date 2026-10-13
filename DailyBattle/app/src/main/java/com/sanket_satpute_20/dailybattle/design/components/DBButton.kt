@@ -30,6 +30,12 @@ import com.sanket_satpute_20.dailybattle.design.sizing.DBSizing
 import com.sanket_satpute_20.dailybattle.design.spacing.DBSpacing
 import com.sanket_satpute_20.dailybattle.design.typography.DBTypography
 
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
+
 /**
  * 15px / 700 explicit typography rule for buttons defined in `05_DESIGN_SYSTEM.md` section 18.
  * This is an implementation detail of the button component and does not belong in the global
@@ -63,12 +69,14 @@ enum class DBButtonType {
  * - 14px radius (DBSizing.ButtonRadius)
  * - 15/700 typography
  * - States: Default, Pressed, Disabled, Loading, Success
+ * - Accessibility semantics: Role.Button, content description, loading/success state description (Sprint 22.1 / 11_ACCESSIBILITY.md §9, §24, §25)
  */
 @Composable
 fun DBButton(
     text: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    contentDescription: String? = null,
     type: DBButtonType = DBButtonType.Primary,
     enabled: Boolean = true,
     isLoading: Boolean = false,
@@ -108,7 +116,18 @@ fun DBButton(
         onClick = onClick,
         modifier = modifier
             .defaultMinSize(minHeight = DBSizing.ButtonHeight, minWidth = DBSizing.TouchMinimum)
-            .height(DBSizing.ButtonHeight),
+            .height(DBSizing.ButtonHeight)
+            .semantics {
+                role = Role.Button
+                if (contentDescription != null) {
+                    this.contentDescription = contentDescription
+                }
+                if (isLoading) {
+                    stateDescription = "Loading"
+                } else if (isSuccess) {
+                    stateDescription = "Success"
+                }
+            },
         enabled = enabled && !isLoading,
         shape = RoundedCornerShape(DBSizing.ButtonRadius),
         colors = ButtonDefaults.buttonColors(

@@ -25,9 +25,16 @@ import com.sanket_satpute_20.dailybattle.design.color.DBColor
 import com.sanket_satpute_20.dailybattle.design.spacing.DBSpacing
 import com.sanket_satpute_20.dailybattle.design.typography.DBTypography
 
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
+
 /**
  * Top Bar per `05_DESIGN_SYSTEM.md` §33.
  * May contain: title, back action, progress, timer, contextual action.
+ * Semantics support added per Sprint 22.1 / 11_ACCESSIBILITY.md §10, §41, §42.
  */
 @Composable
 fun DBTopBar(
@@ -55,12 +62,19 @@ fun DBTopBar(
                 if (onBackClick != null) {
                     // Back Button per §34
                     // Target touch area: >= 44x44, icon: 24px.
-                    // Using text "<-" as a placeholder for icon if needed, but standardizing on a text symbol for now.
                     Box(
                         modifier = Modifier
                             .size(44.dp)
                             .clip(CircleShape)
-                            .clickable(onClick = onBackClick),
+                            .clickable(
+                                role = Role.Button,
+                                onClickLabel = "Navigate back",
+                                onClick = onBackClick
+                            )
+                            .semantics {
+                                role = Role.Button
+                                contentDescription = "Navigate back"
+                            },
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
@@ -82,14 +96,18 @@ fun DBTopBar(
                         text = title,
                         style = DBTypography.H3,
                         color = DBColor.TextPrimary,
-                        textAlign = TextAlign.Center
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.semantics { heading() }
                     )
                 } else if (timer != null) {
                     Text(
                         text = timer,
                         style = DBTypography.H2,
                         color = DBColor.TextPrimary,
-                        textAlign = TextAlign.Center
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.semantics {
+                            contentDescription = "Time remaining: $timer"
+                        }
                     )
                 }
             }
@@ -112,7 +130,10 @@ fun DBTopBar(
                 progress = { progress },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(4.dp),
+                    .height(4.dp)
+                    .semantics {
+                        contentDescription = "Progress: ${(progress * 100).toInt()}%"
+                    },
                 color = DBColor.BrandPrimary,
                 trackColor = DBColor.SurfaceElevated,
                 strokeCap = StrokeCap.Round

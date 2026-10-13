@@ -14,6 +14,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import com.sanket_satpute_20.dailybattle.design.color.DBColor
 import com.sanket_satpute_20.dailybattle.design.radius.DBRadius
 import com.sanket_satpute_20.dailybattle.design.spacing.DBSpacing
@@ -72,6 +74,9 @@ fun DBFeedback(
             .fillMaxWidth()
             .background(containerColor, RoundedCornerShape(DBRadius.Small))
             .padding(horizontal = DBSpacing.MD, vertical = DBSpacing.SM)
+            .semantics(mergeDescendants = true) {
+                contentDescription = "${type.name}: $message"
+            }
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
