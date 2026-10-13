@@ -51,18 +51,60 @@ data class AnalyticsEvent(
         const val VALUE_MODE_OFFICIAL = "official"
         const val VALUE_MODE_PRACTICE = "practice"
 
-        // Sensitive Keys that must never be recorded (Data Minimization / Privacy §54, §55)
+        // Sensitive Keys that must never be recorded (Data Minimization / Privacy §48, §54, §55, §56)
         val FORBIDDEN_SENSITIVE_KEYS = setOf(
+            // Credentials & Authentication
             "password",
+            "pwd",
             "token",
             "auth_token",
             "access_token",
             "refresh_token",
+            "id_token",
             "secret",
             "api_key",
+            "credential",
+            "jwt",
+            "bearer",
+            // Battle Codes & Invitations (§55)
             "battle_code",
+            "friend_code",
+            "invite_code",
+            // Payment & Financial (§54)
             "credit_card",
-            "pin"
+            "card_number",
+            "cvv",
+            "cvc",
+            "pin",
+            "user_pin",
+            "pin_code",
+            "payment_method",
+            // Personal Identifiable Information (PII) (§46, §56)
+            "email",
+            "phone",
+            "phone_number",
+            "telephone",
+            "mobile",
+            "contact",
+            "contacts",
+            "address",
+            "ssn",
+            "real_name",
+            // Hardware Identifiers (§48)
+            "imei",
+            "mac_address",
+            "hardware_id",
+            "android_id",
+            "serial_number",
+            "device_id",
+            // Exact Location (§54)
+            "latitude",
+            "longitude",
+            "lat",
+            "lng",
+            "gps",
+            "location",
+            "exact_location"
         )
 
         /**
