@@ -23,6 +23,19 @@ class RestorePurchasesUseCase @Inject constructor(
             return entitlementRepository.restoreState.value
         }
 
+        // Ensure provider connection
+        if (!billingProvider.isAvailable) {
+            val connected = billingProvider.connect()
+            if (!connected) {
+                val unavailableState = RestoreState.Failed(
+                    error = RestoreError.BillingUnavailable("Billing provider store unavailable"),
+                    canRetry = true
+                )
+                entitlementRepository.updateRestoreState(unavailableState)
+                return unavailableState
+            }
+        }
+
         entitlementRepository.updateRestoreState(RestoreState.Restoring)
 
         val result = billingProvider.restorePurchases()

@@ -1,13 +1,16 @@
 package com.sanket_satpute_20.dailybattle.domain.monetization.billing
 
+import com.sanket_satpute_20.dailybattle.domain.monetization.model.BillingProduct
 import com.sanket_satpute_20.dailybattle.domain.monetization.model.Entitlement
+import kotlinx.coroutines.flow.StateFlow
 
 /**
- * Abstraction for underlying platform billing providers (e.g. Google Play Billing).
+ * Abstraction for underlying platform billing providers (e.g. Google Play Billing, Sandbox Store).
  *
- * Implements Sprint 21.1 architecture boundaries per `13_MONETIZATION.md` §55, §56, §57:
+ * Implements Sprint 21.2 per `13_MONETIZATION.md` §22, §23, §25, §49, §55, §56:
  * - Domain layer is completely decoupled from any third-party billing SDK.
- * - Concrete integrations (Sprint 21.2) implement this contract.
+ * - Manages store connection lifecycle.
+ * - Supports product catalog querying, purchase execution, acknowledgment, and restore operations.
  */
 interface BillingProvider {
 
@@ -17,9 +20,34 @@ interface BillingProvider {
     val isAvailable: Boolean
 
     /**
+     * Observable connection state between application and provider store.
+     */
+    val connectionState: StateFlow<BillingConnectionState>
+
+    /**
+     * Connects to the billing provider service. Returns true if connection succeeds.
+     */
+    suspend fun connect(): Boolean
+
+    /**
+     * Disconnects from the billing provider service.
+     */
+    suspend fun disconnect()
+
+    /**
+     * Queries product catalog details for specified [productIds].
+     */
+    suspend fun queryProductDetails(productIds: Set<String>): List<BillingProduct>
+
+    /**
      * Launches a purchase transaction for [productId].
      */
     suspend fun initiatePurchase(productId: String): BillingPurchaseResult
+
+    /**
+     * Acknowledges an unacknowledged purchase transaction with the store.
+     */
+    suspend fun acknowledgePurchase(purchaseToken: String): Boolean
 
     /**
      * Queries and restores previously purchased transactions from the store.

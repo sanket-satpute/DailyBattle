@@ -336,6 +336,11 @@ class EntitlementArchitectureTest {
         override var isAvailable: Boolean = true
         var initiatePurchaseCallCount = 0
 
+        private val _connectionState = kotlinx.coroutines.flow.MutableStateFlow<com.sanket_satpute_20.dailybattle.domain.monetization.billing.BillingConnectionState>(
+            com.sanket_satpute_20.dailybattle.domain.monetization.billing.BillingConnectionState.Connected
+        )
+        override val connectionState: kotlinx.coroutines.flow.StateFlow<com.sanket_satpute_20.dailybattle.domain.monetization.billing.BillingConnectionState> = _connectionState
+
         var nextPurchaseResult: BillingPurchaseResult = BillingPurchaseResult.Error(
             productId = "default",
             message = "Unconfigured"
@@ -345,9 +350,26 @@ class EntitlementArchitectureTest {
             message = "Unconfigured"
         )
 
+        override suspend fun connect(): Boolean {
+            _connectionState.value = com.sanket_satpute_20.dailybattle.domain.monetization.billing.BillingConnectionState.Connected
+            return true
+        }
+
+        override suspend fun disconnect() {
+            _connectionState.value = com.sanket_satpute_20.dailybattle.domain.monetization.billing.BillingConnectionState.Disconnected
+        }
+
+        override suspend fun queryProductDetails(productIds: Set<String>): List<com.sanket_satpute_20.dailybattle.domain.monetization.model.BillingProduct> {
+            return emptyList()
+        }
+
         override suspend fun initiatePurchase(productId: String): BillingPurchaseResult {
             initiatePurchaseCallCount++
             return nextPurchaseResult
+        }
+
+        override suspend fun acknowledgePurchase(purchaseToken: String): Boolean {
+            return true
         }
 
         override suspend fun restorePurchases(): BillingRestoreResult {
