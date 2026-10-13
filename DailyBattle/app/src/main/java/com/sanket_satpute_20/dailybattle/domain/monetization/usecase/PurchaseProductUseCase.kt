@@ -8,13 +8,15 @@ import com.sanket_satpute_20.dailybattle.domain.monetization.billing.PurchaseVer
 import com.sanket_satpute_20.dailybattle.domain.monetization.model.PurchaseError
 import com.sanket_satpute_20.dailybattle.domain.monetization.model.PurchaseState
 import com.sanket_satpute_20.dailybattle.domain.monetization.repository.EntitlementRepository
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import javax.inject.Inject
 
 /**
  * Handles product purchase execution with provider integration, token verification, and acknowledgment.
  *
- * Implements Sprint 21.2 per `13_MONETIZATION.md` §25, §37, §38, §39:
- * - Duplicate purchase protection (§38): Prevents concurrent or duplicate application-level purchase flows.
+ * Implements Sprint 21.2 & Sprint 21.3 per `13_MONETIZATION.md` §25, §37, §38, §39:
+ * - Duplicate purchase protection (§38): Atomically guards against concurrent rapid taps or duplicate requests.
  * - Token verification (§25): Enforces signature and token validation before granting entitlement.
  * - Acknowledgment pipeline: Acknowledges valid purchases with the store provider.
  * - Error isolation (§37): Failed or cancelled purchases never grant entitlements or corrupt user state.
@@ -24,23 +26,36 @@ class PurchaseProductUseCase @Inject constructor(
     private val billingProvider: BillingProvider,
     private val purchaseVerifier: PurchaseVerifier = DefaultPurchaseVerifier()
 ) {
-    suspend operator fun invoke(productId: String, featureId: String): PurchaseState {
-        val currentState = entitlementRepository.purchaseState.value
+    private val purchaseMutex = Mutex()
 
-        // Duplicate purchase protection (§38): Prevent starting a new flow if one is already pending
-        if (currentState is PurchaseState.Pending) {
-            return currentState
+    suspend operator fun invoke(productId: String, featureId: String): PurchaseState {
+        // Atomic duplicate protection (§38): check state and lock entry
+        val earlyReturnState: PurchaseState? = purchaseMutex.withLock {
+            val currentState = entitlementRepository.purchaseState.value
+
+            if (currentState is PurchaseState.Pending) {
+                return@withLock currentState
+            }
+
+            // Check if item is already active
+            if (entitlementRepository.hasAccessToFeature(featureId)) {
+                val failedState = PurchaseState.Failed(
+                    productId = productId,
+                    error = PurchaseError.ItemAlreadyOwned(productId),
+                    canRetry = false
+                )
+                entitlementRepository.updatePurchaseState(failedState)
+                return@withLock failedState
+            }
+
+            // Set to Pending atomically
+            val pendingState = PurchaseState.Pending(productId)
+            entitlementRepository.updatePurchaseState(pendingState)
+            null
         }
 
-        // Check if item is already active
-        if (entitlementRepository.hasAccessToFeature(featureId)) {
-            val failedState = PurchaseState.Failed(
-                productId = productId,
-                error = PurchaseError.ItemAlreadyOwned(productId),
-                canRetry = false
-            )
-            entitlementRepository.updatePurchaseState(failedState)
-            return failedState
+        if (earlyReturnState != null) {
+            return earlyReturnState
         }
 
         // Ensure provider connection
@@ -56,10 +71,6 @@ class PurchaseProductUseCase @Inject constructor(
                 return unavailableState
             }
         }
-
-        // Transition to Pending
-        val pendingState = PurchaseState.Pending(productId)
-        entitlementRepository.updatePurchaseState(pendingState)
 
         // Delegate to billing provider
         val result = billingProvider.initiatePurchase(productId)

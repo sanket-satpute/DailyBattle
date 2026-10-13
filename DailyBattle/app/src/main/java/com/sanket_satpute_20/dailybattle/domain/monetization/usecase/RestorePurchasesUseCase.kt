@@ -5,6 +5,8 @@ import com.sanket_satpute_20.dailybattle.domain.monetization.billing.BillingRest
 import com.sanket_satpute_20.dailybattle.domain.monetization.model.RestoreError
 import com.sanket_satpute_20.dailybattle.domain.monetization.model.RestoreState
 import com.sanket_satpute_20.dailybattle.domain.monetization.repository.EntitlementRepository
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import javax.inject.Inject
 
 /**
@@ -12,15 +14,26 @@ import javax.inject.Inject
  * - Queries store for existing purchases.
  * - Reconciles restored entitlements into [EntitlementRepository].
  * - Distinguishes empty purchases, network failures, and successful restorations.
+ * - Atomically prevents duplicate concurrent restore requests.
  */
 class RestorePurchasesUseCase @Inject constructor(
     private val entitlementRepository: EntitlementRepository,
     private val billingProvider: BillingProvider
 ) {
+    private val restoreMutex = Mutex()
+
     suspend operator fun invoke(): RestoreState {
-        // Prevent concurrent restores
-        if (entitlementRepository.restoreState.value is RestoreState.Restoring) {
-            return entitlementRepository.restoreState.value
+        // Prevent concurrent restores atomically
+        val earlyReturnState: RestoreState? = restoreMutex.withLock {
+            if (entitlementRepository.restoreState.value is RestoreState.Restoring) {
+                return@withLock entitlementRepository.restoreState.value
+            }
+            entitlementRepository.updateRestoreState(RestoreState.Restoring)
+            null
+        }
+
+        if (earlyReturnState != null) {
+            return earlyReturnState
         }
 
         // Ensure provider connection
@@ -35,8 +48,6 @@ class RestorePurchasesUseCase @Inject constructor(
                 return unavailableState
             }
         }
-
-        entitlementRepository.updateRestoreState(RestoreState.Restoring)
 
         val result = billingProvider.restorePurchases()
 

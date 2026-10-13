@@ -63,6 +63,11 @@ interface EntitlementRepository {
     suspend fun clearAllEntitlements()
 
     /**
+     * Explicitly sets aggregate entitlement state to [EntitlementState.Unknown] (e.g. unverified store or network partition).
+     */
+    suspend fun setUnknownState(reason: String? = null)
+
+    /**
      * Updates the observable [purchaseState].
      */
     suspend fun updatePurchaseState(newState: PurchaseState)

@@ -48,6 +48,7 @@ class SandboxBillingProvider @Inject constructor() : BillingProvider {
     private var simulateNetworkError: Boolean = false
     private var simulateItemUnavailable: Boolean = false
     private var simulateAlreadyOwned: Boolean = false
+    private var simulateBillingUnavailable: Boolean = false
 
     init {
         // Seed standard approved sandbox catalog
@@ -55,6 +56,9 @@ class SandboxBillingProvider @Inject constructor() : BillingProvider {
     }
 
     override suspend fun connect(): Boolean = mutex.withLock {
+        if (simulateBillingUnavailable || _connectionState.value is BillingConnectionState.Unavailable) {
+            return false
+        }
         _connectionState.value = BillingConnectionState.Connecting
         _connectionState.value = BillingConnectionState.Connected
         return true
@@ -196,6 +200,13 @@ class SandboxBillingProvider @Inject constructor() : BillingProvider {
 
     fun setConnectionState(state: BillingConnectionState) {
         _connectionState.value = state
+    }
+
+    fun setSimulateBillingUnavailable(unavailable: Boolean) {
+        simulateBillingUnavailable = unavailable
+        if (unavailable) {
+            _connectionState.value = BillingConnectionState.Unavailable("Simulated store unavailable")
+        }
     }
 
     private fun seedDefaultCatalog() {

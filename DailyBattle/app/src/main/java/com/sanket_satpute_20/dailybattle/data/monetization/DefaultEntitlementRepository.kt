@@ -50,6 +50,10 @@ class DefaultEntitlementRepository @Inject constructor(
     }
 
     override suspend fun hasAccessToFeature(featureId: String): Boolean = mutex.withLock {
+        // §26 & §36: Unknown state fails-closed for optional premium features
+        if (_entitlementState.value is EntitlementState.Unknown) {
+            return false
+        }
         val now = clock.millis()
         entitlementsMap.values.any { it.featureId == featureId && it.isActive(now) }
     }
@@ -69,6 +73,10 @@ class DefaultEntitlementRepository @Inject constructor(
         _entitlementState.value = EntitlementState.Free
         _purchaseState.value = PurchaseState.Idle
         _restoreState.value = RestoreState.Idle
+    }
+
+    override suspend fun setUnknownState(reason: String?) = mutex.withLock {
+        _entitlementState.value = EntitlementState.Unknown(reason)
     }
 
     override suspend fun updatePurchaseState(newState: PurchaseState) {
