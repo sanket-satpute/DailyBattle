@@ -20,21 +20,30 @@ data class PracticeConfiguration(
     val difficulty: PracticeDifficulty = PracticeDifficulty.STANDARD,
 ) {
     /**
-     * Validates that the configuration contains at least one challenge and no unsupported parameters.
+     * Validates that the configuration contains at least one challenge, no unsupported parameters,
+     * and uses only approved adaptive behavior per Sprint 19.4 — Adaptive Practice.
+     *
+     * Per `02_GAMEPLAY.md` §36: adaptive personalization is STATUS: PENDING.
+     * [AdaptivePracticePolicy] enforces this guard.
      */
     fun isValid(): Boolean {
         if (challengeTypes.isEmpty()) return false
         if (challengeTypes.size > 3) return false
+        if (!AdaptivePracticePolicy.isApproved(difficulty)) return false
         return true
     }
 
     fun validate(): DomainResult<Unit> {
-        return if (isValid()) {
-            DomainResult.Success(Unit)
-        } else {
-            DomainResult.Failure(AppError.Validation)
+        if (challengeTypes.isEmpty() || challengeTypes.size > 3) {
+            return DomainResult.Failure(AppError.Validation)
         }
+        val adaptiveCheck = AdaptivePracticePolicy.validateConfiguration(this)
+        if (adaptiveCheck is DomainResult.Failure) {
+            return adaptiveCheck
+        }
+        return DomainResult.Success(Unit)
     }
+
 
     companion object {
         val STANDARD = PracticeConfiguration()
