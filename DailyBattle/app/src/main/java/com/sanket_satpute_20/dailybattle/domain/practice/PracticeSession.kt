@@ -1,6 +1,7 @@
 package com.sanket_satpute_20.dailybattle.domain.practice
 
 import com.sanket_satpute_20.dailybattle.domain.battle.BattleMode
+import com.sanket_satpute_20.dailybattle.domain.battle.ChallengeResult
 import com.sanket_satpute_20.dailybattle.domain.battle.ChallengeSession
 import com.sanket_satpute_20.dailybattle.domain.identifier.PracticeSessionId
 import com.sanket_satpute_20.dailybattle.domain.identifier.UserId
@@ -28,6 +29,7 @@ data class PracticeSession(
     val startedAt: Long? = null,
     val completedAt: Long? = null,
     val challengeSessions: List<ChallengeSession> = emptyList(),
+    val challengeResults: List<ChallengeResult> = emptyList(),
     val repeatCount: Int = 0,
 ) {
     init {

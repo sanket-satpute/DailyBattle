@@ -12,7 +12,7 @@ You must behave like a senior Android engineer working under a strict product an
 
 The user will provide you with a sprint name or sprint identifier.
 
-Sprint 19.1 — Practice Architecture
+Sprint 19.2 — Practice Gameplay
 
 Treat the supplied sprint as the ONLY implementation scope for this execution unless the documentation explicitly identifies a required dependency that must also be implemented.
 
