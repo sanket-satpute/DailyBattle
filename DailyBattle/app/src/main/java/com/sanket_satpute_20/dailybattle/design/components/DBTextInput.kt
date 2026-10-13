@@ -15,6 +15,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.isTraversalGroup
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.sanket_satpute_20.dailybattle.design.color.DBColor
@@ -48,7 +49,9 @@ fun DBTextInput(
     val isError = state == DBInputState.Invalid
     val isSuccess = state == DBInputState.Valid
 
-    Column(modifier = modifier) {
+    Column(
+        modifier = modifier.semantics { isTraversalGroup = true }
+    ) {
         OutlinedTextField(
             value = value,
             onValueChange = onValueChange,

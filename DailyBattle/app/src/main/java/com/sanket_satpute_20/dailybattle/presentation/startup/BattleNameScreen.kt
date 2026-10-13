@@ -15,6 +15,9 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.isTraversalGroup
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.traversalIndex
 import androidx.compose.ui.text.input.ImeAction
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -58,11 +61,16 @@ internal fun BattleNameScreen(
         modifier = modifier
             .fillMaxSize()
             .padding(DBSpacing.ScreenMargin)
+            .semantics { isTraversalGroup = true }
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .align(Alignment.Center)
+                .semantics {
+                    isTraversalGroup = true
+                    traversalIndex = 1f
+                }
         ) {
             Text(
                 text = "YOUR BATTLE\nNAME",
@@ -108,6 +116,7 @@ internal fun BattleNameScreen(
                 .fillMaxWidth()
                 .align(Alignment.BottomCenter)
                 .padding(bottom = DBSpacing.LG)
+                .semantics { traversalIndex = 2f }
         )
     }
 }

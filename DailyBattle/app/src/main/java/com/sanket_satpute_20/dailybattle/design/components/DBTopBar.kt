@@ -28,8 +28,10 @@ import com.sanket_satpute_20.dailybattle.design.typography.DBTypography
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.isTraversalGroup
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.traversalIndex
 
 /**
  * Top Bar per `05_DESIGN_SYSTEM.md` §33.
@@ -49,6 +51,7 @@ fun DBTopBar(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = DBSpacing.MD, vertical = DBSpacing.SM)
+            .semantics { isTraversalGroup = true }
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -56,7 +59,9 @@ fun DBTopBar(
         ) {
             // Left area: Back button or spacing
             Box(
-                modifier = Modifier.weight(1f),
+                modifier = Modifier
+                    .weight(1f)
+                    .semantics { traversalIndex = 1f },
                 contentAlignment = Alignment.CenterStart
             ) {
                 if (onBackClick != null) {
@@ -88,7 +93,9 @@ fun DBTopBar(
 
             // Center area: Title or Timer
             Box(
-                modifier = Modifier.weight(2f),
+                modifier = Modifier
+                    .weight(2f)
+                    .semantics { traversalIndex = 2f },
                 contentAlignment = Alignment.Center
             ) {
                 if (title != null) {
@@ -114,7 +121,9 @@ fun DBTopBar(
 
             // Right area: Action or spacing
             Box(
-                modifier = Modifier.weight(1f),
+                modifier = Modifier
+                    .weight(1f)
+                    .semantics { traversalIndex = 3f },
                 contentAlignment = Alignment.CenterEnd
             ) {
                 if (action != null) {
@@ -133,6 +142,7 @@ fun DBTopBar(
                     .height(4.dp)
                     .semantics {
                         contentDescription = "Progress: ${(progress * 100).toInt()}%"
+                        traversalIndex = 4f
                     },
                 color = DBColor.BrandPrimary,
                 trackColor = DBColor.SurfaceElevated,

@@ -2,6 +2,7 @@ package com.sanket_satpute_20.dailybattle.design.components
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -25,7 +26,9 @@ fun DBBattleCodeInput(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     feedbackText: String? = null,
-    state: DBInputState = DBInputState.Default
+    state: DBInputState = DBInputState.Default,
+    keyboardOptions: KeyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Characters),
+    keyboardActions: KeyboardActions = KeyboardActions.Default
 ) {
     DBTextInput(
         value = value,
@@ -42,7 +45,8 @@ fun DBBattleCodeInput(
         feedbackText = feedbackText,
         enabled = enabled,
         singleLine = true,
-        keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Characters)
+        keyboardOptions = keyboardOptions,
+        keyboardActions = keyboardActions
     )
 }
 

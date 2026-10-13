@@ -18,6 +18,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
@@ -35,9 +37,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -227,7 +231,8 @@ fun SettingsScreen(
                 Text(
                     text = "DELETE ACCOUNT",
                     style = DBTypography.H2,
-                    color = DBColor.Error
+                    color = DBColor.Error,
+                    modifier = Modifier.semantics { heading() }
                 )
             },
             text = {
@@ -267,7 +272,8 @@ fun SettingsScreen(
                 Text(
                     text = "EDIT BATTLE NAME",
                     style = DBTypography.H2,
-                    color = DBColor.TextPrimary
+                    color = DBColor.TextPrimary,
+                    modifier = Modifier.semantics { heading() }
                 )
             },
             text = {
@@ -282,6 +288,8 @@ fun SettingsScreen(
                         value = uiState.editBattleNameInput,
                         onValueChange = onEditBattleNameChange,
                         singleLine = true,
+                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                        keyboardActions = KeyboardActions(onDone = { onSaveBattleName() }),
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedBorderColor = DBColor.BrandPrimary,
                             unfocusedBorderColor = DBColor.Border,
@@ -332,7 +340,8 @@ fun SettingsScreen(
                 Text(
                     text = "BATTLE CODE",
                     style = DBTypography.H2,
-                    color = DBColor.TextPrimary
+                    color = DBColor.TextPrimary,
+                    modifier = Modifier.semantics { heading() }
                 )
             },
             text = {
@@ -394,7 +403,8 @@ fun SettingsScreen(
                 Text(
                     text = "PRIVACY POLICY",
                     style = DBTypography.H2,
-                    color = DBColor.TextPrimary
+                    color = DBColor.TextPrimary,
+                    modifier = Modifier.semantics { heading() }
                 )
             },
             text = {
@@ -433,7 +443,8 @@ fun SettingsScreen(
                 Text(
                     text = "TERMS OF SERVICE",
                     style = DBTypography.H2,
-                    color = DBColor.TextPrimary
+                    color = DBColor.TextPrimary,
+                    modifier = Modifier.semantics { heading() }
                 )
             },
             text = {
@@ -472,7 +483,8 @@ fun SettingsScreen(
                 Text(
                     text = "ABOUT DAILY BATTLE",
                     style = DBTypography.H2,
-                    color = DBColor.TextPrimary
+                    color = DBColor.TextPrimary,
+                    modifier = Modifier.semantics { heading() }
                 )
             },
             text = {

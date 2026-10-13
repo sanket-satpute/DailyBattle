@@ -32,6 +32,7 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.isTraversalGroup
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
@@ -133,7 +134,9 @@ fun CrowdScreen(
         // ANSWERS SECTION
         if (!uiState.isResultRevealed) {
             Column(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .semantics { isTraversalGroup = true },
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 uiState.choices.forEach { choice ->
@@ -179,7 +182,9 @@ fun CrowdScreen(
             }
 
             Column(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .semantics { isTraversalGroup = true },
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 Text(

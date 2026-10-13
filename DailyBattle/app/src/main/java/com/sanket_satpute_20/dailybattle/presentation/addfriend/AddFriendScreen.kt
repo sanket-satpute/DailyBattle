@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -19,8 +21,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.isTraversalGroup
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -95,26 +100,44 @@ fun AddFriendScreen(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 // Main Add Friend interaction area
-                DBBattleCodeInput(
-                    value = enteredCode,
-                    onValueChange = onCodeChanged,
-                    state = inputState,
-                    feedbackText = feedbackMessage,
-                    enabled = submitState !is AddFriendSubmitState.Loading,
-                    modifier = Modifier.fillMaxWidth()
-                )
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .semantics { isTraversalGroup = true },
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    DBBattleCodeInput(
+                        value = enteredCode,
+                        onValueChange = onCodeChanged,
+                        state = inputState,
+                        feedbackText = feedbackMessage,
+                        enabled = submitState !is AddFriendSubmitState.Loading,
+                        keyboardOptions = KeyboardOptions(
+                            capitalization = KeyboardCapitalization.Characters,
+                            imeAction = ImeAction.Done
+                        ),
+                        keyboardActions = KeyboardActions(
+                            onDone = {
+                                if (enteredCode.length == 6 && submitState !is AddFriendSubmitState.Loading) {
+                                    onSubmit()
+                                }
+                            }
+                        ),
+                        modifier = Modifier.fillMaxWidth()
+                    )
 
-                Spacer(modifier = Modifier.height(DBSpacing.MD))
+                    Spacer(modifier = Modifier.height(DBSpacing.MD))
 
-                DBButton(
-                    text = if (submitState is AddFriendSubmitState.Loading) "ADDING..." else "ADD FRIEND",
-                    contentDescription = if (submitState is AddFriendSubmitState.Loading) "Adding friend" else "Add friend with entered code",
-                    onClick = onSubmit,
-                    enabled = enteredCode.length == 6 && submitState !is AddFriendSubmitState.Loading,
-                    isLoading = submitState is AddFriendSubmitState.Loading,
-                    type = DBButtonType.Primary,
-                    modifier = Modifier.fillMaxWidth()
-                )
+                    DBButton(
+                        text = if (submitState is AddFriendSubmitState.Loading) "ADDING..." else "ADD FRIEND",
+                        contentDescription = if (submitState is AddFriendSubmitState.Loading) "Adding friend" else "Add friend with entered code",
+                        onClick = onSubmit,
+                        enabled = enteredCode.length == 6 && submitState !is AddFriendSubmitState.Loading,
+                        isLoading = submitState is AddFriendSubmitState.Loading,
+                        type = DBButtonType.Primary,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
 
                 Spacer(modifier = Modifier.height(DBSpacing.XL))
 
@@ -134,7 +157,8 @@ fun AddFriendScreen(
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(DBRadius.Medium))
                             .background(DBColor.Surface1)
-                            .padding(DBSpacing.MD),
+                            .padding(DBSpacing.MD)
+                            .semantics { isTraversalGroup = true },
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.spacedBy(DBSpacing.MD)
                     ) {

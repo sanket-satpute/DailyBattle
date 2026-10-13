@@ -26,9 +26,11 @@ import com.sanket_satpute_20.dailybattle.design.typography.DBTypography
 
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.isTraversalGroup
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.traversalIndex
 
 enum class DBBottomNavDestination(val label: String) {
     Home("Home"),
@@ -64,7 +66,8 @@ fun DBBottomNavigation(
                     end = Offset(size.width, 0f),
                     strokeWidth = 1.dp.toPx()
                 )
-            },
+            }
+            .semantics { isTraversalGroup = true },
         horizontalArrangement = Arrangement.SpaceEvenly,
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -111,6 +114,7 @@ private fun DBBottomNavItem(
                 role = Role.Tab
                 selected = isSelected
                 contentDescription = "${destination.label} tab"
+                traversalIndex = destination.ordinal.toFloat()
             },
         contentAlignment = Alignment.Center
     ) {

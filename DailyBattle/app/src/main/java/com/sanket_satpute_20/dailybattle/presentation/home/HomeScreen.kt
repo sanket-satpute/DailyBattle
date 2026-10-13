@@ -20,7 +20,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.isTraversalGroup
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.traversalIndex
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sanket_satpute_20.dailybattle.design.color.DBColor
@@ -79,15 +81,23 @@ internal fun HomeScreen(
         modifier = modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(DBSpacing.MD),
+            .padding(DBSpacing.MD)
+            .semantics { isTraversalGroup = true },
         verticalArrangement = Arrangement.spacedBy(DBSpacing.LG)
     ) {
         // Greeting & Momentum
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .semantics {
+                    isTraversalGroup = true
+                    traversalIndex = 1f
+                },
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Column {
+            Column(
+                modifier = Modifier.semantics { traversalIndex = 1f }
+            ) {
                 if (state.isLoading) {
                     SkeletonBox(width = 120, height = 24)
                 } else {
@@ -99,7 +109,10 @@ internal fun HomeScreen(
                 }
             }
 
-            Column(horizontalAlignment = androidx.compose.ui.Alignment.End) {
+            Column(
+                horizontalAlignment = androidx.compose.ui.Alignment.End,
+                modifier = Modifier.semantics { traversalIndex = 2f }
+            ) {
                 if (state.isLoading) {
                     SkeletonBox(width = 60, height = 16)
                     Spacer(modifier = Modifier.height(4.dp))
@@ -123,123 +136,141 @@ internal fun HomeScreen(
         }
 
         // Today's Battle Card
-        if (state.isLoading) {
-            DBBattleCard(
-                state = DBBattleCardState.Loading,
-                title = "TODAY'S BATTLE",
-                subtitle = "Loading...",
-                content = { SkeletonBox(width = 100, height = 20) },
-                action = { SkeletonBox(width = 200, height = 52) }
-            )
-        } else {
-            DBBattleCard(
-                state = state.battleState,
-                title = if (state.battleState == DBBattleCardState.Completed) "TODAY'S BATTLE ✓" else "TODAY'S BATTLE",
-                subtitle = if (state.battleState == DBBattleCardState.Completed) "" else "${state.challengesCount} challenges · ~${state.estimatedMinutes} minutes",
-                content = {
-                    if (state.battleState == DBBattleCardState.Completed) {
-                        Column(
-                            horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.spacedBy(DBSpacing.XS)
-                        ) {
-                            Text(
-                                text = state.score?.toString() ?: "",
-                                style = DBTypography.H1,
-                                color = DBColor.TextPrimary,
-                                modifier = Modifier.semantics {
-                                    contentDescription = "Today's score: ${state.score}"
-                                }
-                            )
-                            Text(text = state.percentileText ?: "", style = DBTypography.Body, color = DBColor.BrandPrimary)
-                            Spacer(modifier = Modifier.height(DBSpacing.MD))
-                            Text(text = "NEXT BATTLE", style = DBTypography.Caption, color = DBColor.TextSecondary)
-                            Text(text = state.nextBattleTime ?: "TOMORROW", style = DBTypography.Body, color = DBColor.TextPrimary)
-                        }
-                    } else {
-                        // Placeholder for ● ● ●
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(DBSpacing.XS),
-                            modifier = Modifier.semantics(mergeDescendants = true) {
-                                contentDescription = "${state.challengesCount} challenges scheduled"
-                            }
-                        ) {
-                            repeat(state.challengesCount) {
-                                Text("●", color = DBColor.TextSecondary) // Snap/Shift colors are hidden per SCR-003
-                            }
-                        }
-                    }
-                },
-                action = {
-                    if (state.battleState != DBBattleCardState.Completed) {
-                        DBButton(
-                            text = "PLAY BATTLE",
-                            onClick = onPlayBattle,
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                    }
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .semantics {
+                    isTraversalGroup = true
+                    traversalIndex = 2f
                 }
-            )
+        ) {
+            if (state.isLoading) {
+                DBBattleCard(
+                    state = DBBattleCardState.Loading,
+                    title = "TODAY'S BATTLE",
+                    subtitle = "Loading...",
+                    content = { SkeletonBox(width = 100, height = 20) },
+                    action = { SkeletonBox(width = 200, height = 52) }
+                )
+            } else {
+                DBBattleCard(
+                    state = state.battleState,
+                    title = if (state.battleState == DBBattleCardState.Completed) "TODAY'S BATTLE ✓" else "TODAY'S BATTLE",
+                    subtitle = if (state.battleState == DBBattleCardState.Completed) "" else "${state.challengesCount} challenges · ~${state.estimatedMinutes} minutes",
+                    content = {
+                        if (state.battleState == DBBattleCardState.Completed) {
+                            Column(
+                                horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.spacedBy(DBSpacing.XS)
+                            ) {
+                                Text(
+                                    text = state.score?.toString() ?: "",
+                                    style = DBTypography.H1,
+                                    color = DBColor.TextPrimary,
+                                    modifier = Modifier.semantics {
+                                        contentDescription = "Today's score: ${state.score}"
+                                    }
+                                )
+                                Text(text = state.percentileText ?: "", style = DBTypography.Body, color = DBColor.BrandPrimary)
+                                Spacer(modifier = Modifier.height(DBSpacing.MD))
+                                Text(text = "NEXT BATTLE", style = DBTypography.Caption, color = DBColor.TextSecondary)
+                                Text(text = state.nextBattleTime ?: "TOMORROW", style = DBTypography.Body, color = DBColor.TextPrimary)
+                            }
+                        } else {
+                            // Placeholder for ● ● ●
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(DBSpacing.XS),
+                                modifier = Modifier.semantics(mergeDescendants = true) {
+                                    contentDescription = "${state.challengesCount} challenges scheduled"
+                                }
+                            ) {
+                                repeat(state.challengesCount) {
+                                    Text("●", color = DBColor.TextSecondary) // Snap/Shift colors are hidden per SCR-003
+                                }
+                            }
+                        }
+                    },
+                    action = {
+                        if (state.battleState != DBBattleCardState.Completed) {
+                            DBButton(
+                                text = "PLAY BATTLE",
+                                onClick = onPlayBattle,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
+                    }
+                )
+            }
         }
 
         // Rival Card
-        if (state.isLoading) {
-            DBCard(modifier = Modifier.fillMaxWidth()) {
-                Column(modifier = Modifier.padding(DBSpacing.MD)) {
-                    SkeletonBox(width = 80, height = 16)
-                    Spacer(modifier = Modifier.height(DBSpacing.MD))
-                    SkeletonBox(width = 200, height = 24)
-                    Spacer(modifier = Modifier.height(DBSpacing.XXS))
-                    SkeletonBox(width = 200, height = 24)
-                    Spacer(modifier = Modifier.height(DBSpacing.MD))
-                    SkeletonBox(width = 150, height = 16)
-                    Spacer(modifier = Modifier.height(DBSpacing.MD))
-                    SkeletonBox(width = 200, height = 52)
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .semantics {
+                    isTraversalGroup = true
+                    traversalIndex = 3f
                 }
-            }
-        } else {
-            if (state.hasRival) {
-                DBRivalCard(
-                    rivalName = state.rivalName,
-                    rivalScore = state.rivalScore,
-                    userName = "You",
-                    userScore = state.userScore,
-                    catchUpText = "${state.pointsToCatch} points to catch",
-                    action = {
-                        DBButton(
-                            text = "BEAT ${state.rivalName.uppercase()}",
-                            type = DBButtonType.Secondary,
-                            onClick = onBeatRival,
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                    }
-                )
-            } else {
+        ) {
+            if (state.isLoading) {
                 DBCard(modifier = Modifier.fillMaxWidth()) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(DBSpacing.MD),
-                        horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally
-                    ) {
-                        Text(
-                            text = "NO RIVAL YET",
-                            style = DBTypography.Caption,
-                            color = DBColor.TextSecondary
-                        )
+                    Column(modifier = Modifier.padding(DBSpacing.MD)) {
+                        SkeletonBox(width = 80, height = 16)
                         Spacer(modifier = Modifier.height(DBSpacing.MD))
-                        Text(
-                            text = "Add a friend and start\nyour first Battle rivalry.",
-                            style = DBTypography.Body,
-                            color = DBColor.TextPrimary,
-                            textAlign = androidx.compose.ui.text.style.TextAlign.Center
-                        )
-                        Spacer(modifier = Modifier.height(DBSpacing.LG))
-                        DBButton(
-                            text = "ADD FRIEND",
-                            type = DBButtonType.Secondary,
-                            onClick = onAddFriend,
-                            modifier = Modifier.fillMaxWidth()
-                        )
+                        SkeletonBox(width = 200, height = 24)
+                        Spacer(modifier = Modifier.height(DBSpacing.XXS))
+                        SkeletonBox(width = 200, height = 24)
+                        Spacer(modifier = Modifier.height(DBSpacing.MD))
+                        SkeletonBox(width = 150, height = 16)
+                        Spacer(modifier = Modifier.height(DBSpacing.MD))
+                        SkeletonBox(width = 200, height = 52)
+                    }
+                }
+            } else {
+                if (state.hasRival) {
+                    DBRivalCard(
+                        rivalName = state.rivalName,
+                        rivalScore = state.rivalScore,
+                        userName = "You",
+                        userScore = state.userScore,
+                        catchUpText = "${state.pointsToCatch} points to catch",
+                        action = {
+                            DBButton(
+                                text = "BEAT ${state.rivalName.uppercase()}",
+                                type = DBButtonType.Secondary,
+                                onClick = onBeatRival,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
+                    )
+                } else {
+                    DBCard(modifier = Modifier.fillMaxWidth()) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(DBSpacing.MD),
+                            horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally
+                        ) {
+                            Text(
+                                text = "NO RIVAL YET",
+                                style = DBTypography.Caption,
+                                color = DBColor.TextSecondary
+                            )
+                            Spacer(modifier = Modifier.height(DBSpacing.MD))
+                            Text(
+                                text = "Add a friend and start\nyour first Battle rivalry.",
+                                style = DBTypography.Body,
+                                color = DBColor.TextPrimary,
+                                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                            )
+                            Spacer(modifier = Modifier.height(DBSpacing.LG))
+                            DBButton(
+                                text = "ADD FRIEND",
+                                type = DBButtonType.Secondary,
+                                onClick = onAddFriend,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
                     }
                 }
             }
