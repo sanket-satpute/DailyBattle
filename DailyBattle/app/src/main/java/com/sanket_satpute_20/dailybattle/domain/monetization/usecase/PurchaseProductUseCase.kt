@@ -1,5 +1,7 @@
 package com.sanket_satpute_20.dailybattle.domain.monetization.usecase
 
+import com.sanket_satpute_20.dailybattle.domain.battle.ActiveBattleSessionManager
+import com.sanket_satpute_20.dailybattle.domain.battle.BattleSessionLifecycle
 import com.sanket_satpute_20.dailybattle.domain.monetization.billing.BillingProvider
 import com.sanket_satpute_20.dailybattle.domain.monetization.billing.BillingPurchaseResult
 import com.sanket_satpute_20.dailybattle.domain.monetization.billing.DefaultPurchaseVerifier
@@ -7,6 +9,7 @@ import com.sanket_satpute_20.dailybattle.domain.monetization.billing.PurchaseVer
 import com.sanket_satpute_20.dailybattle.domain.monetization.billing.PurchaseVerifier
 import com.sanket_satpute_20.dailybattle.domain.monetization.model.PurchaseError
 import com.sanket_satpute_20.dailybattle.domain.monetization.model.PurchaseState
+import com.sanket_satpute_20.dailybattle.domain.monetization.protection.GameplayProtectionPolicy
 import com.sanket_satpute_20.dailybattle.domain.monetization.repository.EntitlementRepository
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -15,7 +18,8 @@ import javax.inject.Inject
 /**
  * Handles product purchase execution with provider integration, token verification, and acknowledgment.
  *
- * Implements Sprint 21.2 & Sprint 21.3 per `13_MONETIZATION.md` §25, §37, §38, §39:
+ * Implements Sprint 21.2, 21.3 & 21.4 per `13_MONETIZATION.md` §25, §37, §38, §39, §47, §51:
+ * - Gameplay Protection (Sprint 21.4): Prevents pay-to-win, score modification, and gameplay interruptions.
  * - Duplicate purchase protection (§38): Atomically guards against concurrent rapid taps or duplicate requests.
  * - Token verification (§25): Enforces signature and token validation before granting entitlement.
  * - Acknowledgment pipeline: Acknowledges valid purchases with the store provider.
@@ -24,11 +28,31 @@ import javax.inject.Inject
 class PurchaseProductUseCase @Inject constructor(
     private val entitlementRepository: EntitlementRepository,
     private val billingProvider: BillingProvider,
-    private val purchaseVerifier: PurchaseVerifier = DefaultPurchaseVerifier()
+    private val purchaseVerifier: PurchaseVerifier = DefaultPurchaseVerifier(),
+    private val gameplayProtectionPolicy: GameplayProtectionPolicy = GameplayProtectionPolicy(),
+    private val activeBattleSessionManager: ActiveBattleSessionManager? = null
 ) {
     private val purchaseMutex = Mutex()
 
-    suspend operator fun invoke(productId: String, featureId: String): PurchaseState {
+    suspend operator fun invoke(
+        productId: String,
+        featureId: String,
+        battleLifecycle: BattleSessionLifecycle? = activeBattleSessionManager?.lifecycle?.value
+    ): PurchaseState {
+        // Enforce Gameplay Protection per Sprint 21.4 (REQ-MON-002, REQ-MON-004, 13_MONETIZATION.md §4, §5, §11, §47)
+        val protectionError = gameplayProtectionPolicy.validatePurchaseEligibility(
+            featureId = featureId,
+            currentBattleLifecycle = battleLifecycle
+        )
+        if (protectionError != null) {
+            val violationState = PurchaseState.Failed(
+                productId = productId,
+                error = protectionError,
+                canRetry = false
+            )
+            entitlementRepository.updatePurchaseState(violationState)
+            return violationState
+        }
         // Atomic duplicate protection (§38): check state and lock entry
         val earlyReturnState: PurchaseState? = purchaseMutex.withLock {
             val currentState = entitlementRepository.purchaseState.value

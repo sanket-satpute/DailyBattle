@@ -10,6 +10,7 @@ sealed interface PurchaseError {
     data object UserCancelled : PurchaseError
     data class BillingUnavailable(val message: String) : PurchaseError
     data class InvalidVerification(val message: String) : PurchaseError
+    data class GameplayProtectionViolation(val reason: String) : PurchaseError
     data class Unknown(val message: String, val cause: Throwable? = null) : PurchaseError
 }
 

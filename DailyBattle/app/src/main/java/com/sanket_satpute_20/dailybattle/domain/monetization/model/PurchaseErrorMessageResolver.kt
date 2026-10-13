@@ -52,6 +52,12 @@ object PurchaseErrorMessageResolver {
                 recoveryAction = "If your account was debited, please contact support.",
                 canRetry = false
             )
+            is PurchaseError.GameplayProtectionViolation -> ResolvedError(
+                code = "ERR_GAMEPLAY_PROTECTION",
+                userMessage = error.reason.ifBlank { "Action blocked by gameplay protection rules." },
+                recoveryAction = "Commercial purchases cannot modify gameplay or interrupt battles.",
+                canRetry = false
+            )
             is PurchaseError.Unknown -> ResolvedError(
                 code = "ERR_PURCHASE_UNKNOWN",
                 userMessage = error.message.ifBlank { "An unexpected purchase error occurred." },
