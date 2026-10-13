@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.padding
@@ -116,7 +117,7 @@ fun DBButton(
         onClick = onClick,
         modifier = modifier
             .defaultMinSize(minHeight = DBSizing.ButtonHeight, minWidth = DBSizing.TouchMinimum)
-            .height(DBSizing.ButtonHeight)
+            .heightIn(min = DBSizing.ButtonHeight)
             .semantics {
                 role = Role.Button
                 if (contentDescription != null) {

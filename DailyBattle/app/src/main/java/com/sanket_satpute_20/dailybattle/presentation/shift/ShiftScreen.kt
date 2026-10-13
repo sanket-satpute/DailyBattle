@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -236,7 +237,7 @@ fun ShiftScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(56.dp) // Minimum touch height requirement (52-56px)
+                        .heightIn(min = 56.dp) // Minimum touch height requirement (52-56px), expands with text scaling
                         .clip(RoundedCornerShape(8.dp))
                         .background(MaterialTheme.colorScheme.primaryContainer)
                         .clickable(

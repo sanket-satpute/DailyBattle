@@ -1,6 +1,8 @@
 package com.sanket_satpute_20.dailybattle.presentation.history
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
@@ -87,7 +89,9 @@ private fun HistoryContent(
     data: HistoryUiStateData
 ) {
     Column(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.Start
     ) {
         Text(
