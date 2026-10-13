@@ -17,6 +17,12 @@ class CompleteBattleUseCase @Inject constructor(
     private val sessionRepository: BattleSessionRepository
 ) {
     suspend fun execute(session: BattleSession): DomainResult<BattleResult> {
+        // Practice Isolation Rule (Rule 26, 08_DATA_AND_API.md §19):
+        // Practice must never silently enter official battle completion or mutate official results.
+        if (session.mode != BattleMode.OFFICIAL) {
+            return DomainResult.Failure(AppError.Domain)
+        }
+
         // Must be in a valid state to complete
         if (session.status == BattleSessionStatus.NOT_STARTED) {
             return DomainResult.Failure(AppError.Validation)

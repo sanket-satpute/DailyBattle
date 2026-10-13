@@ -8,14 +8,14 @@ import com.sanket_satpute_20.dailybattle.domain.identifier.UserId
 import javax.inject.Inject
 
 class InMemoryBattleSessionRepository @Inject constructor() : BattleSessionRepository {
-    private val sessions = mutableMapOf<Pair<String, String>, BattleSession>()
+    private val sessions = mutableMapOf<Triple<String, String, com.sanket_satpute_20.dailybattle.domain.battle.BattleMode>, BattleSession>()
 
     override fun getOfficialSession(userId: UserId, battleId: BattleId): BattleSession? {
-        return sessions[Pair(userId.value, battleId.value)]
+        return sessions[Triple(userId.value, battleId.value, com.sanket_satpute_20.dailybattle.domain.battle.BattleMode.OFFICIAL)]
     }
 
     override fun saveSession(session: BattleSession) {
-        sessions[Pair(session.userId.value, session.battleId.value)] = session
+        sessions[Triple(session.userId.value, session.battleId.value, session.mode)] = session
     }
 
     override fun getUnacknowledgedSessions(): List<BattleSession> {

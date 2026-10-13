@@ -65,4 +65,10 @@ abstract class DataModule {
     abstract fun bindSettingsRepository(
         dataStoreSettingsRepository: DataStoreSettingsRepository,
     ): SettingsRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindPracticeSessionRepository(
+        inMemoryPracticeSessionRepository: com.sanket_satpute_20.dailybattle.data.practice.InMemoryPracticeSessionRepository,
+    ): com.sanket_satpute_20.dailybattle.domain.practice.PracticeSessionRepository
 }

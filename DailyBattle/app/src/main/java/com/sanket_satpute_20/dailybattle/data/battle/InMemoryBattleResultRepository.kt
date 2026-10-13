@@ -80,4 +80,8 @@ class InMemoryBattleResultRepository @Inject constructor() : BattleResultReposit
             DomainResult.Failure(AppError.Domain)
         }
     }
+
+    fun saveResult(result: BattleResult) {
+        results[Pair(result.userId.value, result.battleId.value)] = result
+    }
 }

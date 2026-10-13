@@ -42,5 +42,13 @@ object DomainModule {
     ): com.sanket_satpute_20.dailybattle.domain.authority.DomainAuthorityRegistry {
         return registry
     }
+
+    @Provides
+    @Singleton
+    fun provideActivePracticeSessionManager(
+        repository: com.sanket_satpute_20.dailybattle.domain.practice.PracticeSessionRepository
+    ): com.sanket_satpute_20.dailybattle.domain.practice.ActivePracticeSessionManager {
+        return com.sanket_satpute_20.dailybattle.domain.practice.ActivePracticeSessionManager(repository)
+    }
 }
 
