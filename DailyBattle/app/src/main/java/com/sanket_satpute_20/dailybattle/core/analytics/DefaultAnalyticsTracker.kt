@@ -1,11 +1,15 @@
 package com.sanket_satpute_20.dailybattle.core.analytics
 
+import com.sanket_satpute_20.dailybattle.core.analytics.reliability.AnalyticsReliabilityManager
+import com.sanket_satpute_20.dailybattle.core.analytics.reliability.AnalyticsReliabilityState
 import com.sanket_satpute_20.dailybattle.core.config.AppEnvironment
 import com.sanket_satpute_20.dailybattle.core.config.EnvironmentProvider
+import kotlinx.coroutines.flow.StateFlow
 import java.util.concurrent.CopyOnWriteArrayList
 
 /**
- * Default implementation of [AnalyticsTracker] that dispatches to registered [AnalyticsProvider]s.
+ * Default implementation of [AnalyticsTracker] that dispatches to registered [AnalyticsProvider]s
+ * through [AnalyticsReliabilityManager].
  *
  * Implements core architectural guardrails:
  * - Observational only (REQ-AN-001): Never alters product/domain/gameplay state.
@@ -15,13 +19,18 @@ import java.util.concurrent.CopyOnWriteArrayList
  *   (passwords, tokens, credentials, raw battle codes) before delivery.
  * - Environment Attribution (REQ-AN-014): Automatically enriches events with the runtime environment
  *   so test/dev data does not contaminate production.
+ * - Event Reliability (Sprint 20.3): Handles duplicates, missing events, offline queues, delayed
+ *   delivery, and provider failures via [reliabilityManager].
  */
 class DefaultAnalyticsTracker(
     private val environmentProvider: EnvironmentProvider,
-    initialProviders: List<AnalyticsProvider> = emptyList()
+    initialProviders: List<AnalyticsProvider> = emptyList(),
+    val reliabilityManager: AnalyticsReliabilityManager = AnalyticsReliabilityManager()
 ) : AnalyticsTracker {
 
     private val providers = CopyOnWriteArrayList<AnalyticsProvider>(initialProviders)
+
+    val reliabilityState: StateFlow<AnalyticsReliabilityState> = reliabilityManager.reliabilityState
 
     /**
      * Registers a new provider. If a provider with the same name already exists, it is replaced.
@@ -43,16 +52,34 @@ class DefaultAnalyticsTracker(
      */
     fun getProviders(): List<AnalyticsProvider> = providers.toList()
 
+    /**
+     * Updates network/connectivity state in reliability manager and flushes queued events when online.
+     */
+    fun setOnline(online: Boolean) {
+        reliabilityManager.setOnline(online, providers.toList())
+    }
+
+    /**
+     * Flushes buffered offline or retry events to registered providers.
+     */
+    fun flushQueuedEvents(): Int {
+        return reliabilityManager.flushQueuedEvents(providers.toList())
+    }
+
+    /**
+     * Recovers any session that was interrupted without a completion or abandon event (e.g. app killed).
+     */
+    fun recoverInterruptedSession() {
+        reliabilityManager.recoverInterruptedSession(providers.toList())
+    }
+
     override fun track(event: AnalyticsEvent) {
         val preparedEvent = prepareEvent(event)
 
-        for (provider in providers) {
-            if (!provider.isEnabled) continue
-            try {
-                provider.logEvent(preparedEvent)
-            } catch (_: Throwable) {
-                // REQ-AN-003: Analytics failure must not block gameplay or crash the application.
-            }
+        try {
+            reliabilityManager.processAndDispatch(preparedEvent, providers.toList())
+        } catch (_: Throwable) {
+            // REQ-AN-003: Analytics failure must not block gameplay or crash the application.
         }
     }
 
