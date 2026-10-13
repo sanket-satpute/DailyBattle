@@ -1,7 +1,9 @@
 package com.sanket_satpute_20.dailybattle.presentation.shift
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -158,11 +160,52 @@ fun ShiftScreen(
                 .background(MaterialTheme.colorScheme.surfaceVariant),
             contentAlignment = Alignment.Center
         ) {
-            Text(
-                text = "SHIFT GRID\n(Pending DEC-GAME-002)",
-                color = MaterialTheme.colorScheme.onSurface,
-                textAlign = TextAlign.Center
-            )
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = "SHIFT GRID\n(Pending DEC-GAME-002)",
+                    color = MaterialTheme.colorScheme.onSurface,
+                    textAlign = TextAlign.Center
+                )
+
+                if (uiState.isCorrect) {
+                    Spacer(modifier = Modifier.size(16.dp))
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(DBColor.Success.copy(alpha = 0.2f))
+                            .border(1.dp, DBColor.Success, RoundedCornerShape(8.dp))
+                            .padding(horizontal = 16.dp, vertical = 8.dp)
+                            .semantics { contentDescription = "Correct ✓" }
+                    ) {
+                        Text(
+                            text = "CORRECT ✓",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = DBColor.Success,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                } else if (uiState.isIncorrect) {
+                    Spacer(modifier = Modifier.size(16.dp))
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(DBColor.Error.copy(alpha = 0.2f))
+                            .border(1.dp, DBColor.Error, RoundedCornerShape(8.dp))
+                            .padding(horizontal = 16.dp, vertical = 8.dp)
+                            .semantics { contentDescription = "Incorrect ✕" }
+                    ) {
+                        Text(
+                            text = "INCORRECT ✕",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = DBColor.Error,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+            }
         }
 
         Spacer(modifier = Modifier.size(24.dp))

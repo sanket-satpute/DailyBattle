@@ -150,7 +150,7 @@ fun DBButton(
                     Spacer(modifier = Modifier.width(DBSpacing.XS))
                 }
                 Text(
-                    text = if (isSuccess) "SUCCESS" else text.uppercase(),
+                    text = if (isSuccess) "✓ SUCCESS" else text.uppercase(),
                     style = ButtonTextStyle,
                     color = if (enabled) contentColor else disabledContentColor
                 )
@@ -158,7 +158,9 @@ fun DBButton(
             
             if (isLoading && !isSuccess) {
                 CircularProgressIndicator(
-                    modifier = Modifier.size(24.dp),
+                    modifier = Modifier
+                        .size(24.dp)
+                        .semantics { this.contentDescription = "Loading" },
                     color = if (type == DBButtonType.Primary) DBColor.TextPrimary else DBColor.BrandPrimary,
                     strokeWidth = 2.dp
                 )

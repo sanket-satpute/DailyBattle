@@ -14,6 +14,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sanket_satpute_20.dailybattle.design.color.DBColor
+import com.sanket_satpute_20.dailybattle.design.components.DBErrorState
+import com.sanket_satpute_20.dailybattle.design.components.DBLoadingState
 import com.sanket_satpute_20.dailybattle.design.components.DBTopBar
 import com.sanket_satpute_20.dailybattle.design.typography.DBTypography
 
@@ -42,19 +44,12 @@ fun ProfileScreen(
         Box(modifier = Modifier.fillMaxSize()) {
             when (uiState) {
                 is ProfileUiState.Loading -> {
-                    Text(
-                        text = "Loading profile...",
-                        style = DBTypography.Body,
-                        color = DBColor.TextSecondary,
-                        modifier = Modifier.align(Alignment.Center)
-                    )
+                    DBLoadingState(message = "Loading profile...")
                 }
                 is ProfileUiState.Error -> {
-                    Text(
-                        text = uiState.message,
-                        style = DBTypography.Body,
-                        color = DBColor.Error,
-                        modifier = Modifier.align(Alignment.Center)
+                    DBErrorState(
+                        title = "COULDN'T LOAD PROFILE",
+                        description = uiState.message
                     )
                 }
                 is ProfileUiState.Success -> {

@@ -15,6 +15,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.sanket_satpute_20.dailybattle.design.color.DBColor
+import com.sanket_satpute_20.dailybattle.design.components.DBErrorState
+import com.sanket_satpute_20.dailybattle.design.components.DBLoadingState
 import com.sanket_satpute_20.dailybattle.design.typography.DBTypography
 
 @Composable
@@ -40,16 +42,15 @@ fun HistoryScreen(
     ) {
         when (uiState) {
             is HistoryUiState.Loading -> {
-                CircularProgressIndicator(color = DBColor.BrandPrimary)
+                DBLoadingState(message = "Loading history...")
             }
             is HistoryUiState.Empty -> {
                 HistoryEmptyState()
             }
             is HistoryUiState.Error -> {
-                Text(
-                    text = uiState.message,
-                    style = DBTypography.Body,
-                    color = DBColor.Error
+                DBErrorState(
+                    title = "COULDN'T LOAD HISTORY",
+                    description = uiState.message
                 )
             }
             is HistoryUiState.Success -> {

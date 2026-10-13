@@ -165,11 +165,25 @@ fun CrowdScreen(
                             },
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(
-                            text = choice.text,
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = if (isSelected) DBColor.Crowd else DBColor.TextPrimary
-                        )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            if (isSelected) {
+                                Text(
+                                    text = "✓ ",
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = DBColor.Crowd,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                            Text(
+                                text = choice.text,
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = if (isSelected) DBColor.Crowd else DBColor.TextPrimary,
+                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+                            )
+                        }
                     }
                 }
             }
@@ -212,9 +226,10 @@ fun CrowdScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = choice.text,
+                            text = if (isUserPick) "${choice.text} (YOU)" else choice.text,
                             color = DBColor.TextPrimary,
-                            modifier = Modifier.weight(0.3f)
+                            fontWeight = if (isUserPick) FontWeight.Bold else FontWeight.Normal,
+                            modifier = Modifier.weight(0.35f)
                         )
                         Box(
                             modifier = Modifier

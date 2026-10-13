@@ -27,31 +27,31 @@ import com.sanket_satpute_20.dailybattle.design.typography.DBTypography
 @Composable
 fun DBLoadingState(
     modifier: Modifier = Modifier,
-    message: String? = null
+    message: String = "Loading..."
 ) {
     Box(
         modifier = modifier
             .fillMaxSize()
-            .semantics { contentDescription = message ?: "Loading" },
+            .semantics { contentDescription = message },
         contentAlignment = Alignment.Center
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             CircularProgressIndicator(
-                modifier = Modifier.size(32.dp), // Small contextual indicator per §49
+                modifier = Modifier
+                    .size(32.dp)
+                    .semantics { contentDescription = message },
                 color = DBColor.BrandPrimary,
                 strokeWidth = 3.dp
             )
 
-            if (message != null) {
-                androidx.compose.foundation.layout.Spacer(
-                    modifier = Modifier.padding(top = DBSpacing.MD)
-                )
-                Text(
-                    text = message,
-                    style = DBTypography.Body,
-                    color = DBColor.TextSecondary
-                )
-            }
+            androidx.compose.foundation.layout.Spacer(
+                modifier = Modifier.padding(top = DBSpacing.MD)
+            )
+            Text(
+                text = message,
+                style = DBTypography.Body,
+                color = DBColor.TextSecondary
+            )
         }
     }
 }

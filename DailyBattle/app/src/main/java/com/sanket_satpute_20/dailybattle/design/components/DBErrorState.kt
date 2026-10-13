@@ -45,6 +45,15 @@ fun DBErrorState(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
+                text = "!",
+                style = DBTypography.H1,
+                color = DBColor.Error,
+                modifier = Modifier.semantics { contentDescription = "Error indicator" }
+            )
+
+            Spacer(modifier = Modifier.height(DBSpacing.XS))
+
+            Text(
                 text = title,
                 style = DBTypography.H3,
                 color = DBColor.TextPrimary

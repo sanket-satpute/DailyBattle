@@ -20,6 +20,11 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.font.FontWeight
 import com.sanket_satpute_20.dailybattle.design.color.DBColor
 import com.sanket_satpute_20.dailybattle.design.animation.pulse
 import com.sanket_satpute_20.dailybattle.design.animation.shake
@@ -143,12 +148,52 @@ fun SnapScreen(
                 .background(MaterialTheme.colorScheme.surfaceVariant),
             contentAlignment = Alignment.Center
         ) {
-            // Placeholder: The actual generation of targets/distractors is blocked.
-            Text(
-                text = "GAME AREA\n(Pending DEC-GAME-001)",
-                color = MaterialTheme.colorScheme.onSurface,
-                textAlign = TextAlign.Center
-            )
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = "GAME AREA\n(Pending DEC-GAME-001)",
+                    color = MaterialTheme.colorScheme.onSurface,
+                    textAlign = TextAlign.Center
+                )
+
+                if (uiState.isCorrect) {
+                    Spacer(modifier = Modifier.size(16.dp))
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(DBColor.Success.copy(alpha = 0.2f))
+                            .border(1.dp, DBColor.Success, RoundedCornerShape(8.dp))
+                            .padding(horizontal = 16.dp, vertical = 8.dp)
+                            .semantics { contentDescription = "Correct ✓" }
+                    ) {
+                        Text(
+                            text = "CORRECT ✓",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = DBColor.Success,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                } else if (uiState.isIncorrect) {
+                    Spacer(modifier = Modifier.size(16.dp))
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(DBColor.Error.copy(alpha = 0.2f))
+                            .border(1.dp, DBColor.Error, RoundedCornerShape(8.dp))
+                            .padding(horizontal = 16.dp, vertical = 8.dp)
+                            .semantics { contentDescription = "Incorrect ✕" }
+                    ) {
+                        Text(
+                            text = "INCORRECT ✕",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = DBColor.Error,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+            }
         }
 
         Spacer(modifier = Modifier.size(24.dp))
