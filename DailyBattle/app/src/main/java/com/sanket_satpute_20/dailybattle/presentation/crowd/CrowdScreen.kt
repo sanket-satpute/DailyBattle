@@ -2,7 +2,9 @@ package com.sanket_satpute_20.dailybattle.presentation.crowd
 
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.tween
+import com.sanket_satpute_20.dailybattle.design.animation.rememberIsReducedMotion
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -190,7 +192,8 @@ fun CrowdScreen(
             }
         } else {
             // RESULT DISTRIBUTION
-            var startAnimation by remember { mutableStateOf(false) }
+            val isReducedMotion = rememberIsReducedMotion()
+            var startAnimation by remember { mutableStateOf(isReducedMotion) }
             
             LaunchedEffect(Unit) {
                 startAnimation = true
@@ -212,8 +215,8 @@ fun CrowdScreen(
                     val percentage = uiState.distribution?.percentages?.get(choice.id) ?: 0
                     val isUserPick = choice.id == uiState.selectedChoiceId
                     val animatedFraction by animateFloatAsState(
-                        targetValue = if (startAnimation) percentage / 100f else 0f,
-                        animationSpec = tween(durationMillis = 800, easing = FastOutSlowInEasing),
+                        targetValue = if (startAnimation || isReducedMotion) percentage / 100f else 0f,
+                        animationSpec = if (isReducedMotion) snap() else tween(durationMillis = 800, easing = FastOutSlowInEasing),
                         label = "DistributionAnimation"
                     )
                     

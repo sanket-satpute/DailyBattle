@@ -82,29 +82,48 @@ private fun ResultsContent(
     onShareClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var showPercentile by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
-    var showImprovement by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
-    var showBreakdown by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
-    var showRival by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
+    val isReducedMotion = com.sanket_satpute_20.dailybattle.design.animation.rememberIsReducedMotion()
+    var showPercentile by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(isReducedMotion) }
+    var showImprovement by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(isReducedMotion) }
+    var showBreakdown by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(isReducedMotion) }
+    var showRival by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(isReducedMotion) }
 
-    val animatedScore = androidx.compose.runtime.remember { androidx.compose.animation.core.Animatable(0f) }
+    val animatedScore = androidx.compose.runtime.remember { 
+        androidx.compose.animation.core.Animatable(if (isReducedMotion) summary.result.totalScore.toFloat() else 0f) 
+    }
 
-    androidx.compose.runtime.LaunchedEffect(summary.result.totalScore) {
-        animatedScore.animateTo(
-            targetValue = summary.result.totalScore.toFloat(),
-            animationSpec = androidx.compose.animation.core.tween(
-                durationMillis = 800,
-                easing = androidx.compose.animation.core.LinearOutSlowInEasing
+    androidx.compose.runtime.LaunchedEffect(summary.result.totalScore, isReducedMotion) {
+        if (isReducedMotion) {
+            // Per 11_ACCESSIBILITY.md §19 & §51:
+            // "If reduced motion is enabled: skip or shorten the counter animation, show the final score promptly"
+            animatedScore.snapTo(summary.result.totalScore.toFloat())
+            showPercentile = true
+            showImprovement = true
+            showBreakdown = true
+            showRival = true
+        } else {
+            animatedScore.animateTo(
+                targetValue = summary.result.totalScore.toFloat(),
+                animationSpec = androidx.compose.animation.core.tween(
+                    durationMillis = 800,
+                    easing = androidx.compose.animation.core.LinearOutSlowInEasing
+                )
             )
-        )
-        kotlinx.coroutines.delay(200)
-        showPercentile = true
-        kotlinx.coroutines.delay(200)
-        showImprovement = true
-        kotlinx.coroutines.delay(200)
-        showBreakdown = true
-        kotlinx.coroutines.delay(200)
-        showRival = true
+            kotlinx.coroutines.delay(200)
+            showPercentile = true
+            kotlinx.coroutines.delay(200)
+            showImprovement = true
+            kotlinx.coroutines.delay(200)
+            showBreakdown = true
+            kotlinx.coroutines.delay(200)
+            showRival = true
+        }
+    }
+
+    val enterTransition = if (isReducedMotion) {
+        androidx.compose.animation.EnterTransition.None
+    } else {
+        androidx.compose.animation.fadeIn() + androidx.compose.animation.expandVertically(expandFrom = Alignment.Top)
     }
 
     Column(
@@ -144,7 +163,7 @@ private fun ResultsContent(
         // 3. Percentile
         androidx.compose.animation.AnimatedVisibility(
             visible = showPercentile,
-            enter = androidx.compose.animation.fadeIn() + androidx.compose.animation.expandVertically(expandFrom = Alignment.Top)
+            enter = enterTransition
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 val formattedPercentile = (summary.result.percentile * 100).toInt()
@@ -161,7 +180,7 @@ private fun ResultsContent(
         // 4. Improvement
         androidx.compose.animation.AnimatedVisibility(
             visible = showImprovement,
-            enter = androidx.compose.animation.fadeIn() + androidx.compose.animation.expandVertically(expandFrom = Alignment.Top)
+            enter = enterTransition
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 summary.scoreImprovement?.let { improvement ->
@@ -181,7 +200,7 @@ private fun ResultsContent(
         // 5. Breakdown Card
         androidx.compose.animation.AnimatedVisibility(
             visible = showBreakdown,
-            enter = androidx.compose.animation.fadeIn() + androidx.compose.animation.expandVertically(expandFrom = Alignment.Top)
+            enter = enterTransition
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 DBResultCard(
@@ -232,7 +251,7 @@ private fun ResultsContent(
         // 7. Rival Comparison & Bottom Actions
         androidx.compose.animation.AnimatedVisibility(
             visible = showRival,
-            enter = androidx.compose.animation.fadeIn() + androidx.compose.animation.expandVertically(expandFrom = Alignment.Top)
+            enter = enterTransition
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 summary.rivalComparison?.let { rival ->

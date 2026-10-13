@@ -3,6 +3,11 @@ package com.sanket_satpute_20.dailybattle.ui.theme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
+import com.sanket_satpute_20.dailybattle.design.animation.LocalReducedMotion
+import com.sanket_satpute_20.dailybattle.design.animation.isSystemReducedMotionEnabled
 import com.sanket_satpute_20.dailybattle.design.color.DBColor
 
 /**
@@ -22,11 +27,20 @@ private val DarkColorScheme = darkColorScheme(
 
 @Composable
 fun DailyBattleTheme(
+    reducedMotionOverride: Boolean? = null,
     content: @Composable () -> Unit
 ) {
-    MaterialTheme(
-        colorScheme = DarkColorScheme,
-        typography = Typography,
-        content = content
-    )
+    val context = LocalContext.current
+    val systemReducedMotion = remember(context) { isSystemReducedMotionEnabled(context) }
+    val isReducedMotion = reducedMotionOverride ?: systemReducedMotion
+
+    CompositionLocalProvider(
+        LocalReducedMotion provides isReducedMotion
+    ) {
+        MaterialTheme(
+            colorScheme = DarkColorScheme,
+            typography = Typography,
+            content = content
+        )
+    }
 }
