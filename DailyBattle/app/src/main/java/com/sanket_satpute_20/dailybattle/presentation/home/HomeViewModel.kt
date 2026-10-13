@@ -71,4 +71,12 @@ class HomeViewModel @Inject constructor(
             }
         }
     }
+
+    fun setOffline(isOffline: Boolean) {
+        _state.update { it.copy(isOffline = isOffline) }
+    }
+
+    fun setError(isError: Boolean, message: String? = null) {
+        _state.update { it.copy(isError = isError, errorMessage = message) }
+    }
 }
