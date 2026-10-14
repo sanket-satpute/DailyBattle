@@ -6,6 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import com.sanket_satpute_20.dailybattle.core.lifecycle.AppLifecycleManager
 import com.sanket_satpute_20.dailybattle.core.lifecycle.BackgroundReason
+import com.sanket_satpute_20.dailybattle.core.performance.StartupPerformanceTracker
 import com.sanket_satpute_20.dailybattle.navigation.DailyBattleApp
 import com.sanket_satpute_20.dailybattle.ui.theme.DailyBattleTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -17,12 +18,18 @@ class MainActivity : ComponentActivity() {
     @Inject
     lateinit var lifecycleManager: AppLifecycleManager
 
+    @Inject
+    lateinit var startupPerformanceTracker: StartupPerformanceTracker
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         if (savedInstanceState != null) {
             val isProcessRecreation = savedInstanceState.getBoolean(KEY_IS_PROCESS_RECREATION, false)
             lifecycleManager.onRecreation(isProcessRecreation)
+            if (::startupPerformanceTracker.isInitialized) {
+                startupPerformanceTracker.recordWarmStartBegin()
+            }
         }
         setContent {
             DailyBattleTheme {
@@ -39,6 +46,9 @@ class MainActivity : ComponentActivity() {
     override fun onStart() {
         super.onStart()
         lifecycleManager.onForeground()
+        if (::startupPerformanceTracker.isInitialized) {
+            startupPerformanceTracker.recordWarmStartCompleted()
+        }
     }
 
     override fun onStop() {

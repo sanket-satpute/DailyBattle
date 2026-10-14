@@ -20,6 +20,10 @@ fun StartupRoute(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
+    androidx.compose.runtime.LaunchedEffect(Unit) {
+        viewModel.onFirstScreenRendered("Startup")
+    }
+
     androidx.compose.runtime.LaunchedEffect(state) {
         if (state is ScreenState.Success) {
             onStartupComplete()
