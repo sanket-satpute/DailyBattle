@@ -41,6 +41,8 @@ class DefaultStartupPerformanceTracker @Inject constructor(
 
     private val screenRenderBeginTimes = ConcurrentHashMap<String, Long>()
     private var warmStartBeginTimeMs: Long? = null
+    private val isColdStartReported = java.util.concurrent.atomic.AtomicBoolean(false)
+    private val isFirstScreenReported = java.util.concurrent.atomic.AtomicBoolean(false)
 
     init {
         lifecycleManager.addListener(this)
@@ -57,13 +59,14 @@ class DefaultStartupPerformanceTracker @Inject constructor(
     }
 
     override fun recordColdStartCompleted(timestampMs: Long?): Long? {
-        val now = timestampMs ?: timeProvider.elapsedRealtime()
-        val current = _metrics.value
-        if (current.isColdStartCompleted) {
-            return current.coldStartDurationMs
+        if (!isColdStartReported.compareAndSet(false, true)) {
+            return _metrics.value.coldStartDurationMs
         }
 
+        val now = timestampMs ?: timeProvider.elapsedRealtime()
+        val current = _metrics.value
         val duration = max(0L, now - current.processStartTimeMs)
+
         _metrics.update {
             it.copy(
                 coldStartDurationMs = duration,
@@ -111,12 +114,12 @@ class DefaultStartupPerformanceTracker @Inject constructor(
     }
 
     override fun recordFirstScreenRenderCompleted(screenName: String, timestampMs: Long?): Long? {
-        val now = timestampMs ?: timeProvider.elapsedRealtime()
-        val current = _metrics.value
-        if (current.isFirstScreenRendered) {
-            return current.firstScreenRenderDurationMs
+        if (!isFirstScreenReported.compareAndSet(false, true)) {
+            return _metrics.value.firstScreenRenderDurationMs
         }
 
+        val now = timestampMs ?: timeProvider.elapsedRealtime()
+        val current = _metrics.value
         val beginTime = screenRenderBeginTimes[screenName] ?: current.processStartTimeMs
         val duration = max(0L, now - beginTime)
 
@@ -168,6 +171,8 @@ class DefaultStartupPerformanceTracker @Inject constructor(
     }
 
     override fun resetForTesting() {
+        isColdStartReported.set(false)
+        isFirstScreenReported.set(false)
         screenRenderBeginTimes.clear()
         warmStartBeginTimeMs = null
         val now = timeProvider.elapsedRealtime()

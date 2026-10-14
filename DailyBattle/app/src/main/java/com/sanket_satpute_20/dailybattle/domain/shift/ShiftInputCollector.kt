@@ -3,6 +3,9 @@ package com.sanket_satpute_20.dailybattle.domain.shift
 import com.sanket_satpute_20.dailybattle.core.error.AppError
 import com.sanket_satpute_20.dailybattle.domain.result.DomainResult
 
+import com.sanket_satpute_20.dailybattle.core.performance.GameplayPerformanceTracker
+import com.sanket_satpute_20.dailybattle.core.performance.NoOpGameplayPerformanceTracker
+
 /**
  * Collects raw inputs for a Shift challenge.
  *
@@ -11,8 +14,14 @@ import com.sanket_satpute_20.dailybattle.domain.result.DomainResult
  * Observation -> Shifting -> Answer -> ReactionFeedback
  */
 class ShiftInputCollector(
-    private val timeProvider: () -> Long = { System.currentTimeMillis() }
+    private val timeProvider: () -> Long,
+    private val performanceTracker: GameplayPerformanceTracker,
 ) : ShiftEngine {
+
+    constructor(timeProvider: () -> Long = { System.currentTimeMillis() }) : this(
+        timeProvider,
+        NoOpGameplayPerformanceTracker,
+    )
 
     private var _currentState: ShiftState = ShiftState.NotStarted
     override val currentState: ShiftState
@@ -61,6 +70,12 @@ class ShiftInputCollector(
             is ShiftEvent.TapCell -> {
                 if (_currentState !is ShiftState.Answer) {
                     return DomainResult.Failure(AppError.BattleState)
+                }
+
+                if (event.timestampMs > 0L) {
+                    val now = timeProvider()
+                    val latency = maxOf(0L, now - event.timestampMs)
+                    performanceTracker.recordInputLatency(latency)
                 }
                 
                 selections.add(ShiftSelectionRecord(event.cellId, event.timestampMs))

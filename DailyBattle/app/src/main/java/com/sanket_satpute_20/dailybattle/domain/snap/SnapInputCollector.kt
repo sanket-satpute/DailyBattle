@@ -3,6 +3,9 @@ package com.sanket_satpute_20.dailybattle.domain.snap
 import com.sanket_satpute_20.dailybattle.core.error.AppError
 import com.sanket_satpute_20.dailybattle.domain.result.DomainResult
 
+import com.sanket_satpute_20.dailybattle.core.performance.GameplayPerformanceTracker
+import com.sanket_satpute_20.dailybattle.core.performance.NoOpGameplayPerformanceTracker
+
 /**
  * Collects raw inputs for a Snap challenge round.
  * 
@@ -11,8 +14,14 @@ import com.sanket_satpute_20.dailybattle.domain.result.DomainResult
  * the timestamps of events and validates state transitions to produce a RawSnapResult.
  */
 class SnapInputCollector(
-    private val timeProvider: () -> Long = { System.currentTimeMillis() }
+    private val timeProvider: () -> Long,
+    private val performanceTracker: GameplayPerformanceTracker,
 ) : SnapEngine {
+
+    constructor(timeProvider: () -> Long = { System.currentTimeMillis() }) : this(
+        timeProvider,
+        NoOpGameplayPerformanceTracker,
+    )
 
     private var _currentState: SnapState = SnapState.NotStarted
     override val currentState: SnapState
@@ -35,7 +44,7 @@ class SnapInputCollector(
 
     override fun start(): DomainResult<SnapState> {
         if (_currentState !is SnapState.Active) {
-             return DomainResult.Failure(AppError.BattleState)
+            return DomainResult.Failure(AppError.BattleState)
         }
         roundStartTime = timeProvider()
         return DomainResult.Success(_currentState)
@@ -54,6 +63,12 @@ class SnapInputCollector(
             is SnapEvent.Tap -> {
                 if (_currentState is SnapState.Completed) {
                     return DomainResult.Failure(AppError.BattleState)
+                }
+
+                if (event.timestampMs > 0L) {
+                    val now = timeProvider()
+                    val latency = maxOf(0L, now - event.timestampMs)
+                    performanceTracker.recordInputLatency(latency)
                 }
                 
                 // Record the tap

@@ -3,6 +3,9 @@ package com.sanket_satpute_20.dailybattle.domain.crowd
 import com.sanket_satpute_20.dailybattle.core.error.AppError
 import com.sanket_satpute_20.dailybattle.domain.result.DomainResult
 
+import com.sanket_satpute_20.dailybattle.core.performance.GameplayPerformanceTracker
+import com.sanket_satpute_20.dailybattle.core.performance.NoOpGameplayPerformanceTracker
+
 /**
  * Collects raw inputs for a Crowd Call challenge.
  *
@@ -11,8 +14,14 @@ import com.sanket_satpute_20.dailybattle.domain.result.DomainResult
  * NotStarted -> Question -> PredictionResult -> Completed
  */
 class CrowdInputCollector(
-    private val timeProvider: () -> Long = { System.currentTimeMillis() }
+    private val timeProvider: () -> Long,
+    private val performanceTracker: GameplayPerformanceTracker,
 ) : CrowdEngine {
+
+    constructor(timeProvider: () -> Long = { System.currentTimeMillis() }) : this(
+        timeProvider,
+        NoOpGameplayPerformanceTracker,
+    )
 
     private var _currentState: CrowdState = CrowdState.NotStarted
     override val currentState: CrowdState
@@ -69,6 +78,13 @@ class CrowdInputCollector(
                 if (_currentState !is CrowdState.Question) {
                     return DomainResult.Failure(AppError.BattleState)
                 }
+
+                if (event.timestampMs > 0L) {
+                    val now = timeProvider()
+                    val latency = maxOf(0L, now - event.timestampMs)
+                    performanceTracker.recordInputLatency(latency)
+                }
+
                 selectedChoiceId = event.choiceId
                 val timeTaken = if (challengeStartTime != null) event.timestampMs - challengeStartTime!! else 0L
                 challengeDurationMs = timeTaken
