@@ -9,7 +9,7 @@ package com.sanket_satpute_20.dailybattle.core.analytics
 class LoggingAnalyticsProvider(
     override val name: String = "Logging",
     override val isEnabled: Boolean = true,
-    private val logOutput: (String) -> Unit = { println(it) }
+    private val logOutput: (String) -> Unit = {}
 ) : AnalyticsProvider {
 
     override fun logEvent(event: AnalyticsEvent) {

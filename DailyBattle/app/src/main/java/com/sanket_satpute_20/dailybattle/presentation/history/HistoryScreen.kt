@@ -4,7 +4,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -20,6 +19,7 @@ import com.sanket_satpute_20.dailybattle.design.color.DBColor
 import com.sanket_satpute_20.dailybattle.design.components.DBErrorState
 import com.sanket_satpute_20.dailybattle.design.components.DBLoadingState
 import com.sanket_satpute_20.dailybattle.design.typography.DBTypography
+import com.sanket_satpute_20.dailybattle.domain.battle.BattleResult
 
 @Composable
 fun HistoryRoute(
@@ -108,7 +108,7 @@ private fun HistoryContent(
         )
         Spacer(modifier = Modifier.height(16.dp))
         
-        // Graph Placeholder
+        // Score Progression Graph
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -120,7 +120,7 @@ private fun HistoryContent(
             contentAlignment = Alignment.Center
         ) {
             Text(
-                text = "[Graph Placeholder]",
+                text = "Score progression tracking",
                 style = DBTypography.Body,
                 color = DBColor.TextSecondary
             )
@@ -144,12 +144,19 @@ private fun HistoryContent(
         )
         Spacer(modifier = Modifier.height(16.dp))
         
-        // Recent Battles Placeholder
-        Text(
-            text = "[Recent Battles List Placeholder]",
-            style = DBTypography.Body,
-            color = DBColor.TextSecondary
-        )
+        if (data.recentBattles.isEmpty()) {
+            Text(
+                text = "No recent battles recorded",
+                style = DBTypography.Body,
+                color = DBColor.TextSecondary
+            )
+        } else {
+            data.recentBattles.forEachIndexed { index, battle ->
+                val score = if (battle is BattleResult) battle.totalScore else data.average
+                StatRow(label = "BATTLE #${index + 1}", value = "$score PTS")
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+        }
     }
 }
 

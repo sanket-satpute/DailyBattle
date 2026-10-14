@@ -1,4 +1,4 @@
-package com.sanket_satpute_20.dailybattle.e2e
+﻿package com.sanket_satpute_20.dailybattle.e2e
 
 import com.sanket_satpute_20.dailybattle.core.error.AppError
 import com.sanket_satpute_20.dailybattle.core.lifecycle.DefaultAppLifecycleManager
@@ -7,7 +7,6 @@ import com.sanket_satpute_20.dailybattle.core.lifecycle.DefaultLifecycleBattlePr
 import com.sanket_satpute_20.dailybattle.data.retry.DefaultIdempotentRetryHandler
 import com.sanket_satpute_20.dailybattle.data.retry.IdempotentRetryHandler
 import com.sanket_satpute_20.dailybattle.domain.battle.ActiveBattleSessionManager
-import com.sanket_satpute_20.dailybattle.domain.battle.BattleEngine
 import com.sanket_satpute_20.dailybattle.domain.battle.BattleEvent
 import com.sanket_satpute_20.dailybattle.domain.battle.BattleMode
 import com.sanket_satpute_20.dailybattle.domain.battle.BattleResult
@@ -49,10 +48,10 @@ import java.time.ZoneId
 import java.util.concurrent.atomic.AtomicInteger
 
 /**
- * Sprint 23.7 — Duplicate Action Testing Suite
+ * Sprint 23.7 â€” Duplicate Action Testing Suite
  *
  * Systematically tests all 8 duplicate action vectors per `docs/ROADMAP.md` (lines 1802-1813),
- * `docs/06_NAVIGATION_AND_FLOWS.md` §54, and `docs/09_OFFLINE_AND_ERROR_HANDLING.md` §14, §22, §81:
+ * `docs/06_NAVIGATION_AND_FLOWS.md` Â§54, and `docs/09_OFFLINE_AND_ERROR_HANDLING.md` Â§14, Â§22, Â§81:
  *
  * 1. Double tap
  * 2. Triple tap
@@ -428,7 +427,7 @@ class DuplicateActionE2ETest {
         val topLevelRoutes = setOf(AppRoute.Home.route, AppRoute.Friends.route, AppRoute.Rival.route, AppRoute.Profile.route, AppRoute.Settings.route)
 
         fun navigateTab(route: String) {
-            // Standard SingleTop + PopUpTo(Home, saveState=true, restoreState=true) per 06_NAVIGATION_AND_FLOWS.md §54
+            // Standard SingleTop + PopUpTo(Home, saveState=true, restoreState=true) per 06_NAVIGATION_AND_FLOWS.md Â§54
             if (backstack.lastOrNull() == route) {
                 // Tapping active tab repeatedly does NOT add duplicate instances (SingleTop)
                 return

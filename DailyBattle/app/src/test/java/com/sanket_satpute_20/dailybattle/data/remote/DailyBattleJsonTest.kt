@@ -4,7 +4,6 @@ import com.sanket_satpute_20.dailybattle.data.remote.serialization.DailyBattleJs
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerializationException
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotNull
 import org.junit.Test
 
 @Serializable

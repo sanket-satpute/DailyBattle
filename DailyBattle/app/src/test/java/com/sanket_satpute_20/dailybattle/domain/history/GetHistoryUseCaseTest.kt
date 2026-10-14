@@ -10,7 +10,6 @@ import com.sanket_satpute_20.dailybattle.domain.identifier.UserId
 import com.sanket_satpute_20.dailybattle.domain.result.DomainResult
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.time.Clock
 import java.time.Instant

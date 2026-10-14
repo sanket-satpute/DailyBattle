@@ -1,4 +1,4 @@
-package com.sanket_satpute_20.dailybattle.data.remote
+﻿package com.sanket_satpute_20.dailybattle.data.remote
 
 import com.sanket_satpute_20.dailybattle.core.error.AppError
 import com.sanket_satpute_20.dailybattle.data.remote.auth.AuthenticationRequiredException
@@ -34,16 +34,12 @@ import com.sanket_satpute_20.dailybattle.domain.rival.ScoreDirection
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.SerializationException
-import okhttp3.ResponseBody.Companion.toResponseBody
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Assert.fail
 import org.junit.Test
-import retrofit2.HttpException
-import retrofit2.Response
-import java.io.IOException
 import java.net.ConnectException
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
@@ -86,7 +82,7 @@ class ApiMappingComprehensiveTest {
         assertEquals(1, domain.version)
         assertEquals(3, domain.challenges.size)
 
-        // Strict 3-challenge order verification (08_DATA_AND_API.md §9)
+        // Strict 3-challenge order verification (08_DATA_AND_API.md Â§9)
         assertEquals(ChallengeType.SNAP, domain.challenges[0].type)
         assertEquals(1, domain.challenges[0].order)
         assertEquals(ChallengeType.SHIFT, domain.challenges[1].type)

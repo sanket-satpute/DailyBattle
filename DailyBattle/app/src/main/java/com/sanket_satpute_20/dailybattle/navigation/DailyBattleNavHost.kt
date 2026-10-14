@@ -192,8 +192,9 @@ fun DailyBattleNavHost(
 }
 
 /**
- * Temporary placeholder for screens. Replaced by actual screen
- * implementations in later sprints.
+ * Battle tab placeholder. Retained per `06_NAVIGATION_AND_FLOWS.md` line 149-155:
+ * "The exact long-term structure of the Battle tab is not fully defined in the current product specification.
+ * Therefore: STATUS: PENDING. Do not invent additional Battle-tab features."
  */
 @Composable
 private fun ScreenPlaceholder(label: String) {

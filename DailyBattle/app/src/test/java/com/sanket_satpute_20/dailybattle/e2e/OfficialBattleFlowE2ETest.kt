@@ -1,6 +1,5 @@
-package com.sanket_satpute_20.dailybattle.e2e
+﻿package com.sanket_satpute_20.dailybattle.e2e
 
-import com.sanket_satpute_20.dailybattle.core.lifecycle.AppLifecycleManager
 import com.sanket_satpute_20.dailybattle.core.lifecycle.DefaultAppLifecycleManager
 import com.sanket_satpute_20.dailybattle.core.lifecycle.DefaultGameplayStateRestorer
 import com.sanket_satpute_20.dailybattle.core.lifecycle.DefaultLifecycleBattlePreserver
@@ -35,10 +34,10 @@ import org.junit.Before
 import org.junit.Test
 
 /**
- * Sprint 23.5 — Official Battle E2E Test Suite
+ * Sprint 23.5 â€” Official Battle E2E Test Suite
  *
- * Verifies the complete canonical Official Battle flow per `docs/12_TESTING_AND_QA.md` §18,
- * `docs/ROADMAP.md` (lines 1766-1786), and `docs/06_NAVIGATION_AND_FLOWS.md` §11:
+ * Verifies the complete canonical Official Battle flow per `docs/12_TESTING_AND_QA.md` Â§18,
+ * `docs/ROADMAP.md` (lines 1766-1786), and `docs/06_NAVIGATION_AND_FLOWS.md` Â§11:
  *
  *   Launch -> Welcome -> Battle Name -> Home -> Battle Intro -> Snap -> Shift -> Crowd Call -> Results -> Rival
  *
@@ -79,7 +78,7 @@ class OfficialBattleFlowE2ETest {
 
     @Test
     fun `canonical flow order strictly matches documented progression`() {
-        // Define the authoritative canonical screen chain per 12_TESTING_AND_QA.md §18
+        // Define the authoritative canonical screen chain per 12_TESTING_AND_QA.md Â§18
         val expectedFlow = listOf(
             AppRoute.Welcome.route,
             AppRoute.BattleName.route,

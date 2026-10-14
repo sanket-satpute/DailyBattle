@@ -9,14 +9,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.sanket_satpute_20.dailybattle.R
 import com.sanket_satpute_20.dailybattle.design.color.DBColor
 import com.sanket_satpute_20.dailybattle.design.components.DBButton
 import com.sanket_satpute_20.dailybattle.design.components.DBButtonType

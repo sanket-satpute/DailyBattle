@@ -2,7 +2,6 @@ package com.sanket_satpute_20.dailybattle.presentation.history
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.sanket_satpute_20.dailybattle.domain.battle.BattleResultRepository
 import com.sanket_satpute_20.dailybattle.domain.identifier.UserId
 import com.sanket_satpute_20.dailybattle.domain.history.GetHistoryUseCase
 import com.sanket_satpute_20.dailybattle.domain.result.DomainResult

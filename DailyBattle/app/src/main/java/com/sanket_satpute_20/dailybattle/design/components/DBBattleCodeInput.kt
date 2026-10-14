@@ -13,7 +13,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import com.sanket_satpute_20.dailybattle.design.spacing.DBSpacing
 import com.sanket_satpute_20.dailybattle.domain.validation.InputValidator
-import com.sanket_satpute_20.dailybattle.domain.validation.ValidationResult
 
 /**
  * Specialized input for Battle Codes.

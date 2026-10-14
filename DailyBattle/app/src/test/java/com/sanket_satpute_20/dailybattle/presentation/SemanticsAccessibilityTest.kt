@@ -1,19 +1,18 @@
-package com.sanket_satpute_20.dailybattle.presentation
+﻿package com.sanket_satpute_20.dailybattle.presentation
 
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /**
- * Sprint 22.1 — Semantics
+ * Sprint 22.1 â€” Semantics
  * Unit tests validating semantic label contracts and content descriptions
- * specified in `docs/11_ACCESSIBILITY.md` (§9, §10, §17, §24, §25, §26, §31, §36, §37, §38, §39, §41, §42, §64, §65, §67, §68, §69, §88).
+ * specified in `docs/11_ACCESSIBILITY.md` (Â§9, Â§10, Â§17, Â§24, Â§25, Â§26, Â§31, Â§36, Â§37, Â§38, Â§39, Â§41, Â§42, Â§64, Â§65, Â§67, Â§68, Â§69, Â§88).
  */
 class SemanticsAccessibilityTest {
 
     @Test
     fun `primary CTA state descriptions comply with accessibility contract`() {
-        // §24, §25: Buttons must expose loading and success state descriptions
+        // Â§24, Â§25: Buttons must expose loading and success state descriptions
         fun getButtonStateDescription(isLoading: Boolean, isSuccess: Boolean): String? {
             return when {
                 isLoading -> "Loading"
@@ -29,7 +28,7 @@ class SemanticsAccessibilityTest {
 
     @Test
     fun `bottom navigation tab description conforms to tab semantics`() {
-        // §31: Bottom navigation tab items must have accessible labels indicating tab role
+        // Â§31: Bottom navigation tab items must have accessible labels indicating tab role
         fun formatTabDescription(label: String): String = "$label tab"
 
         assertEquals("Home tab", formatTabDescription("Home"))
@@ -40,7 +39,7 @@ class SemanticsAccessibilityTest {
 
     @Test
     fun `timer and challenge progress formatting provides accessible context`() {
-        // §41, §42: Progress and timer must provide clear, understandable descriptions
+        // Â§41, Â§42: Progress and timer must provide clear, understandable descriptions
         fun formatProgressDescription(progress: Float): String = "Progress: ${(progress * 100).toInt()}%"
         fun formatTimerDescription(secondsRemaining: Int): String = "Time remaining: ${secondsRemaining}s"
         fun formatSequenceDescription(current: Int, total: Int): String = "Sequence: Challenge $current of $total"
@@ -52,7 +51,7 @@ class SemanticsAccessibilityTest {
 
     @Test
     fun `friend row merged semantics provide unified announcement`() {
-        // §67: Friend row must combine name, relation tag, and score into single announcement
+        // Â§67: Friend row must combine name, relation tag, and score into single announcement
         fun buildFriendRowDescription(name: String, relation: String?, score: Int?, isPending: Boolean): String {
             val parts = mutableListOf(name)
             if (relation != null) parts.add("($relation)")
@@ -81,7 +80,7 @@ class SemanticsAccessibilityTest {
 
     @Test
     fun `rival screen score gap and match history semantics format accurately`() {
-        // §68: Rival screen comparison and match history descriptions
+        // Â§68: Rival screen comparison and match history descriptions
         fun formatScoreGap(direction: String, gap: Int): String {
             return when (direction) {
                 "AHEAD" -> "$gap POINTS AHEAD"
@@ -110,7 +109,7 @@ class SemanticsAccessibilityTest {
 
     @Test
     fun `crowd call distribution and option semantics communicate clear percentages`() {
-        // §38, §39: Distribution rows must provide accessible option and percentage data
+        // Â§38, Â§39: Distribution rows must provide accessible option and percentage data
         fun formatDistributionDescription(optionText: String, percentage: Int, voteCount: Int): String {
             return "Option $optionText: $percentage percent, $voteCount votes"
         }
@@ -136,7 +135,7 @@ class SemanticsAccessibilityTest {
 
     @Test
     fun `profile and stat merged semantics communicate label and value`() {
-        // §69: Profile DNA and Stat rows must communicate label and values
+        // Â§69: Profile DNA and Stat rows must communicate label and values
         fun formatStatDescription(label: String, value: String, maxValue: String?): String {
             return "$label: $value" + if (maxValue != null) " out of $maxValue" else ""
         }
@@ -151,7 +150,7 @@ class SemanticsAccessibilityTest {
 
     @Test
     fun `input feedback semantics include error or success prefix`() {
-        // §26, §64: Error messages must have clear non-color-only semantic prefix
+        // Â§26, Â§64: Error messages must have clear non-color-only semantic prefix
         fun formatInputFeedback(isError: Boolean, isSuccess: Boolean, text: String): String {
             val prefix = when {
                 isError -> "Error: "

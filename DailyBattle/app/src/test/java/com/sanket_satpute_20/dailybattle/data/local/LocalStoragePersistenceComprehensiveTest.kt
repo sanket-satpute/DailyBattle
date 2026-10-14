@@ -1,4 +1,4 @@
-package com.sanket_satpute_20.dailybattle.data.local
+﻿package com.sanket_satpute_20.dailybattle.data.local
 
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import com.sanket_satpute_20.dailybattle.core.error.AppError
@@ -18,7 +18,6 @@ import com.sanket_satpute_20.dailybattle.data.local.entity.BattleHistoryItemEnti
 import com.sanket_satpute_20.dailybattle.data.local.entity.BattleResultEntity
 import com.sanket_satpute_20.dailybattle.data.local.entity.BattleSessionEntity
 import com.sanket_satpute_20.dailybattle.data.local.entity.ChallengeSessionEntity
-import com.sanket_satpute_20.dailybattle.data.local.entity.FriendEntity
 import com.sanket_satpute_20.dailybattle.data.local.entity.ProfileEntity
 import com.sanket_satpute_20.dailybattle.data.local.entity.RivalEntity
 import com.sanket_satpute_20.dailybattle.data.local.entity.RivalMatchHistoryEntity
@@ -33,7 +32,6 @@ import com.sanket_satpute_20.dailybattle.domain.battle.BattleSession
 import com.sanket_satpute_20.dailybattle.domain.battle.BattleSessionStatus
 import com.sanket_satpute_20.dailybattle.domain.battle.ChallengeSession
 import com.sanket_satpute_20.dailybattle.domain.battle.ChallengeSessionStatus
-import com.sanket_satpute_20.dailybattle.domain.friend.FriendStatus
 import com.sanket_satpute_20.dailybattle.domain.identifier.BattleId
 import com.sanket_satpute_20.dailybattle.domain.identifier.BattleSessionId
 import com.sanket_satpute_20.dailybattle.domain.identifier.ChallengeId
@@ -44,7 +42,6 @@ import com.sanket_satpute_20.dailybattle.domain.profile.Profile
 import com.sanket_satpute_20.dailybattle.domain.result.DomainResult
 import com.sanket_satpute_20.dailybattle.domain.rival.Rival
 import com.sanket_satpute_20.dailybattle.domain.rival.RivalMatchHistoryItem
-import com.sanket_satpute_20.dailybattle.domain.rival.RivalStatus
 import com.sanket_satpute_20.dailybattle.domain.rival.ScoreDirection
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow

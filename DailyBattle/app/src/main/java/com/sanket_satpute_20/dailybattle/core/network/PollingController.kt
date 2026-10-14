@@ -10,7 +10,6 @@ import kotlinx.coroutines.flow.first
 import java.util.concurrent.atomic.AtomicInteger
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlin.math.min
 import kotlin.math.pow
 
 /**

@@ -1,4 +1,4 @@
-package com.sanket_satpute_20.dailybattle.presentation.addfriend
+﻿package com.sanket_satpute_20.dailybattle.presentation.addfriend
 
 import androidx.lifecycle.SavedStateHandle
 import com.sanket_satpute_20.dailybattle.core.error.AppError
@@ -13,7 +13,6 @@ import com.sanket_satpute_20.dailybattle.domain.identifier.UserId
 import com.sanket_satpute_20.dailybattle.domain.result.DomainResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain

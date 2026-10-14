@@ -1,6 +1,5 @@
 package com.sanket_satpute_20.dailybattle.core.time
 
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay

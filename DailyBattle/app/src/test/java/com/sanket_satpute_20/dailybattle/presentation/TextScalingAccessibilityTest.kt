@@ -1,7 +1,6 @@
-package com.sanket_satpute_20.dailybattle.presentation
+﻿package com.sanket_satpute_20.dailybattle.presentation
 
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -12,23 +11,23 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /**
- * Sprint 22.4 — Text Scaling
+ * Sprint 22.4 â€” Text Scaling
  * Unit tests validating dynamic text scaling compliance across:
  * 1. Larger font scaling support without rigid container clipping (SP unit usage, line heights)
- * 2. Minimum important text size contract (>= 12sp per §14)
+ * 2. Minimum important text size contract (>= 12sp per Â§14)
  * 3. Buttons enforcing minimum touch target while expanding dynamically on scaled text
  * 4. Cards and stats adapting dynamically to multi-line content
  * 5. Score values remaining visible and non-clipped
  * 6. Viewport overflow scrolling contracts
  *
- * Per `docs/11_ACCESSIBILITY.md` (§13, §14, §15, §16, §59, §60, §62)
+ * Per `docs/11_ACCESSIBILITY.md` (Â§13, Â§14, Â§15, Â§16, Â§59, Â§60, Â§62)
  * and `docs/ROADMAP.md` (Sprint 22.4).
  */
 class TextScalingAccessibilityTest {
 
     @Test
     fun `all typography tokens must use SP units for dynamic font scaling`() {
-        // §15: Application must support Android text scaling where practical.
+        // Â§15: Application must support Android text scaling where practical.
         // All font sizes and line heights in DBTypography must be defined in sp, not dp or px.
         assertTrue("Display fontSize must use SP", DBTypography.Display.fontSize.type == TextUnitType.Sp)
         assertTrue("Display lineHeight must use SP", DBTypography.Display.lineHeight.type == TextUnitType.Sp)
@@ -57,7 +56,7 @@ class TextScalingAccessibilityTest {
 
     @Test
     fun `minimum important text size must be at least 12sp per accessibility spec`() {
-        // §14: "The design system states: No important UI should be below 12 px."
+        // Â§14: "The design system states: No important UI should be below 12 px."
         // In Compose SP, minimum token size must be >= 12.sp.
         assertTrue("Caption text size must be >= 12sp", DBTypography.Caption.fontSize.value >= 12f)
         assertTrue("Label text size must be >= 12sp", DBTypography.Label.fontSize.value >= 12f)
@@ -66,7 +65,7 @@ class TextScalingAccessibilityTest {
 
     @Test
     fun `button height accommodates scaled text while preserving minimum touch target`() {
-        // §16: Fixed-height text containers must be avoided for content that may scale.
+        // Â§16: Fixed-height text containers must be avoided for content that may scale.
         // DBButton uses .heightIn(min = DBSizing.ButtonHeight) rather than rigid .height().
         val minButtonHeight = DBSizing.ButtonHeight // 52.dp
 
@@ -151,7 +150,7 @@ class TextScalingAccessibilityTest {
 
     @Test
     fun `score values remain visible and non-clipped when scaled up`() {
-        // §17: "Scores are high-priority information... The final score must have a stable semantic representation."
+        // Â§17: "Scores are high-priority information... The final score must have a stable semantic representation."
         // Score formatting must not truncate digits regardless of scaling
         fun formatScore(score: Int): String = score.toString()
 
@@ -164,13 +163,13 @@ class TextScalingAccessibilityTest {
         assertEquals("0", zeroScore)
 
         // Ensure score does not contain ellipsis or clipped chars
-        assertTrue(!regularScore.contains("…"))
-        assertTrue(!highScore.contains("…"))
+        assertTrue(!regularScore.contains("â€¦"))
+        assertTrue(!highScore.contains("â€¦"))
     }
 
     @Test
     fun `viewport overflow scrolling policy enables safe access under large text`() {
-        // §60 & §62: When text scaling causes content to exceed viewport height (e.g. 360x800),
+        // Â§60 & Â§62: When text scaling causes content to exceed viewport height (e.g. 360x800),
         // scrolling must be enabled so critical controls are reachable.
         data class ScreenScrollConfig(val screenName: String, val isScrollable: Boolean)
 

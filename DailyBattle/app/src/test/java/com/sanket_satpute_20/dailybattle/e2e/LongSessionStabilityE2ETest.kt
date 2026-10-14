@@ -1,10 +1,7 @@
-package com.sanket_satpute_20.dailybattle.e2e
+﻿package com.sanket_satpute_20.dailybattle.e2e
 
 import com.sanket_satpute_20.dailybattle.core.analytics.AnalyticsTracker
 import com.sanket_satpute_20.dailybattle.core.error.AppError
-import com.sanket_satpute_20.dailybattle.core.lifecycle.AppLifecycleEvent
-import com.sanket_satpute_20.dailybattle.core.lifecycle.AppLifecycleListener
-import com.sanket_satpute_20.dailybattle.core.lifecycle.AppLifecycleManager
 import com.sanket_satpute_20.dailybattle.core.lifecycle.AppLifecycleState
 import com.sanket_satpute_20.dailybattle.core.lifecycle.BackgroundReason
 import com.sanket_satpute_20.dailybattle.core.lifecycle.DefaultAppLifecycleManager
@@ -53,10 +50,10 @@ import java.time.Instant
 import java.time.ZoneId
 
 /**
- * Sprint 24.3 — Long Session Stability Test Suite
+ * Sprint 24.3 â€” Long Session Stability Test Suite
  *
- * Verifies application stability under prolonged operational sessions per `docs/ROADMAP.md` (lines 1847–1856)
- * and `docs/12_TESTING_AND_QA.md` §57, §58 across the 6 mandatory scenarios:
+ * Verifies application stability under prolonged operational sessions per `docs/ROADMAP.md` (lines 1847â€“1856)
+ * and `docs/12_TESTING_AND_QA.md` Â§57, Â§58 across the 6 mandatory scenarios:
  *
  * 1. Repeated battles (consecutive official rounds without session/state leakage or memory creep)
  * 2. Repeated navigation (rapid/deep backstack transitions without retaining screens or leaking listeners)

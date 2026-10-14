@@ -1,6 +1,5 @@
 package com.sanket_satpute_20.dailybattle.domain.crowd
 
-import com.sanket_satpute_20.dailybattle.core.error.AppError
 import com.sanket_satpute_20.dailybattle.domain.result.DomainResult
 
 /**

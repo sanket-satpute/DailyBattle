@@ -2,8 +2,6 @@ package com.sanket_satpute_20.dailybattle.data.retry
 
 import com.sanket_satpute_20.dailybattle.core.error.AppError
 import com.sanket_satpute_20.dailybattle.data.battle.RoomBattleResultRepository
-import com.sanket_satpute_20.dailybattle.data.conflict.ConflictResolutionAction
-import com.sanket_satpute_20.dailybattle.data.conflict.DefaultConflictResolver
 import com.sanket_satpute_20.dailybattle.data.friend.RoomFriendRepository
 import com.sanket_satpute_20.dailybattle.data.local.dao.BattleHistoryDao
 import com.sanket_satpute_20.dailybattle.data.local.dao.BattleResultDao
@@ -16,7 +14,6 @@ import com.sanket_satpute_20.dailybattle.data.local.entity.FriendEntity
 import com.sanket_satpute_20.dailybattle.data.sync.InMemorySyncQueueStore
 import com.sanket_satpute_20.dailybattle.data.sync.PendingOperation
 import com.sanket_satpute_20.dailybattle.data.sync.SyncOperationType
-import com.sanket_satpute_20.dailybattle.domain.friend.FriendStatus
 import com.sanket_satpute_20.dailybattle.domain.identifier.BattleId
 import com.sanket_satpute_20.dailybattle.domain.identifier.BattleSessionId
 import com.sanket_satpute_20.dailybattle.domain.identifier.UserId
@@ -32,7 +29,6 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
-import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.util.concurrent.atomic.AtomicInteger

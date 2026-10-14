@@ -1,15 +1,11 @@
-package com.sanket_satpute_20.dailybattle.data.remote
+﻿package com.sanket_satpute_20.dailybattle.data.remote
 
-import com.sanket_satpute_20.dailybattle.data.remote.dto.battle.BattleResultResponseDto
 import com.sanket_satpute_20.dailybattle.data.remote.dto.battle.BattleSessionResponseDto
 import com.sanket_satpute_20.dailybattle.data.remote.dto.battle.ChallengeDto
-import com.sanket_satpute_20.dailybattle.data.remote.dto.battle.ChallengeResultDto
 import com.sanket_satpute_20.dailybattle.data.remote.dto.battle.TodayBattleResponseDto
 import com.sanket_satpute_20.dailybattle.data.remote.dto.history.HistoryResponseDto
 import com.sanket_satpute_20.dailybattle.data.remote.dto.profile.BattleDnaDto
-import com.sanket_satpute_20.dailybattle.data.remote.dto.profile.PersonalRecordsDto
 import com.sanket_satpute_20.dailybattle.data.remote.dto.profile.ProfileResponseDto
-import com.sanket_satpute_20.dailybattle.data.remote.dto.social.AddFriendResponseDto
 import com.sanket_satpute_20.dailybattle.data.remote.dto.social.FriendDto
 import com.sanket_satpute_20.dailybattle.data.remote.dto.social.FriendsResponseDto
 import com.sanket_satpute_20.dailybattle.data.remote.dto.social.RivalResponseDto
@@ -34,7 +30,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /**
- * Sprint 16.5 — Schema Validation Test Suite.
+ * Sprint 16.5 â€” Schema Validation Test Suite.
  *
  * Validates:
  * - Response schema conformance across Battle, Social, and Profile endpoints.

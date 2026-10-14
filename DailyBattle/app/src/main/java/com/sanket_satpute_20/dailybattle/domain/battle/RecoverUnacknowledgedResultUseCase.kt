@@ -1,6 +1,5 @@
 package com.sanket_satpute_20.dailybattle.domain.battle
 
-import com.sanket_satpute_20.dailybattle.core.error.AppError
 import com.sanket_satpute_20.dailybattle.domain.result.DomainResult
 import javax.inject.Inject
 

@@ -1,10 +1,9 @@
-package com.sanket_satpute_20.dailybattle.data.local.migration
+﻿package com.sanket_satpute_20.dailybattle.data.local.migration
 
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.sanket_satpute_20.dailybattle.data.local.database.DailyBattleDatabase
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Assert.fail
 import org.junit.Test

@@ -1,11 +1,8 @@
 package com.sanket_satpute_20.dailybattle.data.remote
 
 import com.sanket_satpute_20.dailybattle.data.remote.dto.battle.BattleResultResponseDto
-import com.sanket_satpute_20.dailybattle.data.remote.dto.battle.BattleSessionResponseDto
 import com.sanket_satpute_20.dailybattle.data.remote.dto.battle.ChallengeDto
 import com.sanket_satpute_20.dailybattle.data.remote.dto.battle.ChallengeResultDto
-import com.sanket_satpute_20.dailybattle.data.remote.dto.battle.CompleteBattleRequestDto
-import com.sanket_satpute_20.dailybattle.data.remote.dto.battle.StartBattleRequestDto
 import com.sanket_satpute_20.dailybattle.data.remote.dto.battle.SubmitChallengeResultRequestDto
 import com.sanket_satpute_20.dailybattle.data.remote.dto.battle.SubmitChallengeResultResponseDto
 import com.sanket_satpute_20.dailybattle.data.remote.dto.battle.TodayBattleResponseDto
@@ -21,9 +18,7 @@ import com.sanket_satpute_20.dailybattle.data.remote.dto.social.RivalResponseDto
 import com.sanket_satpute_20.dailybattle.data.remote.dto.social.RivalScoreComparisonResponseDto
 import com.sanket_satpute_20.dailybattle.data.remote.serialization.DailyBattleJson
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
-import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /**

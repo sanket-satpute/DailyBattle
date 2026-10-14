@@ -1,6 +1,5 @@
-package com.sanket_satpute_20.dailybattle.data.local.migration
+﻿package com.sanket_satpute_20.dailybattle.data.local.migration
 
-import android.database.SQLException
 import androidx.sqlite.db.SupportSQLiteDatabase
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse

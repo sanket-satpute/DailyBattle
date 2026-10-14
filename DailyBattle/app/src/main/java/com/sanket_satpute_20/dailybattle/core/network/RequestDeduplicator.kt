@@ -1,7 +1,6 @@
 package com.sanket_satpute_20.dailybattle.core.network
 
 import com.sanket_satpute_20.dailybattle.domain.result.DomainResult
-import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope

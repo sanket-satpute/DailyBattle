@@ -1,6 +1,5 @@
-package com.sanket_satpute_20.dailybattle.presentation
+﻿package com.sanket_satpute_20.dailybattle.presentation
 
-import com.sanket_satpute_20.dailybattle.design.components.DBButtonType
 import com.sanket_satpute_20.dailybattle.design.components.DBFeedbackType
 import com.sanket_satpute_20.dailybattle.design.components.DBInputState
 import org.junit.Assert.assertEquals
@@ -9,7 +8,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /**
- * Sprint 22.3 — State Accessibility
+ * Sprint 22.3 â€” State Accessibility
  * Unit tests validating non-color state indicators across:
  * 1. Correct state (symbols, text, semantics)
  * 2. Incorrect state (symbols, text, semantics)
@@ -18,21 +17,21 @@ import org.junit.Test
  * 5. Loading state (textual message accompanying spinner, semantics)
  * 6. Error state (structured titles, descriptions, retry action, glyphs)
  *
- * Per `docs/11_ACCESSIBILITY.md` (§20, §21, §22, §23, §24, §25, §26, §27)
+ * Per `docs/11_ACCESSIBILITY.md` (Â§20, Â§21, Â§22, Â§23, Â§24, Â§25, Â§26, Â§27)
  * and `docs/ROADMAP.md` (Sprint 22.3).
  */
 class StateAccessibilityTest {
 
     @Test
     fun `correct states provide explicit non-color glyphs and text`() {
-        // §22: Correct states must have non-color indicators (e.g. ✓)
+        // Â§22: Correct states must have non-color indicators (e.g. âœ“)
         fun formatButtonSuccessText(isSuccess: Boolean, originalText: String): String {
-            return if (isSuccess) "✓ SUCCESS" else originalText.uppercase()
+            return if (isSuccess) "âœ“ SUCCESS" else originalText.uppercase()
         }
 
         fun getInputTrailingIconGlyph(state: DBInputState): String? {
             return when (state) {
-                DBInputState.Valid -> "✓"
+                DBInputState.Valid -> "âœ“"
                 DBInputState.Invalid -> "!"
                 DBInputState.Default -> null
             }
@@ -40,24 +39,24 @@ class StateAccessibilityTest {
 
         fun getFeedbackIndicator(type: DBFeedbackType): String {
             return when (type) {
-                DBFeedbackType.Success -> "✓"
-                DBFeedbackType.Error -> "✕"
+                DBFeedbackType.Success -> "âœ“"
+                DBFeedbackType.Error -> "âœ•"
                 DBFeedbackType.Warning -> "!"
                 DBFeedbackType.Info -> "i"
             }
         }
 
-        assertEquals("✓ SUCCESS", formatButtonSuccessText(isSuccess = true, originalText = "PLAY BATTLE"))
-        assertEquals("✓", getInputTrailingIconGlyph(DBInputState.Valid))
-        assertEquals("✓", getFeedbackIndicator(DBFeedbackType.Success))
+        assertEquals("âœ“ SUCCESS", formatButtonSuccessText(isSuccess = true, originalText = "PLAY BATTLE"))
+        assertEquals("âœ“", getInputTrailingIconGlyph(DBInputState.Valid))
+        assertEquals("âœ“", getFeedbackIndicator(DBFeedbackType.Success))
     }
 
     @Test
     fun `incorrect states provide explicit non-color glyphs and text`() {
-        // §22: Incorrect states must have non-color indicators (e.g. ✕, !)
+        // Â§22: Incorrect states must have non-color indicators (e.g. âœ•, !)
         fun getInputTrailingIconGlyph(state: DBInputState): String? {
             return when (state) {
-                DBInputState.Valid -> "✓"
+                DBInputState.Valid -> "âœ“"
                 DBInputState.Invalid -> "!"
                 DBInputState.Default -> null
             }
@@ -65,20 +64,20 @@ class StateAccessibilityTest {
 
         fun getFeedbackIndicator(type: DBFeedbackType): String {
             return when (type) {
-                DBFeedbackType.Success -> "✓"
-                DBFeedbackType.Error -> "✕"
+                DBFeedbackType.Success -> "âœ“"
+                DBFeedbackType.Error -> "âœ•"
                 DBFeedbackType.Warning -> "!"
                 DBFeedbackType.Info -> "i"
             }
         }
 
         assertEquals("!", getInputTrailingIconGlyph(DBInputState.Invalid))
-        assertEquals("✕", getFeedbackIndicator(DBFeedbackType.Error))
+        assertEquals("âœ•", getFeedbackIndicator(DBFeedbackType.Error))
     }
 
     @Test
     fun `selected state is distinguished by border, typography, and glyphs beyond color`() {
-        // §23: Selected controls must have clear state not depending only on color
+        // Â§23: Selected controls must have clear state not depending only on color
         data class SelectionVisualAttributes(
             val hasCheckmarkGlyph: Boolean,
             val isBold: Boolean,
@@ -111,7 +110,7 @@ class StateAccessibilityTest {
 
     @Test
     fun `user pick in distribution results provides textual marker beyond accent bar`() {
-        // §20, §23: Challenge results must identify user pick in text, not color alone
+        // Â§20, Â§23: Challenge results must identify user pick in text, not color alone
         fun formatChoiceResultLabel(text: String, isUserPick: Boolean): String {
             return if (isUserPick) "$text (YOU)" else text
         }
@@ -122,7 +121,7 @@ class StateAccessibilityTest {
 
     @Test
     fun `disabled states communicate unavailability beyond muted color`() {
-        // §24: Disabled state must communicate unavailability through semantics and textual tags
+        // Â§24: Disabled state must communicate unavailability through semantics and textual tags
         fun isControlInteractive(enabled: Boolean, isLoading: Boolean): Boolean {
             return enabled && !isLoading
         }
@@ -138,7 +137,7 @@ class StateAccessibilityTest {
 
     @Test
     fun `loading states always pair visual indicator with accessible textual context`() {
-        // §25: Loading must never rely on a rotating spinner alone
+        // Â§25: Loading must never rely on a rotating spinner alone
         fun getLoadingAccessibleContext(message: String): Pair<String, Boolean> {
             val hasTextualMessage = message.isNotBlank()
             return Pair(message, hasTextualMessage)
@@ -151,7 +150,7 @@ class StateAccessibilityTest {
 
     @Test
     fun `error state conveys problem and recovery non-reliant on red color`() {
-        // §26: Error states provide structured textual context, indicator glyph, and retry
+        // Â§26: Error states provide structured textual context, indicator glyph, and retry
         data class ErrorStateContract(
             val indicatorGlyph: String,
             val title: String,

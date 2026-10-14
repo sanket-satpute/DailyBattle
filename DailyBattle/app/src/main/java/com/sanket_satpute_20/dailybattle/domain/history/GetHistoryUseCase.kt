@@ -1,6 +1,5 @@
 package com.sanket_satpute_20.dailybattle.domain.history
 
-import com.sanket_satpute_20.dailybattle.domain.battle.BattleResult
 import com.sanket_satpute_20.dailybattle.domain.battle.BattleResultRepository
 import com.sanket_satpute_20.dailybattle.domain.identifier.UserId
 import com.sanket_satpute_20.dailybattle.domain.result.DomainResult

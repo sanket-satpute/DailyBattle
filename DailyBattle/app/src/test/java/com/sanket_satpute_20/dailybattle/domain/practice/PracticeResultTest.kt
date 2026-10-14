@@ -1,4 +1,4 @@
-package com.sanket_satpute_20.dailybattle.domain.practice
+﻿package com.sanket_satpute_20.dailybattle.domain.practice
 
 import com.sanket_satpute_20.dailybattle.core.error.AppError
 import com.sanket_satpute_20.dailybattle.data.battle.InMemoryBattleResultRepository
@@ -9,20 +9,16 @@ import com.sanket_satpute_20.dailybattle.domain.battle.BattleMode
 import com.sanket_satpute_20.dailybattle.domain.battle.BattleResult
 import com.sanket_satpute_20.dailybattle.domain.battle.BattleSession
 import com.sanket_satpute_20.dailybattle.domain.battle.BattleSessionStatus
-import com.sanket_satpute_20.dailybattle.domain.battle.ChallengeResult
 import com.sanket_satpute_20.dailybattle.domain.battle.ChallengeType
 import com.sanket_satpute_20.dailybattle.domain.identifier.BattleId
 import com.sanket_satpute_20.dailybattle.domain.identifier.BattleResultId
 import com.sanket_satpute_20.dailybattle.domain.identifier.BattleSessionId
-import com.sanket_satpute_20.dailybattle.domain.identifier.ChallengeId
-import com.sanket_satpute_20.dailybattle.domain.identifier.ChallengeResultId
 import com.sanket_satpute_20.dailybattle.domain.identifier.PracticeResultId
 import com.sanket_satpute_20.dailybattle.domain.identifier.PracticeSessionId
 import com.sanket_satpute_20.dailybattle.domain.identifier.UserId
 import com.sanket_satpute_20.dailybattle.domain.result.DomainResult
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertThrows
@@ -32,7 +28,7 @@ import org.junit.Test
 import java.util.UUID
 
 /**
- * Verification of Sprint 19.3 — Practice Results.
+ * Verification of Sprint 19.3 â€” Practice Results.
  *
  * Requirements:
  * - Practice results remain isolated (`ROADMAP.md` Phase 19, Sprint 19.3).

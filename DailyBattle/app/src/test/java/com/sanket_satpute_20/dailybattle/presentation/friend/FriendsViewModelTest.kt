@@ -1,11 +1,10 @@
-package com.sanket_satpute_20.dailybattle.presentation.friend
+﻿package com.sanket_satpute_20.dailybattle.presentation.friend
 
 import com.sanket_satpute_20.dailybattle.core.error.AppError
 import com.sanket_satpute_20.dailybattle.domain.battle.ActiveBattleSessionManager
 import com.sanket_satpute_20.dailybattle.domain.battle.BattleResult
 import com.sanket_satpute_20.dailybattle.domain.battle.BattleResultRepository
 import com.sanket_satpute_20.dailybattle.domain.battle.BattleSession
-import com.sanket_satpute_20.dailybattle.domain.battle.BattleSessionStatus
 import com.sanket_satpute_20.dailybattle.domain.battle.GetBattleResultUseCase
 import com.sanket_satpute_20.dailybattle.domain.friend.Friend
 import com.sanket_satpute_20.dailybattle.domain.friend.FriendRepository
@@ -18,7 +17,6 @@ import com.sanket_satpute_20.dailybattle.domain.result.DomainResult
 import com.sanket_satpute_20.dailybattle.domain.rival.GetCurrentRivalUseCase
 import com.sanket_satpute_20.dailybattle.domain.rival.Rival
 import com.sanket_satpute_20.dailybattle.domain.rival.RivalRepository
-import com.sanket_satpute_20.dailybattle.domain.rival.RivalScoreComparison
 import com.sanket_satpute_20.dailybattle.domain.user.User
 import com.sanket_satpute_20.dailybattle.domain.user.UserRepository
 import kotlinx.coroutines.Dispatchers

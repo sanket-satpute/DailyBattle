@@ -1,19 +1,14 @@
-@file:Suppress("DEPRECATION")
+﻿@file:Suppress("DEPRECATION")
 
 package com.sanket_satpute_20.dailybattle.e2e
 
 import android.content.ComponentCallbacks2
 import com.sanket_satpute_20.dailybattle.core.lifecycle.AppLifecycleEvent
 import com.sanket_satpute_20.dailybattle.core.lifecycle.AppLifecycleListener
-import com.sanket_satpute_20.dailybattle.core.lifecycle.AppLifecycleState
-import com.sanket_satpute_20.dailybattle.core.lifecycle.BackgroundReason
 import com.sanket_satpute_20.dailybattle.core.lifecycle.DefaultAppLifecycleManager
 import com.sanket_satpute_20.dailybattle.core.lifecycle.DefaultGameplayStateRestorer
 import com.sanket_satpute_20.dailybattle.core.lifecycle.DefaultLifecycleBattlePreserver
-import com.sanket_satpute_20.dailybattle.core.memory.AppMemoryManager
 import com.sanket_satpute_20.dailybattle.core.memory.DefaultAppMemoryManager
-import com.sanket_satpute_20.dailybattle.core.memory.MemoryTrimCallback
-import com.sanket_satpute_20.dailybattle.core.memory.MemoryTrimLevel
 import com.sanket_satpute_20.dailybattle.core.memory.ResourceCache
 import com.sanket_satpute_20.dailybattle.data.cache.CacheMetadataStore
 import com.sanket_satpute_20.dailybattle.data.cache.CachePolicy
@@ -25,7 +20,6 @@ import com.sanket_satpute_20.dailybattle.domain.battle.BattleResultRepository
 import com.sanket_satpute_20.dailybattle.domain.battle.BattleSession
 import com.sanket_satpute_20.dailybattle.domain.battle.BattleSessionRepository
 import com.sanket_satpute_20.dailybattle.domain.battle.BattleSessionStatus
-import com.sanket_satpute_20.dailybattle.domain.battle.ChallengeSequence
 import com.sanket_satpute_20.dailybattle.domain.battle.ChallengeSession
 import com.sanket_satpute_20.dailybattle.domain.battle.ChallengeSessionStatus
 import com.sanket_satpute_20.dailybattle.domain.battle.CompleteBattleUseCase
@@ -39,7 +33,6 @@ import com.sanket_satpute_20.dailybattle.domain.result.DomainResult
 import com.sanket_satpute_20.dailybattle.navigation.AppRoute
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
@@ -50,10 +43,10 @@ import java.time.Instant
 import java.time.ZoneId
 
 /**
- * Sprint 24.4 — Memory Verification E2E Test Suite
+ * Sprint 24.4 â€” Memory Verification E2E Test Suite
  *
- * Verifies the 4 critical memory dimensions per `docs/ROADMAP.md` (lines 1857–1865)
- * and `docs/12_TESTING_AND_QA.md` §57:
+ * Verifies the 4 critical memory dimensions per `docs/ROADMAP.md` (lines 1857â€“1865)
+ * and `docs/12_TESTING_AND_QA.md` Â§57:
  *
  * 1. Leaks (listener leaks, observer leaks, weak reference retention)
  * 2. Retained screens ("Especially test: Home -> Battle -> Results -> Home repeatedly")
@@ -159,7 +152,7 @@ class MemoryVerificationE2ETest {
 
     @Test
     fun `vector 2 - retained screens - Home to Battle to Results to Home repeatedly pops all intermediate gameplay backstack entries without retaining screens`() = runTest {
-        // "Especially test: Home -> Battle -> Results -> Home repeatedly" per 12_TESTING_AND_QA.md §57
+        // "Especially test: Home -> Battle -> Results -> Home repeatedly" per 12_TESTING_AND_QA.md Â§57
         val backstack = ArrayDeque<String>()
         val totalLoops = 10
 

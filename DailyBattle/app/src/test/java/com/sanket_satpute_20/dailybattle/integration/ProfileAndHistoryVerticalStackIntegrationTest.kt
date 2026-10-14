@@ -1,8 +1,7 @@
-package com.sanket_satpute_20.dailybattle.integration
+﻿package com.sanket_satpute_20.dailybattle.integration
 
 import com.sanket_satpute_20.dailybattle.data.battle.RoomBattleResultRepository
 import com.sanket_satpute_20.dailybattle.data.local.entity.BattleResultEntity
-import com.sanket_satpute_20.dailybattle.data.local.entity.ProfileEntity
 import com.sanket_satpute_20.dailybattle.data.local.entity.UserEntity
 import com.sanket_satpute_20.dailybattle.data.profile.RoomProfileRepository
 import com.sanket_satpute_20.dailybattle.data.user.RoomUserRepository

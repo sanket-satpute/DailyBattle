@@ -1,4 +1,4 @@
-package com.sanket_satpute_20.dailybattle.e2e
+﻿package com.sanket_satpute_20.dailybattle.e2e
 
 import com.sanket_satpute_20.dailybattle.core.error.AppError
 import com.sanket_satpute_20.dailybattle.data.battle.InMemoryBattleResultRepository
@@ -20,7 +20,6 @@ import com.sanket_satpute_20.dailybattle.domain.battle.BattleStatus
 import com.sanket_satpute_20.dailybattle.domain.battle.Challenge
 import com.sanket_satpute_20.dailybattle.domain.battle.ChallengeResult
 import com.sanket_satpute_20.dailybattle.domain.battle.ChallengeSequence
-import com.sanket_satpute_20.dailybattle.domain.battle.ChallengeSessionStatus
 import com.sanket_satpute_20.dailybattle.domain.battle.ChallengeType
 import com.sanket_satpute_20.dailybattle.domain.battle.GetOrStartOfficialBattleUseCase
 import com.sanket_satpute_20.dailybattle.domain.history.GetHistoryUseCase
@@ -35,14 +34,11 @@ import com.sanket_satpute_20.dailybattle.domain.scoring.BattleScoreAggregator
 import com.sanket_satpute_20.dailybattle.domain.scoring.ChallengeScoreConstants
 import com.sanket_satpute_20.dailybattle.domain.scoring.ChallengeScoreValidator
 import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
-import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Assert.fail
@@ -53,11 +49,11 @@ import java.time.ZoneId
 import java.util.concurrent.atomic.AtomicInteger
 
 /**
- * Sprint 23.9 — Phase 23 Comprehensive Regression Suite
+ * Sprint 23.9 â€” Phase 23 Comprehensive Regression Suite
  *
  * Codifies and verifies all regression baselines established across Phase 23
  * (Sprint 23.1 through Sprint 23.8) per `docs/ROADMAP.md` (line 1826-1829),
- * `docs/12_TESTING_AND_QA.md` §46, and `docs/16_DEFINITION_OF_DONE.md` §57:
+ * `docs/12_TESTING_AND_QA.md` Â§46, and `docs/16_DEFINITION_OF_DONE.md` Â§57:
  *
  * 1. Official Battle Progression (Snap -> Shift -> Crowd Call -> Results)
  * 2. Attempt Integrity (Single official attempt, reject duplicate start)

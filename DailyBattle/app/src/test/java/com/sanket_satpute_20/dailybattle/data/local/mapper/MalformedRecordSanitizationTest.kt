@@ -1,24 +1,18 @@
-package com.sanket_satpute_20.dailybattle.data.local.mapper
+﻿package com.sanket_satpute_20.dailybattle.data.local.mapper
 
 import com.sanket_satpute_20.dailybattle.data.local.entity.BattleHistoryItemEntity
 import com.sanket_satpute_20.dailybattle.data.local.entity.BattleResultEntity
 import com.sanket_satpute_20.dailybattle.data.local.entity.BattleSessionEntity
 import com.sanket_satpute_20.dailybattle.data.local.entity.ChallengeEntity
 import com.sanket_satpute_20.dailybattle.data.local.entity.ChallengeResultEntity
-import com.sanket_satpute_20.dailybattle.data.local.entity.ChallengeSessionEntity
 import com.sanket_satpute_20.dailybattle.data.local.entity.FriendEntity
 import com.sanket_satpute_20.dailybattle.data.local.entity.ProfileEntity
-import com.sanket_satpute_20.dailybattle.data.local.entity.RivalEntity
 import com.sanket_satpute_20.dailybattle.data.local.entity.RivalMatchHistoryEntity
-import com.sanket_satpute_20.dailybattle.data.local.entity.UserEntity
 import com.sanket_satpute_20.dailybattle.domain.battle.BattleMode
 import com.sanket_satpute_20.dailybattle.domain.battle.BattleSessionStatus
-import com.sanket_satpute_20.dailybattle.domain.battle.ChallengeSessionStatus
 import com.sanket_satpute_20.dailybattle.domain.battle.ChallengeType
 import com.sanket_satpute_20.dailybattle.domain.friend.FriendStatus
 import com.sanket_satpute_20.dailybattle.domain.rival.MatchOutcome
-import com.sanket_satpute_20.dailybattle.domain.rival.RivalStatus
-import com.sanket_satpute_20.dailybattle.domain.user.AccountStatus
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test

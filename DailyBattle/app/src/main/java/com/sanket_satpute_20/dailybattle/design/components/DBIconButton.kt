@@ -1,14 +1,12 @@
 package com.sanket_satpute_20.dailybattle.design.components
 
 import androidx.compose.foundation.layout.defaultMinSize
-import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.padding
 import com.sanket_satpute_20.dailybattle.design.color.DBColor
 import com.sanket_satpute_20.dailybattle.design.sizing.DBSizing

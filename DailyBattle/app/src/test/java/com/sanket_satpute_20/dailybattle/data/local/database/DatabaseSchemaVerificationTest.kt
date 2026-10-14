@@ -1,6 +1,5 @@
-package com.sanket_satpute_20.dailybattle.data.local.database
+﻿package com.sanket_satpute_20.dailybattle.data.local.database
 
-import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
