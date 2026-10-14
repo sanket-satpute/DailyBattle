@@ -94,7 +94,7 @@ fun DailyBattleNavHost(
                 )
             }
             composable(AppRoute.Me.route) {
-                ScreenPlaceholder(label = "Me")
+                com.sanket_satpute_20.dailybattle.presentation.profile.ProfileRoute()
             }
             composable(AppRoute.Profile.route) {
                 com.sanket_satpute_20.dailybattle.presentation.profile.ProfileRoute()
@@ -137,23 +137,50 @@ fun DailyBattleNavHost(
                 )
             }
             composable(AppRoute.Snap.route) {
-                ScreenPlaceholder(label = "Snap (SCR-005)")
+                com.sanket_satpute_20.dailybattle.presentation.snap.SnapScreen(
+                    uiState = com.sanket_satpute_20.dailybattle.presentation.snap.SnapUiState(),
+                    onElementTap = {},
+                    onComplete = {
+                        navController.navigate(AppRoute.Shift.route) {
+                            popUpTo(AppRoute.Snap.route) { inclusive = true }
+                        }
+                    }
+                )
             }
             composable(AppRoute.Shift.route) {
-                ScreenPlaceholder(label = "Shift (SCR-006)")
+                com.sanket_satpute_20.dailybattle.presentation.shift.ShiftScreen(
+                    uiState = com.sanket_satpute_20.dailybattle.presentation.shift.ShiftUiState(),
+                    onAnswerSelected = {},
+                    onComplete = {
+                        navController.navigate(AppRoute.CrowdCall.route) {
+                            popUpTo(AppRoute.Shift.route) { inclusive = true }
+                        }
+                    }
+                )
             }
             composable(AppRoute.CrowdCall.route) {
-                ScreenPlaceholder(label = "Crowd Call (SCR-007)")
+                com.sanket_satpute_20.dailybattle.presentation.crowd.CrowdScreen(
+                    uiState = com.sanket_satpute_20.dailybattle.presentation.crowd.CrowdUiState(),
+                    onAnswerSelected = {},
+                    onComplete = {
+                        navController.navigate(AppRoute.Results.route) {
+                            popUpTo(AppRoute.CrowdCall.route) { inclusive = true }
+                        }
+                    }
+                )
             }
             composable(AppRoute.Results.route) {
-                ScreenPlaceholder(label = "Results (SCR-008)")
+                com.sanket_satpute_20.dailybattle.presentation.result.ResultsScreen(
+                    onBeatRivalClick = {
+                        navController.navigate(AppRoute.Rival.route)
+                    },
+                    onShareClick = {}
+                )
             }
             composable(AppRoute.Rival.route) {
                 com.sanket_satpute_20.dailybattle.presentation.rival.RivalRoute(
                     onNavigateBack = { navController.popBackStack() },
                     onNavigateToPractice = {
-                        // For now, Practice might just go to BattleIntro or somewhere else
-                        // The blueprint says "Rival can lead to Practice". Let's assume it leads to Home or somewhere similar, or just pop back for now until Practice screen exists.
                         navController.navigate(AppRoute.Home.route) {
                             popUpTo(AppRoute.MainGraph.route) { inclusive = true }
                         }
