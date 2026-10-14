@@ -22,14 +22,20 @@ object NetworkClientFactory {
     fun createOkHttpClient(
         config: NetworkConfig,
         authTokenProvider: AuthTokenProvider,
+        additionalInterceptors: List<okhttp3.Interceptor> = emptyList(),
     ): OkHttpClient {
-        return OkHttpClient.Builder()
+        val builder = OkHttpClient.Builder()
             .connectTimeout(config.connectTimeoutSeconds, TimeUnit.SECONDS)
             .readTimeout(config.readTimeoutSeconds, TimeUnit.SECONDS)
             .writeTimeout(config.writeTimeoutSeconds, TimeUnit.SECONDS)
             .addInterceptor(HeaderInterceptor())
             .addInterceptor(AuthInterceptor(authTokenProvider))
-            .build()
+
+        for (interceptor in additionalInterceptors) {
+            builder.addInterceptor(interceptor)
+        }
+
+        return builder.build()
     }
 
     fun createRetrofitBuilder(

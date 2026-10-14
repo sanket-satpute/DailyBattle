@@ -48,7 +48,12 @@ object NetworkModule {
     fun provideOkHttpClient(
         config: NetworkConfig,
         authTokenProvider: AuthTokenProvider,
-    ): OkHttpClient = NetworkClientFactory.createOkHttpClient(config, authTokenProvider)
+        payloadSizeInterceptor: com.sanket_satpute_20.dailybattle.core.network.PayloadSizeInterceptor? = null,
+    ): OkHttpClient = NetworkClientFactory.createOkHttpClient(
+        config = config,
+        authTokenProvider = authTokenProvider,
+        additionalInterceptors = listOfNotNull(payloadSizeInterceptor),
+    )
 
     @Provides
     @Singleton
