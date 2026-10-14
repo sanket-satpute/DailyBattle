@@ -52,6 +52,8 @@ interface AppLifecycleManager {
         timestamp: Long? = null,
     )
 
+    val listenerCount: Int get() = 0
+
     fun addListener(listener: AppLifecycleListener)
     fun removeListener(listener: AppLifecycleListener)
 }
@@ -60,6 +62,8 @@ interface AppLifecycleManager {
 class DefaultAppLifecycleManager @Inject constructor(
     private val clock: Clock,
 ) : AppLifecycleManager {
+
+    override val listenerCount: Int get() = listeners.size
 
     private val _state = MutableStateFlow(AppLifecycleState.FOREGROUND)
     override val state: StateFlow<AppLifecycleState> = _state.asStateFlow()
