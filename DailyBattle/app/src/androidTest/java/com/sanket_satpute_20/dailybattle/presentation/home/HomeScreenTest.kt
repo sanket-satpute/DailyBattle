@@ -7,7 +7,10 @@ import com.sanket_satpute_20.dailybattle.design.components.DBBattleCardState
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
+import org.junit.runner.RunWith
+import androidx.test.ext.junit.runners.AndroidJUnit4
 
+@RunWith(AndroidJUnit4::class)
 class HomeScreenTest {
 
     @get:Rule

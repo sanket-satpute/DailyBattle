@@ -40,7 +40,19 @@ fun ResultsScreen(
     onShareClick: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    ResultsScreen(
+        uiState = uiState,
+        onBeatRivalClick = onBeatRivalClick,
+        onShareClick = onShareClick
+    )
+}
 
+@Composable
+fun ResultsScreen(
+    uiState: ResultsUiState,
+    onBeatRivalClick: () -> Unit = {},
+    onShareClick: () -> Unit = {}
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -51,7 +63,7 @@ fun ResultsScreen(
             onBackClick = null // No back button on results as per blueprint
         )
         
-        when (val state = uiState) {
+        when (uiState) {
             is ResultsUiState.Loading -> {
                 DBLoadingState(modifier = Modifier.weight(1f))
             }
@@ -59,13 +71,13 @@ fun ResultsScreen(
                 DBErrorState(
                     modifier = Modifier.weight(1f),
                     title = "COULDN'T LOAD RESULTS",
-                    description = state.message,
+                    description = uiState.message,
                     onRetry = null
                 )
             }
             is ResultsUiState.Success -> {
                 ResultsContent(
-                    summary = state.summary,
+                    summary = uiState.summary,
                     onBeatRivalClick = onBeatRivalClick,
                     onShareClick = onShareClick,
                     modifier = Modifier.weight(1f)
