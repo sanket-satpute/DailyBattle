@@ -12,6 +12,8 @@ interface CacheMetadataStore {
     suspend fun setLastUpdated(key: String, timestamp: Long)
     suspend fun clear(key: String)
     suspend fun clearAll()
+    suspend fun pruneExpired(maxAgeMs: Long, currentTimeMs: Long)
+    val entryCount: Int get() = 0
 }
 
 /**
@@ -34,4 +36,16 @@ class InMemoryCacheMetadataStore @Inject constructor() : CacheMetadataStore {
     override suspend fun clearAll() {
         timestamps.clear()
     }
+
+    override suspend fun pruneExpired(maxAgeMs: Long, currentTimeMs: Long) {
+        val iterator = timestamps.entries.iterator()
+        while (iterator.hasNext()) {
+            val entry = iterator.next()
+            if (currentTimeMs - entry.value > maxAgeMs) {
+                iterator.remove()
+            }
+        }
+    }
+
+    override val entryCount: Int get() = timestamps.size
 }
