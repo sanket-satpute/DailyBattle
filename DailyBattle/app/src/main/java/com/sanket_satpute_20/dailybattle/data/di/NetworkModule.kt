@@ -49,10 +49,11 @@ object NetworkModule {
         config: NetworkConfig,
         authTokenProvider: AuthTokenProvider,
         payloadSizeInterceptor: com.sanket_satpute_20.dailybattle.core.network.PayloadSizeInterceptor? = null,
+        securityLoggingInterceptor: com.sanket_satpute_20.dailybattle.core.security.logging.SecurityLoggingInterceptor? = null,
     ): OkHttpClient = NetworkClientFactory.createOkHttpClient(
         config = config,
         authTokenProvider = authTokenProvider,
-        additionalInterceptors = listOfNotNull(payloadSizeInterceptor),
+        additionalInterceptors = listOfNotNull(payloadSizeInterceptor, securityLoggingInterceptor),
     )
 
     @Provides
