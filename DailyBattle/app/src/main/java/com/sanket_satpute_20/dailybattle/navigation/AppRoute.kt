@@ -1,5 +1,7 @@
 package com.sanket_satpute_20.dailybattle.navigation
 
+import com.sanket_satpute_20.dailybattle.core.lifecycle.GameplayNavigationRoutes
+
 /**
  * Navigation destinations hosted by [DailyBattleNavHost].
  *
@@ -44,23 +46,23 @@ sealed interface AppRoute {
     }
 
     data object BattleIntro : AppRoute {
-        override val route: String = "battle_intro"
+        override val route: String = GameplayNavigationRoutes.BATTLE_INTRO
     }
 
     data object Snap : AppRoute {
-        override val route: String = "snap"
+        override val route: String = GameplayNavigationRoutes.SNAP
     }
 
     data object Shift : AppRoute {
-        override val route: String = "shift"
+        override val route: String = GameplayNavigationRoutes.SHIFT
     }
 
     data object CrowdCall : AppRoute {
-        override val route: String = "crowd_call"
+        override val route: String = GameplayNavigationRoutes.CROWD_CALL
     }
 
     data object Results : AppRoute {
-        override val route: String = "results"
+        override val route: String = GameplayNavigationRoutes.RESULTS
     }
 
     data object Rival : AppRoute {

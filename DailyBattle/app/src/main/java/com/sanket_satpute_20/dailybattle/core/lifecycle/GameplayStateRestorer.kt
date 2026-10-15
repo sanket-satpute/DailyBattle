@@ -9,7 +9,6 @@ import com.sanket_satpute_20.dailybattle.domain.battle.ChallengeSessionStatus
 import com.sanket_satpute_20.dailybattle.domain.battle.ChallengeType
 import com.sanket_satpute_20.dailybattle.domain.identifier.BattleId
 import com.sanket_satpute_20.dailybattle.domain.identifier.UserId
-import com.sanket_satpute_20.dailybattle.navigation.AppRoute
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -160,8 +159,8 @@ class DefaultGameplayStateRestorer @Inject constructor(
     override fun determineRestoredRoute(session: BattleSession): String {
         val recoveryState = evaluateRecoveryState(session)
         return when (recoveryState) {
-            is GameplayRecoveryState.NotStarted -> AppRoute.BattleIntro.route
-            is GameplayRecoveryState.BattleCompleted -> AppRoute.Results.route
+            is GameplayRecoveryState.NotStarted -> GameplayNavigationRoutes.BATTLE_INTRO
+            is GameplayRecoveryState.BattleCompleted -> GameplayNavigationRoutes.RESULTS
             is GameplayRecoveryState.ChallengeActive -> {
                 routeForChallengeType(recoveryState.challengeType)
             }
@@ -170,7 +169,7 @@ class DefaultGameplayStateRestorer @Inject constructor(
                 if (nextType != null) {
                     routeForChallengeType(nextType)
                 } else {
-                    AppRoute.Results.route
+                    GameplayNavigationRoutes.RESULTS
                 }
             }
         }
@@ -213,9 +212,9 @@ class DefaultGameplayStateRestorer @Inject constructor(
 
     private fun routeForChallengeType(type: ChallengeType): String {
         return when (type) {
-            ChallengeType.SNAP -> AppRoute.Snap.route
-            ChallengeType.SHIFT -> AppRoute.Shift.route
-            ChallengeType.CROWD_CALL -> AppRoute.CrowdCall.route
+            ChallengeType.SNAP -> GameplayNavigationRoutes.SNAP
+            ChallengeType.SHIFT -> GameplayNavigationRoutes.SHIFT
+            ChallengeType.CROWD_CALL -> GameplayNavigationRoutes.CROWD_CALL
         }
     }
 }

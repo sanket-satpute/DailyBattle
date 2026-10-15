@@ -12,7 +12,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import com.sanket_satpute_20.dailybattle.design.spacing.DBSpacing
-import com.sanket_satpute_20.dailybattle.domain.validation.InputValidator
 
 /**
  * Specialized input for Battle Codes.
@@ -33,7 +32,7 @@ fun DBBattleCodeInput(
         value = value,
         onValueChange = { newValue ->
             // Enforce max 6 characters and normalize to uppercase immediately
-            val normalized = InputValidator.normalizeBattleCode(newValue)
+            val normalized = newValue.trim().uppercase()
             if (normalized.length <= 6) {
                 onValueChange(normalized)
             }
