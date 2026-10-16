@@ -22,8 +22,36 @@ android {
         testInstrumentationRunner = "com.sanket_satpute_20.dailybattle.HiltTestRunner"
     }
 
+    signingConfigs {
+        create("release") {
+            val keystorePath = System.getenv("RELEASE_KEYSTORE_PATH")
+                ?: (project.findProperty("RELEASE_KEYSTORE_PATH") as? String)
+                ?: System.getenv("KEYSTORE_PATH")
+                ?: (project.findProperty("KEYSTORE_PATH") as? String)
+            if (!keystorePath.isNullOrBlank() && file(keystorePath).exists()) {
+                storeFile = file(keystorePath)
+                storePassword = System.getenv("RELEASE_STORE_PASSWORD")
+                    ?: (project.findProperty("RELEASE_STORE_PASSWORD") as? String)
+                    ?: System.getenv("KEYSTORE_PASSWORD")
+                    ?: (project.findProperty("KEYSTORE_PASSWORD") as? String)
+                keyAlias = System.getenv("RELEASE_KEY_ALIAS")
+                    ?: (project.findProperty("RELEASE_KEY_ALIAS") as? String)
+                    ?: System.getenv("KEY_ALIAS")
+                    ?: (project.findProperty("KEY_ALIAS") as? String)
+                keyPassword = System.getenv("RELEASE_KEY_PASSWORD")
+                    ?: (project.findProperty("RELEASE_KEY_PASSWORD") as? String)
+                    ?: System.getenv("KEY_PASSWORD")
+                    ?: (project.findProperty("KEY_PASSWORD") as? String)
+            }
+        }
+    }
+
     buildTypes {
         release {
+            val releaseSigning = signingConfigs.getByName("release")
+            if (releaseSigning.storeFile != null) {
+                signingConfig = releaseSigning
+            }
             optimization {
                 enable = false
             }

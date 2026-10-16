@@ -69,4 +69,31 @@ class HomeViewModelTest {
         assertTrue(state.hasRival)
         assertEquals("Rahul", state.rivalName)
     }
+
+    @Test
+    fun `loadHomeData in Production isolates demo rival and seed scores`() = runTest {
+        val prodProvider = object : com.sanket_satpute_20.dailybattle.core.config.EnvironmentProvider {
+            override val current = com.sanket_satpute_20.dailybattle.core.config.AppEnvironment.Production
+        }
+        val prodViewModel = HomeViewModel(
+            userRepository = userRepository,
+            environmentProvider = prodProvider
+        )
+        prodViewModel.loadHomeData()
+        
+        advanceUntilIdle()
+        
+        val state = prodViewModel.state.value
+        assertFalse(state.isLoading)
+        assertFalse(state.isError)
+        assertEquals("Sanket", state.userName)
+        assertEquals(DBBattleCardState.Ready, state.battleState)
+        assertEquals(0, state.momentumDays)
+        assertFalse(state.hasRival)
+        assertEquals("", state.rivalName)
+        assertEquals(0, state.rivalScore)
+        assertEquals(0, state.userScore)
+        assertEquals(0, state.pointsToCatch)
+    }
 }
+

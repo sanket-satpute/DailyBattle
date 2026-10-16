@@ -2,6 +2,9 @@ package com.sanket_satpute_20.dailybattle.presentation.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.sanket_satpute_20.dailybattle.core.config.AppEnvironment
+import com.sanket_satpute_20.dailybattle.core.config.BuildTypeEnvironmentProvider
+import com.sanket_satpute_20.dailybattle.core.config.EnvironmentProvider
 import com.sanket_satpute_20.dailybattle.design.components.DBBattleCardState
 import com.sanket_satpute_20.dailybattle.domain.user.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -34,7 +37,8 @@ data class HomeState(
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val environmentProvider: EnvironmentProvider = BuildTypeEnvironmentProvider(isDebugBuild = true),
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(HomeState())
@@ -49,20 +53,21 @@ class HomeViewModel @Inject constructor(
             _state.update { it.copy(isLoading = true, isError = false, battleState = DBBattleCardState.Loading) }
             
             val name = userRepository.getBattleName() ?: "Player"
+            val isProduction = environmentProvider.current == AppEnvironment.Production
             
             _state.update {
                 it.copy(
                     isLoading = false,
                     userName = name,
-                    momentumDays = 7, // Placeholder per SCR-003
+                    momentumDays = if (isProduction) 0 else 7, // Demo placeholder isolated from production per §65
                     battleState = DBBattleCardState.Ready,
                     challengesCount = 3,
                     estimatedMinutes = 3,
-                    hasRival = true, // Placeholder per SCR-003
-                    rivalName = "Rahul",
-                    rivalScore = 914,
-                    userScore = 901,
-                    pointsToCatch = 13
+                    hasRival = !isProduction, // Demo rival isolated from production per §65
+                    rivalName = if (isProduction) "" else "Rahul",
+                    rivalScore = if (isProduction) 0 else 914,
+                    userScore = if (isProduction) 0 else 901,
+                    pointsToCatch = if (isProduction) 0 else 13
                 )
             }
         }
