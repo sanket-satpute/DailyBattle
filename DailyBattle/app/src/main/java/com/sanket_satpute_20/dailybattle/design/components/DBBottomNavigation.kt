@@ -56,7 +56,7 @@ fun DBBottomNavigation(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .heightIn(min = 72.dp) // Per spec: 72-80px minimum touch height, expands with text scaling
+            .heightIn(min = 72.dp, max = 80.dp) // Per spec §32 & §94: 72–80px
             .background(DBColor.BackgroundPrimary)
             .drawBehind {
                 // Subtle top border

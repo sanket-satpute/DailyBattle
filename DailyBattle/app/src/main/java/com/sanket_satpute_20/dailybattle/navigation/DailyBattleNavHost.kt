@@ -11,9 +11,13 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.sanket_satpute_20.dailybattle.design.color.DBColor
 import com.sanket_satpute_20.dailybattle.design.typography.DBTypography
 import com.sanket_satpute_20.dailybattle.presentation.home.HomeRoute
+import com.sanket_satpute_20.dailybattle.presentation.snap.SnapViewModel
 import com.sanket_satpute_20.dailybattle.presentation.startup.BattleNameRoute
 import com.sanket_satpute_20.dailybattle.presentation.startup.StartupRoute
 import com.sanket_satpute_20.dailybattle.presentation.startup.WelcomeRoute
@@ -137,9 +141,11 @@ fun DailyBattleNavHost(
                 )
             }
             composable(AppRoute.Snap.route) {
+                val snapViewModel: SnapViewModel = hiltViewModel()
+                val snapUiState by snapViewModel.uiState.collectAsState()
                 com.sanket_satpute_20.dailybattle.presentation.snap.SnapScreen(
-                    uiState = com.sanket_satpute_20.dailybattle.presentation.snap.SnapUiState(),
-                    onElementTap = {},
+                    uiState = snapUiState,
+                    onElementTap = snapViewModel::onElementTapped,
                     onComplete = {
                         navController.navigate(AppRoute.Shift.route) {
                             popUpTo(AppRoute.Snap.route) { inclusive = true }

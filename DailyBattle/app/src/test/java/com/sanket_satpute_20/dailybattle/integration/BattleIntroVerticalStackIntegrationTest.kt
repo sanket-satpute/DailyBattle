@@ -122,7 +122,7 @@ class BattleIntroVerticalStackIntegrationTest {
         // 4. Verify UI Navigation Event emitted
         assertNotNull(receivedEvent)
         assertTrue(receivedEvent is BattleIntroEvent.NavigateToBattle)
-        assertEquals(AppRoute.BattleIntro.route, (receivedEvent as BattleIntroEvent.NavigateToBattle).targetRoute)
+        assertEquals(AppRoute.Snap.route, (receivedEvent as BattleIntroEvent.NavigateToBattle).targetRoute)
 
         eventJob.cancel()
     }

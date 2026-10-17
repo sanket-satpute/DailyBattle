@@ -62,7 +62,12 @@ class BattleIntroViewModel @Inject constructor(
                     activeBattleSessionManager.bindSession(session)
                     _state.update { it.copy(isLoading = false) }
                     val targetRoute = gameplayStateRestorer.determineRestoredRoute(session)
-                    _uiEvent.emit(BattleIntroEvent.NavigateToBattle(targetRoute))
+                    val destination = if (targetRoute == com.sanket_satpute_20.dailybattle.core.lifecycle.GameplayNavigationRoutes.BATTLE_INTRO) {
+                        AppRoute.Snap.route
+                    } else {
+                        targetRoute
+                    }
+                    _uiEvent.emit(BattleIntroEvent.NavigateToBattle(destination))
                 }
                 is DomainResult.Failure -> {
                     _state.update { 

@@ -13,6 +13,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -40,6 +41,11 @@ fun ResultsScreen(
     onShareClick: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    LaunchedEffect(Unit) {
+        if (uiState is ResultsUiState.Loading) {
+            viewModel.loadInitialResult()
+        }
+    }
     ResultsScreen(
         uiState = uiState,
         onBeatRivalClick = onBeatRivalClick,
