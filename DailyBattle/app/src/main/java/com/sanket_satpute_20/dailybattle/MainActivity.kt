@@ -47,7 +47,7 @@ class MainActivity : ComponentActivity() {
     }
 
     override fun onDestroy() {
-        if (::interactionFeedback.isInitialized) {
+        if (isFinishing && ::interactionFeedback.isInitialized) {
             interactionFeedback.release()
         }
         super.onDestroy()
