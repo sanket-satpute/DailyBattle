@@ -22,6 +22,8 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.runtime.setValue
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.sanket_satpute_20.dailybattle.core.feedback.InteractionFeedbackEvent
+import com.sanket_satpute_20.dailybattle.core.feedback.LocalInteractionFeedback
 import com.sanket_satpute_20.dailybattle.design.color.DBColor
 import com.sanket_satpute_20.dailybattle.design.components.DBButton
 import com.sanket_satpute_20.dailybattle.design.components.DBButtonType
@@ -100,6 +102,15 @@ private fun ResultsContent(
     onShareClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val feedback = LocalInteractionFeedback.current
+    LaunchedEffect(summary.result.totalScore, summary.isNewPersonalBest) {
+        feedback.emit(InteractionFeedbackEvent.SCORE_REVEAL)
+        if (summary.isNewPersonalBest) {
+            kotlinx.coroutines.delay(180)
+            feedback.emit(InteractionFeedbackEvent.PERSONAL_BEST)
+        }
+    }
+
     val isReducedMotion = com.sanket_satpute_20.dailybattle.design.animation.rememberIsReducedMotion()
     var showPercentile by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(isReducedMotion) }
     var showImprovement by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(isReducedMotion) }
