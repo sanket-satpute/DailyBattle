@@ -14,7 +14,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -25,6 +24,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
+import com.sanket_satpute_20.dailybattle.core.feedback.InteractionFeedbackEvent
+import com.sanket_satpute_20.dailybattle.core.feedback.LocalInteractionFeedback
 import com.sanket_satpute_20.dailybattle.design.color.DBColor
 import com.sanket_satpute_20.dailybattle.design.animation.pulse
 import com.sanket_satpute_20.dailybattle.design.animation.shake
@@ -106,27 +107,18 @@ fun SnapScreen(
 
         Spacer(modifier = Modifier.size(24.dp))
 
-        val haptic = LocalHapticFeedback.current
+        val feedback = LocalInteractionFeedback.current
 
         // Trigger haptics and sound hooks based on state changes
         LaunchedEffect(uiState.isCorrect) {
             if (uiState.isCorrect) {
-                // Short success sound hook (blocked by actual sound assets)
-                // SoundManager.playSound("success")
-                
-                // Light/success haptic
-                // Fallback to text handle move if platform doesn't map confirm well in standard set
-                haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.TextHandleMove) 
+                feedback.emit(InteractionFeedbackEvent.CORRECT) 
             }
         }
         
         LaunchedEffect(uiState.isIncorrect) {
             if (uiState.isIncorrect) {
-                // Short error sound hook (blocked by actual sound assets)
-                // SoundManager.playSound("error")
-                
-                // Short error haptic
-                haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
+                feedback.emit(InteractionFeedbackEvent.INCORRECT)
             }
         }
 
