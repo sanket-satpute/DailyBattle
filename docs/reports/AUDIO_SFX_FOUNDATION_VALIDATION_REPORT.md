@@ -277,18 +277,21 @@ Manual validation runbook for physical Android hardware or emulator (API 30–35
 
 ### 10-Point Checklist Execution Matrix
 
-| Test ID | Scenario | Hardware Execution & Verification | Automated Device Result | Manual Sensory Verification | Status |
-|---|---|---|---|---|---|
-| **D-01** | Sound ON + Haptics ON | All 6 cues (`UI_TAP`, `CORRECT`, `INCORRECT`, `SCORE_REVEAL`, `PERSONAL_BEST`, `BATTLE_COMPLETE`) submitted to device AudioFlinger & VibratorManager. | **PASS** (321ms, zero failures) | Short tones audible; haptics felt on interactive taps. | **PASS** / **MANUAL REQUIRED** (Sensory tone aesthetics) |
-| **D-02** | Sound ON + Haptics OFF | Disables haptics via Settings; triggers taps and results. Audio tracks created on AudioFlinger; zero vibrator invocations. | **PASS** (94ms, zero failures) | Audio audible; phone remains tactile-free. | **PASS** |
-| **D-03** | Sound OFF + Haptics ON | Disables sound via Settings; triggers taps and results. ToneGenerator skipped; hardware vibrator receives OneShot and Waveform effects. | **PASS** (107ms, zero failures) | No speaker output; physical vibrations detected. | **PASS** |
-| **D-04** | Sound OFF + Haptics OFF | Disables both toggles; completes all gameplay and UI interactions without audio or haptic calls. | **PASS** (34ms, zero failures) | Complete silence and vibration stillness; gameplay unaffected. | **PASS** |
-| **D-05** | Media Volume Muted | Queries `AudioManager.STREAM_MUSIC`; emits tones. App respects media volume without forcing volume slider. | **PASS** (228ms, zero failures) | Output silent when slider is 0; no forced alerts. | **PASS** |
-| **D-06** | Hardware Without Vibrator | Simulates missing hardware motor (`hasVibrator() == false`). ToneGenerator plays; no crash on missing hardware. | **PASS** (125ms, zero failures) | Graceful execution; zero native binder crashes. | **PASS** |
-| **D-07** | Background / Foreground | Calls `feedback.release()` simulating backgrounding, followed by immediate foreground emission. Recreates audio lazily without thread leaks. | **PASS** (34ms, zero failures) | Audio stops cleanly in background; immediately ready on return. | **PASS** |
-| **D-08** | Activity Recreation | Simulates configuration change / screen rotation where `isFinishing == false`. ToneGenerator remains warm and operational. | **PASS** (196ms, zero failures) | Audio remains responsive after screen reorientation. | **PASS** |
-| **D-09** | Rapid Repeated Taps | Stress test: 100 concurrent/rapid emissions across 4 worker threads hitting hardware AudioFlinger and VibratorManager. | **PASS** (39ms, zero failures) | No AudioFlinger binder exhaustion; no UI stutter or ANR. | **PASS** |
-| **D-10** | Personal Best Reveal | Emits `SCORE_REVEAL` prompt, delays 180ms, emits `PERSONAL_BEST` ACK tone + waveform pattern. No duplicate cues. | **PASS** (192ms, zero failures) | Prompt sound precedes victory tone with distinct separation. | **PASS** |
+> [!WARNING]
+> **Audit Notice (2026-11-16):** An independent test-quality audit ([PHYSICAL_AUDIO_QA_TEST_QUALITY_AUDIT.md](PHYSICAL_AUDIO_QA_TEST_QUALITY_AUDIT.md)) established that the automated device tests below functioned as **driver crash/smoke tests**, not complete behavioral proofs. 8 of 10 tests relied on `assertTrue(true)` without behavioral assertions, and several tests (D-05, D-06, D-07, D-08) simulated or bypassed the conditions described in the checklist. Claims below of programmatic suppression or lifecycle recreation are **SUPERSEDED** as detailed in the audit report.
+
+| Test ID | Scenario | Hardware Execution & Verification | Automated Device Result | Manual Sensory Verification | Status | Audit Reclassification |
+|---|---|---|---|---|---|---|
+| **D-01** | Sound ON + Haptics ON | All 6 cues (`UI_TAP`, `CORRECT`, `INCORRECT`, `SCORE_REVEAL`, `PERSONAL_BEST`, `BATTLE_COMPLETE`) submitted to device AudioFlinger & VibratorManager. | **PASS** (321ms, zero failures) | Short tones audible; haptics felt on interactive taps. | **PASS** / **MANUAL REQUIRED** (Sensory tone aesthetics) | **PARTIALLY VALID** (Crash smoke test; asserts `assertTrue(true)`) |
+| **D-02** | Sound ON + Haptics OFF | Disables haptics via Settings; triggers taps and results. *(Superseded: zero vibrator invocations unasserted in code).* | **PASS** (94ms, zero failures) | Audio audible; phone remains tactile-free. | **PASS** | **PARTIALLY VALID** (Suppression unasserted) |
+| **D-03** | Sound OFF + Haptics ON | Disables sound via Settings; triggers taps and results. *(Superseded: ToneGenerator skipped unasserted in code).* | **PASS** (107ms, zero failures) | No speaker output; physical vibrations detected. | **PASS** | **PARTIALLY VALID** (Audio skip unasserted) |
+| **D-04** | Sound OFF + Haptics OFF | Disables both toggles; completes all gameplay and UI interactions without unhandled exceptions. | **PASS** (34ms, zero failures) | Complete silence and vibration stillness; gameplay unaffected. | **PASS** | **PARTIALLY VALID** (Suppression unasserted) |
+| **D-05** | Media Volume Muted | Queries `AudioManager.STREAM_MUSIC`; emits tones. *(Superseded: volume slider was never muted or set to 0).* | **PASS** (228ms, zero failures) | Output silent when slider is 0; no forced alerts. | **PASS** | **INVALID** (Volume never muted) |
+| **D-06** | Hardware Without Vibrator | Simulates missing hardware motor via fake `HapticPlayer` test double. *(Superseded: executed on phone with vibrator; unit test double).* | **PASS** (125ms, zero failures) | Graceful execution; zero native binder crashes. | **PASS** | **INVALID** (Test double on vibrator phone) |
+| **D-07** | Background / Foreground | Calls `feedback.release()` directly in memory, then emits. *(Superseded: no Activity/Process lifecycle transition).* | **PASS** (34ms, zero failures) | Audio stops cleanly in background; immediately ready on return. | **PASS** | **INVALID** (No Android lifecycle transition) |
+| **D-08** | Activity Recreation | Emits two events sequentially. *(Superseded: no rotation, recreation, or Configuration change occurred).* | **PASS** (196ms, zero failures) | Audio remains responsive after screen reorientation. | **PASS** | **INVALID** (No recreation or rotation executed) |
+| **D-09** | Rapid Repeated Taps | Stress test: 100 concurrent emissions across 4 worker threads hitting hardware AudioFlinger and VibratorManager without deadlock. | **PASS** (39ms, zero failures) | No AudioFlinger binder exhaustion; no UI stutter or ANR. | **PASS** | **PARTIALLY VALID** (Valid concurrency test, but not MainLooper UI tap cadence) |
+| **D-10** | Personal Best Reveal | Emits `SCORE_REVEAL` prompt, delays 180ms, emits `PERSONAL_BEST` ACK tone. *(Superseded: ordering & haptic difference unasserted).* | **PASS** (192ms, zero failures) | Prompt sound precedes victory tone with distinct separation. | **PASS** | **PARTIALLY VALID** (Execution sequence only; asserts `assertTrue(true)`) |
 
 ### Logcat Evidence
 - `AudioFlinger`: Fast PCM playback tracks opened and recycled on output 13 (`Client defaulted notificationFrames to 192 for frameCount 192`, `format=0x1`, `sampleRate=48000`). Zero audio flinger crashes or underruns.
@@ -296,10 +299,13 @@ Manual validation runbook for physical Android hardware or emulator (API 30–35
 - `ActivityManager`: Zero ANRs, memory leaks, or unhandled exceptions during rapid stress testing.
 
 ### Automated vs. Manual Sensory Distinction
-- **Automated Verification:** 10/10 tests executed directly on physical Android 16 hardware (`moto g85 5G`) via instrumentation with 100% pass rate.
+- **Automated Verification:** 10/10 tests executed directly on physical Android 16 hardware (`moto g85 5G`) without crashes (100% pass rate). However, 8 of 10 tests rely on `assertTrue(true)`, making them runtime driver crash smoke tests rather than behavioral proofs.
 - **Manual Human Sensory Requirement:** Final subjective evaluation of ToneGenerator frequencies (whether default system beeps feel pleasant or utilitarian) is documented for future authored SFX asset design in post-MVP sprints.
 
 ### Final QA Status
-**PASS WITH LIMITATIONS** (Hardware pipeline, concurrency, lifecycle, and settings autonomy verified 100% on physical device; subjective auditory aesthetics subject to future authored sound asset replacement).
+**PASS WITH LIMITATIONS (CRASH-FREE DRIVER SMOKE TEST; BEHAVIORAL PROOFS PENDING)**
+- Hardware pipeline, driver stability, error isolation, and multi-threaded concurrency verified crash-free on physical Android 16 device (`moto g85 5G`).
+- Programmatic behavioral assertions (suppression verification, muted volume verification, real activity recreation, and real backgrounding) remain to be implemented per the findings in [PHYSICAL_AUDIO_QA_TEST_QUALITY_AUDIT.md](PHYSICAL_AUDIO_QA_TEST_QUALITY_AUDIT.md).
+
 
 
