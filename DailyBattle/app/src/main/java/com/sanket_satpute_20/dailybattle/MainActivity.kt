@@ -4,6 +4,9 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.runtime.CompositionLocalProvider
+import com.sanket_satpute_20.dailybattle.core.feedback.AndroidInteractionFeedback
+import com.sanket_satpute_20.dailybattle.core.feedback.LocalInteractionFeedback
 import com.sanket_satpute_20.dailybattle.core.lifecycle.AppLifecycleManager
 import com.sanket_satpute_20.dailybattle.core.lifecycle.BackgroundReason
 import com.sanket_satpute_20.dailybattle.core.performance.StartupPerformanceTracker
@@ -21,6 +24,9 @@ class MainActivity : ComponentActivity() {
     @Inject
     lateinit var startupPerformanceTracker: StartupPerformanceTracker
 
+    @Inject
+    lateinit var interactionFeedback: AndroidInteractionFeedback
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -33,9 +39,18 @@ class MainActivity : ComponentActivity() {
         }
         setContent {
             DailyBattleTheme {
-                DailyBattleApp()
+                CompositionLocalProvider(LocalInteractionFeedback provides interactionFeedback) {
+                    DailyBattleApp()
+                }
             }
         }
+    }
+
+    override fun onDestroy() {
+        if (::interactionFeedback.isInitialized) {
+            interactionFeedback.release()
+        }
+        super.onDestroy()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
