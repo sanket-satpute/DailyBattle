@@ -31,8 +31,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.isTraversalGroup
@@ -43,6 +41,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.sanket_satpute_20.dailybattle.core.feedback.InteractionFeedbackEvent
+import com.sanket_satpute_20.dailybattle.core.feedback.LocalInteractionFeedback
 import com.sanket_satpute_20.dailybattle.design.color.DBColor
 import com.sanket_satpute_20.dailybattle.domain.crowd.CrowdChoice
 import com.sanket_satpute_20.dailybattle.domain.crowd.CrowdDistribution
@@ -80,16 +80,12 @@ fun CrowdScreen(
     onAnswerSelected: (String) -> Unit,
     onComplete: () -> Unit
 ) {
-    val haptic = LocalHapticFeedback.current
+    val feedback = LocalInteractionFeedback.current
 
     // Feedback hooks (Sprint 10.4)
     LaunchedEffect(uiState.isResultRevealed) {
         if (uiState.isResultRevealed) {
-            // Sound hook
-            // SoundManager.playSound("reveal_distribution")
-            
-            // Haptic
-            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+            feedback.emit(InteractionFeedbackEvent.SCORE_REVEAL)
         }
     }
 
@@ -159,7 +155,10 @@ fun CrowdScreen(
                             .clickable(
                                 enabled = uiState.selectedChoiceId == null,
                                 role = Role.Button,
-                                onClick = { onAnswerSelected(choice.id) }
+                                onClick = {
+                                    feedback.emit(InteractionFeedbackEvent.UI_TAP)
+                                    onAnswerSelected(choice.id)
+                                }
                             )
                             .semantics {
                                 role = Role.Button
@@ -286,11 +285,9 @@ fun CrowdScreen(
                 LaunchedEffect(uiState.isCorrect) {
                     if (startAnimation) {
                         if (uiState.isCorrect) {
-                            // SoundManager.playSound("success")
-                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                            feedback.emit(InteractionFeedbackEvent.CORRECT)
                         } else {
-                            // SoundManager.playSound("error")
-                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            feedback.emit(InteractionFeedbackEvent.INCORRECT)
                         }
                     }
                 }
@@ -302,6 +299,7 @@ fun CrowdScreen(
         // Complete callback
         LaunchedEffect(uiState.isComplete) {
             if (uiState.isComplete) {
+                feedback.emit(InteractionFeedbackEvent.BATTLE_COMPLETE)
                 // Short completion feedback delay (as per 10_ANIMATION_HAPTICS.md)
                 kotlinx.coroutines.delay(2000)
                 onComplete()
