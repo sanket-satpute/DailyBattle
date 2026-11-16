@@ -24,7 +24,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.isTraversalGroup
@@ -32,6 +31,8 @@ import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.sanket_satpute_20.dailybattle.core.feedback.InteractionFeedbackEvent
+import com.sanket_satpute_20.dailybattle.core.feedback.LocalInteractionFeedback
 import com.sanket_satpute_20.dailybattle.design.animation.pulse
 import com.sanket_satpute_20.dailybattle.design.animation.shake
 import com.sanket_satpute_20.dailybattle.design.color.DBColor
@@ -120,26 +121,18 @@ fun ShiftScreen(
 
         Spacer(modifier = Modifier.size(24.dp))
 
-        val haptic = LocalHapticFeedback.current
+        val feedback = LocalInteractionFeedback.current
 
         // Feedback hooks (Sprint 9.3 stub)
         LaunchedEffect(uiState.isCorrect) {
             if (uiState.isCorrect) {
-                // Short success sound hook (blocked by actual sound assets)
-                // SoundManager.playSound("success")
-                
-                // Light/success haptic
-                haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.TextHandleMove)
+                feedback.emit(InteractionFeedbackEvent.CORRECT)
             }
         }
 
         LaunchedEffect(uiState.isIncorrect) {
             if (uiState.isIncorrect) {
-                // Short error sound hook (blocked by actual sound assets)
-                // SoundManager.playSound("error")
-                
-                // Short error haptic
-                haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
+                feedback.emit(InteractionFeedbackEvent.INCORRECT)
             }
         }
 
@@ -242,7 +235,10 @@ fun ShiftScreen(
                         .background(MaterialTheme.colorScheme.primaryContainer)
                         .clickable(
                             role = Role.Button,
-                            onClick = { onAnswerSelected(option) }
+                            onClick = {
+                                feedback.emit(InteractionFeedbackEvent.UI_TAP)
+                                onAnswerSelected(option)
+                            }
                         )
                         .semantics {
                             role = Role.Button
