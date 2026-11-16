@@ -82,13 +82,6 @@ fun CrowdScreen(
 ) {
     val feedback = LocalInteractionFeedback.current
 
-    // Feedback hooks (Sprint 10.4)
-    LaunchedEffect(uiState.isResultRevealed) {
-        if (uiState.isResultRevealed) {
-            feedback.emit(InteractionFeedbackEvent.SCORE_REVEAL)
-        }
-    }
-
     Column(
         modifier = Modifier
             .fillMaxSize()
