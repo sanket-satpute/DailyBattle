@@ -21,11 +21,16 @@ import java.util.concurrent.TimeUnit
 
 /**
  * Physical Android Device QA & Validation Suite for Centralized Interaction Feedback.
- * Executes on connected physical hardware (Motorola Moto G85 5G, Android 16 / API 36).
+ * Baseline executed on connected physical hardware (Motorola Moto G85 5G, Android 16 / API 36).
  *
- * Scoped Phase 1 improvements introduce [RecordingTonePlayer] and [RecordingHapticPlayer]
+ * Scoped Phase 1 / 1.1 hardening introduces [RecordingTonePlayer] and [RecordingHapticPlayer]
  * decorators to capture invocation arguments and establish deterministic behavioral assertions
  * for D-01, D-02, D-03, D-04, and D-10 while preserving full delegation to Android hardware.
+ *
+ * Telemetry Boundary:
+ * Recorded calls verify invocation requests dispatched to system delegates, capturing exact
+ * tone mappings, durations, haptic cues, waveforms, and programmatic suppression.
+ * Recorded timestamps verify request-dispatch sequencing, not acoustic completion in AudioFlinger.
  */
 @RunWith(AndroidJUnit4::class)
 class PhysicalAudioFeedbackDeviceTest {
@@ -87,50 +92,52 @@ class PhysicalAudioFeedbackDeviceTest {
 
         // 1. Assert exactly 6 tone requests with correct parameters
         val toneCalls = recordingTonePlayer.recordedCalls
-        assertEquals(6, toneCalls.size)
+        assertEquals("Expected exactly 6 tone requests for 6 interaction events", 6, toneCalls.size)
 
-        assertEquals(ToneGenerator.TONE_PROP_BEEP, toneCalls[0].toneType)
-        assertEquals(35, toneCalls[0].durationMs)
+        assertEquals("Event 0 (UI_TAP) must request TONE_PROP_BEEP", ToneGenerator.TONE_PROP_BEEP, toneCalls[0].toneType)
+        assertEquals("Event 0 (UI_TAP) tone duration must be 35ms", 35, toneCalls[0].durationMs)
 
-        assertEquals(ToneGenerator.TONE_PROP_ACK, toneCalls[1].toneType)
-        assertEquals(75, toneCalls[1].durationMs)
+        assertEquals("Event 1 (CORRECT) must request TONE_PROP_ACK", ToneGenerator.TONE_PROP_ACK, toneCalls[1].toneType)
+        assertEquals("Event 1 (CORRECT) tone duration must be 75ms", 75, toneCalls[1].durationMs)
 
-        assertEquals(ToneGenerator.TONE_PROP_NACK, toneCalls[2].toneType)
-        assertEquals(95, toneCalls[2].durationMs)
+        assertEquals("Event 2 (INCORRECT) must request TONE_PROP_NACK", ToneGenerator.TONE_PROP_NACK, toneCalls[2].toneType)
+        assertEquals("Event 2 (INCORRECT) tone duration must be 95ms", 95, toneCalls[2].durationMs)
 
-        assertEquals(ToneGenerator.TONE_PROP_PROMPT, toneCalls[3].toneType)
-        assertEquals(110, toneCalls[3].durationMs)
+        assertEquals("Event 3 (SCORE_REVEAL) must request TONE_PROP_PROMPT", ToneGenerator.TONE_PROP_PROMPT, toneCalls[3].toneType)
+        assertEquals("Event 3 (SCORE_REVEAL) tone duration must be 110ms", 110, toneCalls[3].durationMs)
 
-        assertEquals(ToneGenerator.TONE_PROP_ACK, toneCalls[4].toneType)
-        assertEquals(150, toneCalls[4].durationMs)
+        assertEquals("Event 4 (PERSONAL_BEST) must request TONE_PROP_ACK", ToneGenerator.TONE_PROP_ACK, toneCalls[4].toneType)
+        assertEquals("Event 4 (PERSONAL_BEST) tone duration must be 150ms", 150, toneCalls[4].durationMs)
 
-        assertEquals(ToneGenerator.TONE_PROP_PROMPT, toneCalls[5].toneType)
-        assertEquals(130, toneCalls[5].durationMs)
+        assertEquals("Event 5 (BATTLE_COMPLETE) must request TONE_PROP_PROMPT", ToneGenerator.TONE_PROP_PROMPT, toneCalls[5].toneType)
+        assertEquals("Event 5 (BATTLE_COMPLETE) tone duration must be 130ms", 130, toneCalls[5].durationMs)
 
         // 2. Assert exactly 5 haptic requests (SCORE_REVEAL intentionally has no haptic cue)
         val hapticCalls = recordingHapticPlayer.recordedCalls
-        assertEquals(5, hapticCalls.size)
+        assertEquals("Expected exactly 5 haptic requests because SCORE_REVEAL omits haptics", 5, hapticCalls.size)
 
         // UI_TAP -> OneShot(12, 35)
-        assertEquals(HapticCue.OneShot(12L, 35), hapticCalls[0].cue)
+        assertEquals("Event 0 (UI_TAP) haptic cue must match OneShot(12, 35)", HapticCue.OneShot(12L, 35), hapticCalls[0].cue)
 
         // CORRECT -> OneShot(24, 80)
-        assertEquals(HapticCue.OneShot(24L, 80), hapticCalls[1].cue)
+        assertEquals("Event 1 (CORRECT) haptic cue must match OneShot(24, 80)", HapticCue.OneShot(24L, 80), hapticCalls[1].cue)
 
         // INCORRECT -> Waveform([0, 18, 28, 18], [0, 65, 0, 65], -1)
+        assertTrue("Event 2 (INCORRECT) haptic cue must be Waveform", hapticCalls[2].cue is HapticCue.Waveform)
         val incorrectCue = hapticCalls[2].cue as HapticCue.Waveform
-        assertTrue(longArrayOf(0, 18, 28, 18).contentEquals(incorrectCue.timings))
-        assertTrue(intArrayOf(0, 65, 0, 65).contentEquals(incorrectCue.amplitudes))
-        assertEquals(-1, incorrectCue.repeat)
+        assertTrue("INCORRECT timings must match [0, 18, 28, 18]", longArrayOf(0, 18, 28, 18).contentEquals(incorrectCue.timings))
+        assertTrue("INCORRECT amplitudes must match [0, 65, 0, 65]", intArrayOf(0, 65, 0, 65).contentEquals(incorrectCue.amplitudes))
+        assertEquals("INCORRECT repeat must be -1 (non-repeating)", -1, incorrectCue.repeat)
 
         // PERSONAL_BEST -> Waveform([0, 28, 35, 45], [0, 75, 0, 110], -1)
+        assertTrue("Event 4 (PERSONAL_BEST) haptic cue must be Waveform", hapticCalls[3].cue is HapticCue.Waveform)
         val pbCue = hapticCalls[3].cue as HapticCue.Waveform
-        assertTrue(longArrayOf(0, 28, 35, 45).contentEquals(pbCue.timings))
-        assertTrue(intArrayOf(0, 75, 0, 110).contentEquals(pbCue.amplitudes))
-        assertEquals(-1, pbCue.repeat)
+        assertTrue("PERSONAL_BEST timings must match [0, 28, 35, 45]", longArrayOf(0, 28, 35, 45).contentEquals(pbCue.timings))
+        assertTrue("PERSONAL_BEST amplitudes must match [0, 75, 0, 110]", intArrayOf(0, 75, 0, 110).contentEquals(pbCue.amplitudes))
+        assertEquals("PERSONAL_BEST repeat must be -1 (non-repeating)", -1, pbCue.repeat)
 
         // BATTLE_COMPLETE -> OneShot(38, 90)
-        assertEquals(HapticCue.OneShot(38L, 90), hapticCalls[4].cue)
+        assertEquals("Event 5 (BATTLE_COMPLETE) haptic cue must match OneShot(38, 90)", HapticCue.OneShot(38L, 90), hapticCalls[4].cue)
     }
 
     /**
@@ -149,18 +156,17 @@ class PhysicalAudioFeedbackDeviceTest {
 
         // Assert exactly 3 tone requests with correct arguments
         val toneCalls = recordingTonePlayer.recordedCalls
-        assertEquals(3, toneCalls.size)
-        assertEquals(ToneGenerator.TONE_PROP_BEEP, toneCalls[0].toneType)
-        assertEquals(35, toneCalls[0].durationMs)
-        assertEquals(ToneGenerator.TONE_PROP_ACK, toneCalls[1].toneType)
-        assertEquals(75, toneCalls[1].durationMs)
-        assertEquals(ToneGenerator.TONE_PROP_NACK, toneCalls[2].toneType)
-        assertEquals(95, toneCalls[2].durationMs)
+        assertEquals("Expected exactly 3 tone requests when sound is enabled", 3, toneCalls.size)
+        assertEquals("UI_TAP must request TONE_PROP_BEEP", ToneGenerator.TONE_PROP_BEEP, toneCalls[0].toneType)
+        assertEquals("UI_TAP tone duration must be 35ms", 35, toneCalls[0].durationMs)
+        assertEquals("CORRECT must request TONE_PROP_ACK", ToneGenerator.TONE_PROP_ACK, toneCalls[1].toneType)
+        assertEquals("CORRECT tone duration must be 75ms", 75, toneCalls[1].durationMs)
+        assertEquals("INCORRECT must request TONE_PROP_NACK", ToneGenerator.TONE_PROP_NACK, toneCalls[2].toneType)
+        assertEquals("INCORRECT tone duration must be 95ms", 95, toneCalls[2].durationMs)
 
-        // Assert zero haptic requests
+        // Assert zero haptic requests (redundant pair removed)
         val hapticCalls = recordingHapticPlayer.recordedCalls
-        assertTrue("Haptics must be completely suppressed when hapticsEnabled is false", hapticCalls.isEmpty())
-        assertEquals(0, hapticCalls.size)
+        assertEquals("Haptics must be completely suppressed (0 calls) when hapticsEnabled is false", 0, hapticCalls.size)
     }
 
     /**
@@ -177,21 +183,21 @@ class PhysicalAudioFeedbackDeviceTest {
         feedback.emit(InteractionFeedbackEvent.PERSONAL_BEST)
         delay(150)
 
-        // Assert zero tone requests
+        // Assert zero tone requests (redundant pair removed)
         val toneCalls = recordingTonePlayer.recordedCalls
-        assertTrue("Tone playback must be completely suppressed when soundEnabled is false", toneCalls.isEmpty())
-        assertEquals(0, toneCalls.size)
+        assertEquals("Tone playback must be completely suppressed (0 calls) when soundEnabled is false", 0, toneCalls.size)
 
         // Assert exactly 3 haptic requests with correct cue arguments
         val hapticCalls = recordingHapticPlayer.recordedCalls
-        assertEquals(3, hapticCalls.size)
-        assertEquals(HapticCue.OneShot(12L, 35), hapticCalls[0].cue)
-        assertEquals(HapticCue.OneShot(24L, 80), hapticCalls[1].cue)
+        assertEquals("Expected exactly 3 haptic requests when haptics are enabled", 3, hapticCalls.size)
+        assertEquals("UI_TAP haptic cue must match OneShot(12, 35)", HapticCue.OneShot(12L, 35), hapticCalls[0].cue)
+        assertEquals("CORRECT haptic cue must match OneShot(24, 80)", HapticCue.OneShot(24L, 80), hapticCalls[1].cue)
 
+        assertTrue("PERSONAL_BEST cue must be a Waveform", hapticCalls[2].cue is HapticCue.Waveform)
         val pbCue = hapticCalls[2].cue as HapticCue.Waveform
-        assertTrue(longArrayOf(0, 28, 35, 45).contentEquals(pbCue.timings))
-        assertTrue(intArrayOf(0, 75, 0, 110).contentEquals(pbCue.amplitudes))
-        assertEquals(-1, pbCue.repeat)
+        assertTrue("PERSONAL_BEST timings must match [0, 28, 35, 45]", longArrayOf(0, 28, 35, 45).contentEquals(pbCue.timings))
+        assertTrue("PERSONAL_BEST amplitudes must match [0, 75, 0, 110]", intArrayOf(0, 75, 0, 110).contentEquals(pbCue.amplitudes))
+        assertEquals("PERSONAL_BEST repeat must be -1 (non-repeating)", -1, pbCue.repeat)
     }
 
     /**
@@ -207,14 +213,12 @@ class PhysicalAudioFeedbackDeviceTest {
             feedback.emit(event)
         }
 
-        // Assert zero tone requests and zero haptic requests
+        // Assert zero tone requests and zero haptic requests (redundant pairs removed)
         val toneCalls = recordingTonePlayer.recordedCalls
-        assertTrue("All tones must be suppressed when soundEnabled is false", toneCalls.isEmpty())
-        assertEquals(0, toneCalls.size)
+        assertEquals("All tones must be suppressed (0 calls) when soundEnabled is false", 0, toneCalls.size)
 
         val hapticCalls = recordingHapticPlayer.recordedCalls
-        assertTrue("All haptics must be suppressed when hapticsEnabled is false", hapticCalls.isEmpty())
-        assertEquals(0, hapticCalls.size)
+        assertEquals("All haptics must be suppressed (0 calls) when hapticsEnabled is false", 0, hapticCalls.size)
     }
 
     /**
@@ -330,6 +334,10 @@ class PhysicalAudioFeedbackDeviceTest {
     /**
      * D-10: Personal Best Reveal Timing Sequence
      * Verifies the exact ResultsScreen sequence: SCORE_REVEAL -> 180ms delay -> PERSONAL_BEST.
+     *
+     * Telemetry Note:
+     * D-10 timestamps establish request-dispatch ordering to the framework delegate,
+     * NOT acoustic playback completion ordering in AudioFlinger or physical tactile perception.
      */
     @Test
     fun d10_personalBestReveal_sequencingAndTiming() = runBlocking {
@@ -344,34 +352,35 @@ class PhysicalAudioFeedbackDeviceTest {
 
         // 1. Assert exactly 2 tone requests in correct chronological sequence
         val toneCalls = recordingTonePlayer.recordedCalls
-        assertEquals(2, toneCalls.size)
+        assertEquals("Expected exactly 2 tone dispatch requests for Personal Best sequence", 2, toneCalls.size)
 
         // Call 0: SCORE_REVEAL tone
-        assertEquals(ToneGenerator.TONE_PROP_PROMPT, toneCalls[0].toneType)
-        assertEquals(110, toneCalls[0].durationMs)
+        assertEquals("Call 0 must request SCORE_REVEAL (TONE_PROP_PROMPT)", ToneGenerator.TONE_PROP_PROMPT, toneCalls[0].toneType)
+        assertEquals("SCORE_REVEAL tone duration must be 110ms", 110, toneCalls[0].durationMs)
 
         // Call 1: PERSONAL_BEST tone
-        assertEquals(ToneGenerator.TONE_PROP_ACK, toneCalls[1].toneType)
-        assertEquals(150, toneCalls[1].durationMs)
+        assertEquals("Call 1 must request PERSONAL_BEST (TONE_PROP_ACK)", ToneGenerator.TONE_PROP_ACK, toneCalls[1].toneType)
+        assertEquals("PERSONAL_BEST tone duration must be 150ms", 150, toneCalls[1].durationMs)
 
         // Deterministic sequence verification: SCORE_REVEAL requested strictly before PERSONAL_BEST
         assertTrue(
-            "SCORE_REVEAL tone request must precede PERSONAL_BEST tone request",
+            "SCORE_REVEAL tone request dispatch must precede PERSONAL_BEST tone request dispatch",
             toneCalls[0].timestampNs < toneCalls[1].timestampNs
         )
 
         // 2. Assert exactly 1 haptic request (SCORE_REVEAL emits no haptic; PERSONAL_BEST emits Waveform)
         val hapticCalls = recordingHapticPlayer.recordedCalls
-        assertEquals(1, hapticCalls.size)
+        assertEquals("Expected exactly 1 haptic request because SCORE_REVEAL omits haptics", 1, hapticCalls.size)
 
+        assertTrue("PERSONAL_BEST haptic cue must be Waveform", hapticCalls[0].cue is HapticCue.Waveform)
         val pbHaptic = hapticCalls[0].cue as HapticCue.Waveform
-        assertTrue(longArrayOf(0, 28, 35, 45).contentEquals(pbHaptic.timings))
-        assertTrue(intArrayOf(0, 75, 0, 110).contentEquals(pbHaptic.amplitudes))
-        assertEquals(-1, pbHaptic.repeat)
+        assertTrue("PERSONAL_BEST timings must match [0, 28, 35, 45]", longArrayOf(0, 28, 35, 45).contentEquals(pbHaptic.timings))
+        assertTrue("PERSONAL_BEST amplitudes must match [0, 75, 0, 110]", intArrayOf(0, 75, 0, 110).contentEquals(pbHaptic.amplitudes))
+        assertEquals("PERSONAL_BEST repeat must be -1 (non-repeating)", -1, pbHaptic.repeat)
 
-        // SCORE_REVEAL tone must precede victory haptic dispatch
+        // SCORE_REVEAL tone request must precede victory haptic request dispatch
         assertTrue(
-            "SCORE_REVEAL tone must precede victory haptic dispatch",
+            "SCORE_REVEAL tone request dispatch must precede victory haptic request dispatch",
             toneCalls[0].timestampNs < hapticCalls[0].timestampNs
         )
     }

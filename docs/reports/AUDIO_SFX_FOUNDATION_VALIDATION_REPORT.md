@@ -303,9 +303,17 @@ Manual validation runbook for physical Android hardware or emulator (API 30–35
 - **Manual Human Sensory Requirement:** Final subjective evaluation of ToneGenerator frequencies (whether default system beeps feel pleasant or utilitarian) is documented for future authored SFX asset design in post-MVP sprints.
 
 ### Final QA Status
-**PASS WITH LIMITATIONS (CRASH-FREE DRIVER SMOKE TEST; BEHAVIORAL PROOFS PENDING)**
-- Hardware pipeline, driver stability, error isolation, and multi-threaded concurrency verified crash-free on physical Android 16 device (`moto g85 5G`).
-- Programmatic behavioral assertions for D-01, D-02, D-03, D-04, and D-10 completed in Phase 1 via recording decorators ([PHYSICAL_AUDIO_QA_PHASE1_VALIDATION.md](PHYSICAL_AUDIO_QA_PHASE1_VALIDATION.md)).
+**PASS WITH LIMITATIONS (CRASH-FREE DRIVER SMOKE TEST; PHASE 1 & 1.1 BEHAVIORAL HARDENING COMPLETE)**
+- Hardware pipeline, driver stability, error isolation, and multi-threaded concurrency verified crash-free on physical Android 16 device (`moto g85 5G`) in baseline commit `37a699c`.
+- **Phase 1 & Phase 1.1 Hardening (2026-11-17):**
+  - Behavioral assertions implemented for D-01, D-02, D-03, D-04, and D-10 via recording decorators ([RecordingFeedbackPlayers.kt](file:///DailyBattle/app/src/androidTest/java/com/sanket_satpute_20/dailybattle/core/feedback/RecordingFeedbackPlayers.kt)).
+  - Decorator hardened with `AtomicInteger` release counts, defensive array copying for `HapticCue.Waveform`, and snapshot immutability.
+  - Redundant assertion pairs removed; diagnostic failure messages added.
+  - Telemetry boundary strictly documented: recorded calls capture framework delegate invocation requests and dispatch sequencing, not acoustic playback completion in AudioFlinger.
+  - Dedicated decorator test suite added: [RecordingFeedbackPlayersTest.kt](file:///DailyBattle/app/src/androidTest/java/com/sanket_satpute_20/dailybattle/core/feedback/RecordingFeedbackPlayersTest.kt).
+  - Validation: `compileDebugAndroidTestKotlin` SUCCESS (16s), `AndroidInteractionFeedbackTest` 17/17 passed in 2m 19s, `assembleDebug` SUCCESS (8s).
+  - On-device instrumentation for Phase 1 / 1.1 suite is **NOT EXECUTED** due to physical device disconnection; historical commit `37a699c` physical execution remains distinguishable.
+  - See full reports: [PHYSICAL_AUDIO_QA_PHASE1_VALIDATION.md](file:///docs/reports/PHYSICAL_AUDIO_QA_PHASE1_VALIDATION.md) and [PHYSICAL_AUDIO_QA_TEST_QUALITY_AUDIT.md](file:///docs/reports/PHYSICAL_AUDIO_QA_TEST_QUALITY_AUDIT.md).
 - Muted volume verification (D-05), physical vibrator absence (D-06), and real lifecycle transitions (D-07, D-08) remain scheduled for subsequent phases.
 
 

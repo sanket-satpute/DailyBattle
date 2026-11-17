@@ -391,16 +391,64 @@ While the production code itself is well-architected (with thread-safety, error 
 
 ## 10. Phase 1 Implementation & Resolution Status (2026-11-17)
 
-Per the recommendations in Section 7, Phase 1 has been executed:
+Per the recommendations in Section 7, Phase 1 was executed:
 - **Recording Decorator Harness Added:** [RecordingFeedbackPlayers.kt](file:///DailyBattle/app/src/androidTest/java/com/sanket_satpute_20/dailybattle/core/feedback/RecordingFeedbackPlayers.kt) introduces `RecordingTonePlayer` and `RecordingHapticPlayer` with full Android framework delegation.
 - **Tautological Assertions Removed:** Tests D-01, D-02, D-03, D-04, and D-10 now contain strict programmatic assertions for tone types, durations, haptic cues, waveforms, and channel suppression.
 - **Validation Report:** Detailed execution findings documented in [PHYSICAL_AUDIO_QA_PHASE1_VALIDATION.md](file:///docs/reports/PHYSICAL_AUDIO_QA_PHASE1_VALIDATION.md).
-- **Status of Scoped Tests:**
-  - D-01: **VALIDATED BEHAVIORALLY**
-  - D-02: **VALIDATED BEHAVIORALLY**
-  - D-03: **VALIDATED BEHAVIORALLY**
-  - D-04: **VALIDATED BEHAVIORALLY**
-  - D-10: **VALIDATED BEHAVIORALLY**
-  - D-05, D-06, D-07, D-08, D-09: Unchanged (deferred to subsequent phases).
+
+---
+
+## 11. Phase 1.1 Hardening & Recording Integrity Resolution (2026-11-17)
+
+Following an audit of the Phase 1 decorator implementation, Phase 1.1 hardens the test harness and corrects verification nomenclature:
+
+1. **Recording Semantics Clarification:**
+   - KDoc and test documentation now explicitly define recorded calls as **framework delegate invocation requests**, not proofs of acoustic playback completion in AudioFlinger or physical tactile motor response.
+   - The underlying system delegates (`SystemTonePlayer`, `SystemHapticPlayer`) wrap asynchronous Android system services (`ToneGenerator.startTone()` and `Vibrator.vibrate()`), which return `Unit` (no synchronous return value indicating physical completion).
+   - Synchronous exception propagation is preserved: decorators do not catch exceptions from delegates.
+
+2. **Thread-Safe Release Counter:**
+   - Replaced non-atomic `@Volatile var releaseCount: Int` with `AtomicInteger(0)`.
+   - Read-only property `val releaseCount: Int get() = _releaseCount.get()` exposed.
+   - Atomic increments via `_releaseCount.incrementAndGet()` under concurrency; thread-safe resets in `clear()`.
+
+3. **Defensive Waveform Array Isolation:**
+   - `RecordingHapticPlayer.vibrate()` defensively clones mutable `timings` and `amplitudes` arrays when recording `HapticCue.Waveform` instances.
+   - Subsequent mutations by callers or test harnesses cannot alter historical recorded telemetry.
+
+4. **Snapshot Immutability:**
+   - `recordedCalls` returns an immutable list snapshot via `.toList()`.
+   - Validated that subsequent player emissions or `clear()` calls do not affect previously returned snapshots.
+
+5. **Assertion Quality & Diagnostic Cleanup:**
+   - Removed redundant assertion pairs in D-02, D-03, and D-04 (e.g., removing `assertTrue(isEmpty())` when followed by `assertEquals(0, size)`).
+   - Replaced with single `assertEquals("...", 0, size)` with informative failure messages.
+   - Added informative diagnostic failure messages across all assertions in D-01, D-02, D-03, D-04, and D-10.
+   - Clarified in D-10 code and comments that timestamps establish request-dispatch ordering to the framework delegate, NOT acoustic playback completion ordering in AudioFlinger.
+
+6. **Dedicated Decorator Test Suite:**
+   - Created [RecordingFeedbackPlayersTest.kt](file:///DailyBattle/app/src/androidTest/java/com/sanket_satpute_20/dailybattle/core/feedback/RecordingFeedbackPlayersTest.kt) with 6 focused tests:
+     - Argument recording and framework delegation.
+     - Thread-safe `releaseCount` under 10 concurrent worker threads.
+     - Defensive array copying for `HapticCue.Waveform`.
+     - Snapshot immutability after `clear()`.
+     - Delegate exception propagation.
+
+7. **Verification Nomenclature Enforcement:**
+   - **Compiled:** SUCCESS (`compileDebugAndroidTestKotlin` passed in 16s).
+   - **JVM unit tested:** SUCCESS (`AndroidInteractionFeedbackTest` 17/17 passed in 2m 19s).
+   - **Instrumentation executed:** NOT EXECUTED (No hardware device attached via ADB; zero devices).
+   - **Framework delegate invoked:** PROVEN PROGRAMMATICALLY (Verified via decorator suite).
+   - **Physical sensory verification:** UNVERIFIED IN THIS SESSION (Requires connected hardware and human evaluation).
+   - Historical commit `37a699c` physical device execution remains distinguishable as a driver crash smoke test on `moto g85 5G`.
+
+8. **Status of Scoped Tests:**
+   - D-01: **ASSERTIONS STRENGTHENED & HARDENED** (Invocation request parameters verified)
+   - D-02: **ASSERTIONS STRENGTHENED & HARDENED** (Audio request verified; haptic suppression verified)
+   - D-03: **ASSERTIONS STRENGTHENED & HARDENED** (Audio suppression verified; haptic request verified)
+   - D-04: **ASSERTIONS STRENGTHENED & HARDENED** (Audio and haptic suppression verified)
+   - D-10: **ASSERTIONS STRENGTHENED & HARDENED** (Request-dispatch sequencing verified)
+   - D-05, D-06, D-07, D-08, D-09: Unchanged (deferred to subsequent phases).
+
 
 
