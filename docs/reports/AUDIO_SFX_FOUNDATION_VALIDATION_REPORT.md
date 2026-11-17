@@ -305,7 +305,8 @@ Manual validation runbook for physical Android hardware or emulator (API 30–35
 ### Final QA Status
 **PASS WITH LIMITATIONS (CRASH-FREE DRIVER SMOKE TEST; BEHAVIORAL PROOFS PENDING)**
 - Hardware pipeline, driver stability, error isolation, and multi-threaded concurrency verified crash-free on physical Android 16 device (`moto g85 5G`).
-- Programmatic behavioral assertions (suppression verification, muted volume verification, real activity recreation, and real backgrounding) remain to be implemented per the findings in [PHYSICAL_AUDIO_QA_TEST_QUALITY_AUDIT.md](PHYSICAL_AUDIO_QA_TEST_QUALITY_AUDIT.md).
+- Programmatic behavioral assertions for D-01, D-02, D-03, D-04, and D-10 completed in Phase 1 via recording decorators ([PHYSICAL_AUDIO_QA_PHASE1_VALIDATION.md](PHYSICAL_AUDIO_QA_PHASE1_VALIDATION.md)).
+- Muted volume verification (D-05), physical vibrator absence (D-06), and real lifecycle transitions (D-07, D-08) remain scheduled for subsequent phases.
 
 
 
