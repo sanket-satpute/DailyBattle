@@ -303,16 +303,21 @@ Manual validation runbook for physical Android hardware or emulator (API 30–35
 - **Manual Human Sensory Requirement:** Final subjective evaluation of ToneGenerator frequencies (whether default system beeps feel pleasant or utilitarian) is documented for future authored SFX asset design in post-MVP sprints.
 
 ### Final QA Status
-**PASS WITH LIMITATIONS (CRASH-FREE DRIVER SMOKE TEST; PHASE 1 & 1.1 BEHAVIORAL HARDENING COMPLETE)**
+**PASS WITH LIMITATIONS (CRASH-FREE DRIVER SMOKE TEST; PHASE 1, 1.1 & 1.1.1 COMPLETE)**
 - Hardware pipeline, driver stability, error isolation, and multi-threaded concurrency verified crash-free on physical Android 16 device (`moto g85 5G`) in baseline commit `37a699c`.
-- **Phase 1 & Phase 1.1 Hardening (2026-11-17):**
+- **Phase 1 & 1.1 Hardening (Commits `fdb4878` & `4fe0f0d`):**
   - Behavioral assertions implemented for D-01, D-02, D-03, D-04, and D-10 via recording decorators ([RecordingFeedbackPlayers.kt](file:///DailyBattle/app/src/androidTest/java/com/sanket_satpute_20/dailybattle/core/feedback/RecordingFeedbackPlayers.kt)).
-  - Decorator hardened with `AtomicInteger` release counts, defensive array copying for `HapticCue.Waveform`, and snapshot immutability.
-  - Redundant assertion pairs removed; diagnostic failure messages added.
-  - Telemetry boundary strictly documented: recorded calls capture framework delegate invocation requests and dispatch sequencing, not acoustic playback completion in AudioFlinger.
-  - Dedicated decorator test suite added: [RecordingFeedbackPlayersTest.kt](file:///DailyBattle/app/src/androidTest/java/com/sanket_satpute_20/dailybattle/core/feedback/RecordingFeedbackPlayersTest.kt).
-  - Validation: `compileDebugAndroidTestKotlin` SUCCESS (16s), `AndroidInteractionFeedbackTest` 17/17 passed in 2m 19s, `assembleDebug` SUCCESS (8s).
-  - On-device instrumentation for Phase 1 / 1.1 suite is **NOT EXECUTED** due to physical device disconnection; historical commit `37a699c` physical execution remains distinguishable.
+  - Decorator hardened with `AtomicInteger` release counts and redundant assertions removed.
+- **Phase 1.1.1 Waveform Immutability & Hardware Execution (2026-11-17):**
+  - Resolved deep snapshot immutability for `HapticCue.Waveform` in `RecordedHapticCall`: input arrays are cloned at recording time, and defensive copies are returned whenever `call.cue` is accessed, preventing caller and consumer array mutations from altering historical records.
+  - Verified delegate arguments fidelity: `RecordingHapticPlayer.vibrate(cue)` forwards exact original instance and arrays to delegate.
+  - Dedicated decorator test suite expanded to 8 tests in [RecordingFeedbackPlayersTest.kt](file:///DailyBattle/app/src/androidTest/java/com/sanket_satpute_20/dailybattle/core/feedback/RecordingFeedbackPlayersTest.kt).
+  - **Physical Device Instrumentation Execution (`moto g85 5G - 16`):**
+    - `RecordingFeedbackPlayersTest`: **8/8 PASSED** in 0.435s (`Instrumentation executed` / `Fake delegate verified`).
+    - `PhysicalAudioFeedbackDeviceTest`: **10/10 PASSED** in 2.301s (`Instrumentation executed` / `Framework invocation recorded`).
+  - **JVM Unit Test Execution:**
+    - `AndroidInteractionFeedbackTest`: **17/17 PASSED** in 1.206s (`JVM unit tested`).
+  - **Build Status:** `compileDebugAndroidTestKotlin` and `assembleDebug` SUCCESS.
   - See full reports: [PHYSICAL_AUDIO_QA_PHASE1_VALIDATION.md](file:///docs/reports/PHYSICAL_AUDIO_QA_PHASE1_VALIDATION.md) and [PHYSICAL_AUDIO_QA_TEST_QUALITY_AUDIT.md](file:///docs/reports/PHYSICAL_AUDIO_QA_TEST_QUALITY_AUDIT.md).
 - Muted volume verification (D-05), physical vibrator absence (D-06), and real lifecycle transitions (D-07, D-08) remain scheduled for subsequent phases.
 

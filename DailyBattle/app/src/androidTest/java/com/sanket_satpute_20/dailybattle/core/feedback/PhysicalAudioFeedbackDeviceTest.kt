@@ -23,14 +23,16 @@ import java.util.concurrent.TimeUnit
  * Physical Android Device QA & Validation Suite for Centralized Interaction Feedback.
  * Baseline executed on connected physical hardware (Motorola Moto G85 5G, Android 16 / API 36).
  *
- * Scoped Phase 1 / 1.1 hardening introduces [RecordingTonePlayer] and [RecordingHapticPlayer]
+ * Scoped Phase 1 / 1.1 / 1.1.1 hardening introduces [RecordingTonePlayer] and [RecordingHapticPlayer]
  * decorators to capture invocation arguments and establish deterministic behavioral assertions
  * for D-01, D-02, D-03, D-04, and D-10 while preserving full delegation to Android hardware.
  *
+ * Verification Level: Framework invocation recorded (with underlying Android hardware delegation).
  * Telemetry Boundary:
- * Recorded calls verify invocation requests dispatched to system delegates, capturing exact
- * tone mappings, durations, haptic cues, waveforms, and programmatic suppression.
- * Recorded timestamps verify request-dispatch sequencing, not acoustic completion in AudioFlinger.
+ * - Recorded calls verify invocation requests dispatched to system delegates, capturing exact
+ *   tone mappings, durations, haptic cues, waveforms, and programmatic suppression.
+ * - Recorded timestamps verify request-dispatch sequencing, NOT acoustic playback completion
+ *   in AudioFlinger or physical sensory verification.
  */
 @RunWith(AndroidJUnit4::class)
 class PhysicalAudioFeedbackDeviceTest {

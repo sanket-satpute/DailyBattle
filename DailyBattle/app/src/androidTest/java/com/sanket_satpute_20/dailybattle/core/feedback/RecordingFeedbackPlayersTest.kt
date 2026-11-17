@@ -13,12 +13,16 @@ import java.util.concurrent.TimeUnit
 /**
  * Focused verification test suite for recording decorators ([RecordingTonePlayer] and [RecordingHapticPlayer]).
  *
+ * Verification Level: Fake delegate verified.
+ *
  * Verifies:
  * 1. Invocation argument recording and framework delegation.
  * 2. Atomic concurrent release counter increments and safe reset.
  * 3. Defensive cloning of [HapticCue.Waveform] arrays against post-recording caller mutations.
- * 4. Snapshot immutability of returned recorded call lists.
- * 5. Transparent exception propagation from underlying delegates.
+ * 4. Deep immutability of exposed [RecordedHapticCall.cue] snapshots against consumer array mutations.
+ * 5. Preservation of original cue instance and arguments forwarded to delegate.
+ * 6. Snapshot immutability of returned recorded call lists.
+ * 7. Transparent exception propagation from underlying delegates.
  */
 @RunWith(AndroidJUnit4::class)
 class RecordingFeedbackPlayersTest {
@@ -148,6 +152,58 @@ class RecordingFeedbackPlayersTest {
     }
 
     @Test
+    fun recordingHapticPlayer_retrievedWaveformCue_mutationsDoNotCorruptHistoricalTelemetry() {
+        val fakeDelegate = FakeHapticPlayer()
+        val recordingPlayer = RecordingHapticPlayer(delegate = fakeDelegate)
+
+        val timings = longArrayOf(0, 50, 100)
+        val amplitudes = intArrayOf(0, 128, 255)
+        val waveform = HapticCue.Waveform(timings, amplitudes, repeat = -1)
+
+        recordingPlayer.vibrate(waveform)
+
+        // Retrieve recorded call and cue
+        val firstRetrieval = recordingPlayer.recordedCalls[0].cue as HapticCue.Waveform
+
+        // Mutate arrays on the retrieved cue object
+        firstRetrieval.timings[1] = 7777L
+        firstRetrieval.amplitudes[1] = 777
+
+        // Re-access the cue from the player to verify historical record was immune
+        val secondRetrieval = recordingPlayer.recordedCalls[0].cue as HapticCue.Waveform
+        assertEquals(
+            "Historical timings must not be altered by mutating a previously retrieved cue",
+            50L,
+            secondRetrieval.timings[1]
+        )
+        assertEquals(
+            "Historical amplitudes must not be altered by mutating a previously retrieved cue",
+            128,
+            secondRetrieval.amplitudes[1]
+        )
+    }
+
+    @Test
+    fun recordingHapticPlayer_delegateReceivesOriginalCueInstanceAndValues() {
+        val fakeDelegate = FakeHapticPlayer()
+        val recordingPlayer = RecordingHapticPlayer(delegate = fakeDelegate)
+
+        val timings = longArrayOf(0, 50, 100)
+        val amplitudes = intArrayOf(0, 128, 255)
+        val waveform = HapticCue.Waveform(timings, amplitudes, repeat = -1)
+
+        recordingPlayer.vibrate(waveform)
+
+        assertEquals("Delegate must receive exactly 1 cue", 1, fakeDelegate.vibratedCues.size)
+        val delegateCue = fakeDelegate.vibratedCues[0] as HapticCue.Waveform
+
+        // Delegate receives original cue instance and exact arrays
+        assertTrue("Delegate must receive the original timings array", timings === delegateCue.timings)
+        assertTrue("Delegate must receive the original amplitudes array", amplitudes === delegateCue.amplitudes)
+        assertEquals(waveform, delegateCue)
+    }
+
+    @Test
     fun snapshotIsolation_clearDoesNotAffectPreviouslyReturnedList() {
         val tonePlayer = RecordingTonePlayer(delegate = FakeTonePlayer())
         val hapticPlayer = RecordingHapticPlayer(delegate = FakeHapticPlayer())
@@ -195,4 +251,3 @@ class RecordingFeedbackPlayersTest {
         assertEquals("Call should be recorded even if delegate throws", 1, recordingTonePlayer.recordedCalls.size)
     }
 }
-

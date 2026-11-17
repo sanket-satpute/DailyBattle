@@ -1,18 +1,19 @@
-# DailyBattle — Phase 1 & 1.1: Audio SFX Behavioral Test Harness & Hardening Validation Report
+# DailyBattle — Phase 1, 1.1 & 1.1.1: Audio SFX Behavioral Test Harness, Hardening & Immutability Report
 
-**Document ID:** DB-REPORT-AUDIO-QA-PHASE1-001  
-**Repository:** `https://github.com/sanket-satpute/DailyBattle`  
-**Branch:** `feature/audio-sfx-foundation`  
-**Baseline Audit Commit:** `01e1f5a`  
-**Phase 1 Commit:** `fdb4878` (`test(audio): add behavioral assertions to physical feedback tests`)  
-**Phase 1.1 Implementation Date:** 2026-11-17  
-**Scope:** Strengthen D-01, D-02, D-03, D-04, and D-10 with meaningful behavioral assertions via recording decorators, harden decorator thread-safety and array isolation, eliminate redundant assertions, and correct verification nomenclature.
+**Document ID:** DB-REPORT-AUDIO-QA-PHASE1-001<br/>
+**Repository:** `https://github.com/sanket-satpute/DailyBattle`<br/>
+**Branch:** `feature/audio-sfx-foundation`<br/>
+**Baseline Audit Commit:** `01e1f5a`<br/>
+**Phase 1 Commit:** `fdb4878` (`test(audio): add behavioral assertions to physical feedback tests`)<br/>
+**Phase 1.1 Commit:** `4fe0f0d` (`test(audio): harden recording decorator reliability`)<br/>
+**Phase 1.1.1 Date:** 2026-11-17<br/>
+**Scope:** Strengthen D-01, D-02, D-03, D-04, and D-10 with meaningful behavioral assertions; harden decorator thread-safety and haptic waveform snapshot immutability; eliminate redundant assertions; execute instrumentation test suites on physical hardware; enforce strict verification terminology.
 
 ---
 
 ## 1. Executive Summary
 
-In response to the test-quality audit ([PHYSICAL_AUDIO_QA_TEST_QUALITY_AUDIT.md](PHYSICAL_AUDIO_QA_TEST_QUALITY_AUDIT.md)), Phase 1 and Phase 1.1 introduce and harden thread-safe recording decorators (`RecordingTonePlayer` and `RecordingHapticPlayer`) for the Android audio and haptic abstraction layers.
+In response to the test-quality audit ([PHYSICAL_AUDIO_QA_TEST_QUALITY_AUDIT.md](PHYSICAL_AUDIO_QA_TEST_QUALITY_AUDIT.md)) and subsequent source reviews, Phases 1, 1.1, and 1.1.1 establish and harden thread-safe recording decorators (`RecordingTonePlayer` and `RecordingHapticPlayer`) for the Android audio and haptic abstraction layers.
 
 All tautological `assertTrue(true)` assertions have been removed from the five scoped tests:
 - **D-01 (Sound ON + Haptics ON):** Replaced `assertTrue(true)` with strict assertions verifying all 6 tone requests (types, durations) and 5 haptic requests (cues, waveforms, repeat, and `SCORE_REVEAL` haptic omission).
@@ -21,153 +22,145 @@ All tautological `assertTrue(true)` assertions have been removed from the five s
 - **D-04 (Sound OFF + Haptics OFF):** Replaced `assertTrue(true)` with strict assertions proving both audio and haptics are completely suppressed across all 6 events. Redundant assertion pairs removed.
 - **D-10 (Personal Best Sequence):** Replaced `assertTrue(true)` with deterministic sequence assertions verifying `SCORE_REVEAL` prompt precedes `PERSONAL_BEST` victory tone and waveform haptics. Clarified that timestamps prove request-dispatch ordering, not acoustic completion in AudioFlinger.
 
-Furthermore, Phase 1.1 hardened the decorator implementation:
+Phase 1.1 & 1.1.1 hardened decorator integrity:
 1. **Thread-Safe Release Counter:** Replaced `@Volatile var releaseCount: Int` with `AtomicInteger(0)` to prevent lost updates under multi-threaded teardowns.
-2. **Defensive Waveform Array Isolation:** Cloned `HapticCue.Waveform` mutable arrays (`timings.clone()`, `amplitudes.clone()`) on recording to ensure caller array mutations cannot corrupt historical telemetry.
-3. **Snapshot Immutability:** Guaranteed that `.toList()` snapshots returned by `recordedCalls` remain immutable even if the decorator is subsequently cleared or receives new calls.
-4. **Focused Decorator Test Suite:** Created [RecordingFeedbackPlayersTest.kt](file:///DailyBattle/app/src/androidTest/java/com/sanket_satpute_20/dailybattle/core/feedback/RecordingFeedbackPlayersTest.kt) verifying decorator delegation, concurrency, defensive copying, and exception propagation.
+2. **Deep Waveform Snapshot Immutability:** Cloned `HapticCue.Waveform` arrays on recording (`rawCue`) AND returned fresh defensive copies of arrays whenever `RecordedHapticCall.cue` is accessed, preventing caller or consumer mutations from altering historical records.
+3. **Preservation of Delegate Arguments:** Verified that `RecordingHapticPlayer.vibrate(cue)` forwards the exact original cue instance and arrays to the underlying delegate.
+4. **Focused Decorator Test Suite:** Created and executed [RecordingFeedbackPlayersTest.kt](file:///DailyBattle/app/src/androidTest/java/com/sanket_satpute_20/dailybattle/core/feedback/RecordingFeedbackPlayersTest.kt) with 8 tests covering delegation, concurrency, deep array copying, snapshot immutability, and exception propagation.
+5. **Physical Device Instrumentation Execution:** Both `RecordingFeedbackPlayersTest` (8/8 passed) and `PhysicalAudioFeedbackDeviceTest` (10/10 passed) executed directly on connected physical Android 16 hardware (`moto g85 5G`).
 
 ---
 
-## 2. Recording Decorator Architecture & Hardening
+## 2. Verification Terminology & Telemetry Boundaries
 
-### Design Principles
-1. **Full Android Hardware Delegation:** Decorators implement production interfaces `TonePlayer` and `HapticPlayer` and forward every invocation directly to the real underlying Android implementations (`SystemTonePlayer` and `SystemHapticPlayer`).
-2. **Thread Safety & Atomic Tracking:** Uses `CopyOnWriteArrayList` to record immutable data classes (`RecordedToneCall`, `RecordedHapticCall`). Release counts are tracked via an `AtomicInteger` with `incrementAndGet()` and thread-safe resets in `clear()`.
-3. **Defensive Array Copying:** `RecordingHapticPlayer.vibrate()` defensively clones `timings` and `amplitudes` arrays when recording `HapticCue.Waveform` instances to ensure historical telemetry is isolated from subsequent caller mutations.
-4. **Snapshot Isolation:** Exposes safe read-only snapshot lists (`.toList()`) to prevent race conditions during assertions.
-5. **Transparent Error Propagation:** Decorators record the request and immediately forward to the delegate without try-catch, preserving the production manager's `runCatching` error-isolation semantics.
-6. **Independent Lifecycle & Resource Cleanup:** Fresh decorator instances are initialized in `@Before setUp()`, and `@After tearDown()` calls `feedback.release()` to ensure native `ToneGenerator` resources are released after every test run.
+To ensure scientific accuracy and prevent misleading claims, all validation is strictly categorized according to the following definitions:
 
-### Pipeline Diagram
-```
-[AndroidInteractionFeedback.emit(event)]
-                   │
-         ┌─────────┴─────────┐
-         ▼                   ▼
-  [TonePlayer]        [HapticPlayer]
-         │                   │
-         ▼                   ▼
-  RecordingTonePlayer  RecordingHapticPlayer
-         │                   │
-         ├─► Records call    ├─► Records call
-         │   (tone, ms, ns)  │   (isolated cue, ns)
-         ▼                   ▼
-  SystemTonePlayer    SystemHapticPlayer
-         │                   │
-         ▼                   ▼
-   AudioFlinger       VibratorManager
-```
-
-### Strict Telemetry Boundary & Nomenclature
-
-To ensure scientific accuracy and prevent misleading claims, all validation is reported according to five distinct categories:
-
-| Category | Definition | Status in Phase 1.1 |
+| Verification Level | Meaning | Status in Phase 1.1.1 |
 |---|---|---|
-| **Compiled** | Source and test files compiled with 0 errors. | **CONFIRMED** (`compileDebugAndroidTestKotlin` SUCCESS) |
-| **JVM unit tested** | Dedicated JVM unit test suite executed and passed on local workstation. | **CONFIRMED** (17/17 passed in 2m 19s) |
-| **Instrumentation executed** | Android instrumentation tests actually ran on an Android runtime. | **NOT EXECUTED** (ADB disconnected; 0 hardware devices attached) |
-| **Framework delegate invoked** | Recording decorator intercepted request and invoked underlying framework player. | **PROVEN PROGRAMMATICALLY** (Verified via decorator test suite) |
-| **Physical sensory verification** | Human tester verified audible sound from speakers or physical vibration on skin. | **NOT EXECUTED IN THIS SESSION** (Deferred to post-MVP physical QA) |
+| **Compiled** | Source and tests compile with 0 errors. | **CONFIRMED** (`compileDebugAndroidTestKotlin` SUCCESS) |
+| **JVM unit tested** | JVM tests actually execute and pass on local host. | **CONFIRMED** (`AndroidInteractionFeedbackTest` 17/17 passed in 1.2s) |
+| **Instrumentation executed** | Android instrumentation tests actually execute on Android runtime. | **CONFIRMED** (18/18 tests passed on physical `moto g85 5G - 16`) |
+| **Fake delegate verified** | Test verifies forwarding to a fake implementation. | **CONFIRMED** (8/8 tests in `RecordingFeedbackPlayersTest`) |
+| **Framework invocation recorded** | Decorator records a request and forwards it to the Android implementation. | **CONFIRMED** (D-01 through D-04, D-10 in `PhysicalAudioFeedbackDeviceTest`) |
+| **Physical sensory verification** | Human confirms actual audible sound or physical vibration. | **NOT EXECUTED IN THIS SESSION** (Deferred to post-MVP physical QA) |
 
-**Key Boundary Clarifications:**
-- **Decorators Verify:**
-  1. Requests emitted by `AndroidInteractionFeedback`.
-  2. Invocations forwarded to the underlying Android framework delegates.
-  3. Absolute programmatic suppression when settings are disabled.
-  4. Precise argument mapping (tone types, durations, waveforms, timings, amplitudes).
-  5. Chronological dispatch sequencing of requests.
-- **Decorators Do NOT Claim:**
-  - Audible acoustic playback completion in AudioFlinger.
-  - Hardware physical vibration completion in VibratorManager.
-  - Human sensory perception of sound waves or tactile feedback.
+### Strict Boundary Rules:
+- A **recorded request** does not prove successful audio playback or AudioFlinger buffer completion.
+- A **method invocation** does not prove that the speaker produced audible sound.
+- A **vibration API invocation** does not prove physical motor movement on skin.
+- A **timestamp** proves request-dispatch ordering to the framework delegate, NOT acoustic playback completion.
+- Never report tests as passed unless their execution reports confirm it.
 
 ---
 
-## 3. Updated Test Assertions (D-01, D-02, D-03, D-04, D-10)
+## 3. Haptic Waveform Snapshot Immutability Implementation
 
-### 3.1 D-01: Sound ON + Haptics ON
-- **Emitted Events:** `UI_TAP`, `CORRECT`, `INCORRECT`, `SCORE_REVEAL`, `PERSONAL_BEST`, `BATTLE_COMPLETE`.
-- **Assertions:**
-  - `assertEquals("Expected exactly 6 tone requests for 6 interaction events", 6, toneCalls.size)`
-  - Exact tone mapping and durations with diagnostic failure messages:
-    - `UI_TAP` → `TONE_PROP_BEEP`, 35 ms
-    - `CORRECT` → `TONE_PROP_ACK`, 75 ms
-    - `INCORRECT` → `TONE_PROP_NACK`, 95 ms
-    - `SCORE_REVEAL` → `TONE_PROP_PROMPT`, 110 ms
-    - `PERSONAL_BEST` → `TONE_PROP_ACK`, 150 ms
-    - `BATTLE_COMPLETE` → `TONE_PROP_PROMPT`, 130 ms
-  - `assertEquals("Expected exactly 5 haptic requests because SCORE_REVEAL omits haptics", 5, hapticCalls.size)`
-  - Exact haptic cue patterns with diagnostic failure messages:
-    - `UI_TAP` → `OneShot(12L, 35)`
-    - `CORRECT` → `OneShot(24L, 80)`
-    - `INCORRECT` → `Waveform(timings=[0,18,28,18], amplitudes=[0,65,0,65], repeat=-1)`
-    - `PERSONAL_BEST` → `Waveform(timings=[0,28,35,45], amplitudes=[0,75,0,110], repeat=-1)`
-    - `BATTLE_COMPLETE` → `OneShot(38L, 90)`
+### The Problem
+In initial implementations, `RecordingHapticPlayer` cloned waveform arrays when recording, but `RecordedHapticCall` exposed the stored cue instance through its public `val cue: HapticCue` property. If a test consumer retrieved `call.cue as HapticCue.Waveform` and modified `cue.timings[0] = 999L`, the underlying historical record was mutated, corrupting subsequent assertions and snapshot isolation.
 
-### 3.2 D-02: Sound ON + Haptics OFF
-- **Emitted Events:** `UI_TAP`, `CORRECT`, `INCORRECT`.
-- **Assertions:**
-  - `assertEquals("Expected exactly 3 tone requests when sound is enabled", 3, toneCalls.size)` with diagnostic messages for each event.
-  - `assertEquals("Haptics must be completely suppressed (0 calls) when hapticsEnabled is false", 0, hapticCalls.size)` (redundant `assertTrue(isEmpty())` removed).
+### The Solution
+`RecordedHapticCall` implements two-way defensive isolation:
+```kotlin
+class RecordedHapticCall(
+    cue: HapticCue,
+    val timestampNs: Long = System.nanoTime()
+) {
+    // 1. Defensively clone caller arrays on recording
+    private val rawCue: HapticCue = when (cue) {
+        is HapticCue.OneShot -> cue
+        is HapticCue.Waveform -> HapticCue.Waveform(
+            timings = cue.timings.clone(),
+            amplitudes = cue.amplitudes.clone(),
+            repeat = cue.repeat
+        )
+    }
 
-### 3.3 D-03: Sound OFF + Haptics ON
-- **Emitted Events:** `UI_TAP`, `CORRECT`, `PERSONAL_BEST`.
-- **Assertions:**
-  - `assertEquals("Tone playback must be completely suppressed (0 calls) when soundEnabled is false", 0, toneCalls.size)` (redundant `assertTrue(isEmpty())` removed).
-  - `assertEquals("Expected exactly 3 haptic requests when haptics are enabled", 3, hapticCalls.size)` with matching `OneShot` and `Waveform` parameters.
+    // 2. Return fresh defensive clones whenever cue is accessed
+    val cue: HapticCue
+        get() = when (rawCue) {
+            is HapticCue.OneShot -> rawCue
+            is HapticCue.Waveform -> HapticCue.Waveform(
+                timings = rawCue.timings.clone(),
+                amplitudes = rawCue.amplitudes.clone(),
+                repeat = rawCue.repeat
+            )
+        }
+}
+```
 
-### 3.4 D-04: Sound OFF + Haptics OFF
-- **Emitted Events:** All 6 `InteractionFeedbackEvent` values.
-- **Assertions:**
-  - `assertEquals("All tones must be suppressed (0 calls) when soundEnabled is false", 0, toneCalls.size)`
-  - `assertEquals("All haptics must be suppressed (0 calls) when hapticsEnabled is false", 0, hapticCalls.size)` (redundant `assertTrue(isEmpty())` removed for both).
-
-### 3.5 D-10: Personal Best Sequence
-- **Emitted Events:** `SCORE_REVEAL`, delay 180 ms, `PERSONAL_BEST`.
-- **Assertions:**
-  - `assertEquals("Expected exactly 2 tone dispatch requests for Personal Best sequence", 2, toneCalls.size)` (`TONE_PROP_PROMPT` 110ms, then `TONE_PROP_ACK` 150ms).
-  - Request-dispatch ordering: `assertTrue("SCORE_REVEAL tone request dispatch must precede PERSONAL_BEST tone request dispatch", toneCalls[0].timestampNs < toneCalls[1].timestampNs)`.
-  - `assertEquals("Expected exactly 1 haptic request because SCORE_REVEAL omits haptics", 1, hapticCalls.size)` (`SCORE_REVEAL` emits no haptic; `PERSONAL_BEST` emits `Waveform([0,28,35,45], [0,75,0,110])`).
-  - Cross-channel dispatch ordering: `assertTrue("SCORE_REVEAL tone request dispatch must precede victory haptic request dispatch", toneCalls[0].timestampNs < hapticCalls[0].timestampNs)`.
-  - Explicit telemetry comment: `// D-10 timestamps establish request-dispatch ordering to the framework delegate, NOT acoustic playback completion ordering in AudioFlinger or physical tactile perception.`
+### Guarantees:
+1. **Pre-recording isolation:** Caller mutating original arrays after `vibrate()` cannot alter `rawCue`.
+2. **Post-retrieval isolation:** Consumer mutating arrays on a retrieved `call.cue` cannot alter `rawCue`.
+3. **Delegate fidelity:** `RecordingHapticPlayer.vibrate(cue)` forwards the exact original `cue` instance to the underlying delegate (`timings === delegateCue.timings`).
+4. **Zero production impact:** Production `HapticCue` and `HapticPlayer` interfaces remain completely unchanged.
 
 ---
 
-## 4. Focused Decorator Test Suite (`RecordingFeedbackPlayersTest`)
+## 4. Decorator Test Execution (`RecordingFeedbackPlayersTest`)
 
-Located in [RecordingFeedbackPlayersTest.kt](file:///DailyBattle/app/src/androidTest/java/com/sanket_satpute_20/dailybattle/core/feedback/RecordingFeedbackPlayersTest.kt):
+Executed via `connectedDebugAndroidTest` on physical hardware:
+- **Device:** Motorola Moto G85 5G (`moto g85 5G`)
+- **Android Version:** Android 16 (API 36)
+- **Command:** `gradlew -p DailyBattle connectedDebugAndroidTest -P "android.testInstrumentationRunnerArguments.class=com.sanket_satpute_20.dailybattle.core.feedback.RecordingFeedbackPlayersTest"`
+- **Result:** **PASS (8/8 passed, 0 failures, 0 skipped in 0.435s)**
 
-| Test Case | Verification Target |
-|---|---|
-| `recordingTonePlayer_recordsInvocationArguments_andDelegates` | Intercepts `playTone(24, 80)`, captures parameters and timestamp, forwards exactly to underlying delegate. |
-| `recordingHapticPlayer_recordsInvocationArguments_andDelegates` | Intercepts `vibrate(OneShot(25, 90))`, captures cue, forwards to delegate, and verifies `hasVibrator()` delegation. |
-| `recordingTonePlayer_concurrentRelease_threadSafeCounter` | 10 concurrent threads each execute 50 `release()` calls (500 total). Asserts `AtomicInteger` releaseCount equals 500 without lost increments. Verifies `clear()` safely resets count to 0. |
-| `recordingHapticPlayer_waveformArrays_defensivelyCopied` | Passes `Waveform` with mutable arrays, mutates the original arrays after call, and verifies recorded copy retained original values. |
-| `snapshotIsolation_clearDoesNotAffectPreviouslyReturnedList` | Obtains `.recordedCalls` snapshot, clears players, and asserts that the snapshot remains populated and unchanged. |
-| `exceptionPropagation_delegateFailurePropagatesDirectly` | Verifies that exceptions thrown by an underlying delegate propagate synchronously to the caller while the call remains recorded. |
-
----
-
-## 5. Execution & Validation Results
-
-| Test Suite / Command | Category | Result | Duration | Notes |
+| Test Method | Verification Level | Duration | Result | Verification Target |
 |---|---|---|---|---|
-| `gradlew -p DailyBattle compileDebugAndroidTestKotlin` | **Compiled** | **SUCCESS** | 16s | 0 errors, 0 warnings. Compiles `PhysicalAudioFeedbackDeviceTest`, `RecordingFeedbackPlayers`, and `RecordingFeedbackPlayersTest`. |
-| `gradlew -p DailyBattle testDebugUnitTest --tests com.sanket_satpute_20.dailybattle.core.feedback.AndroidInteractionFeedbackTest --rerun-tasks` | **JVM unit tested** | **SUCCESS** | 2m 19s | 17/17 passed. Re-executed cleanly with all 33 tasks executed. |
-| `gradlew -p DailyBattle assembleDebug` | **Compiled** | **SUCCESS** | 8s | Debug APK assembled successfully. |
-| Physical on-device execution (`connectedDebugAndroidTest`) | **Instrumentation executed** | **NOT EXECUTED** | N/A | No physical device connected (`adb devices` returned 0 devices). Reported strictly per protocol; no physical instrumentation pass claimed. |
+| `recordingHapticPlayer_recordsInvocationArguments_andDelegates` | Fake delegate verified | 0.221 s | **PASS** | Records arguments and forwards to delegate; verifies `hasVibrator()` delegation. |
+| `recordingTonePlayer_concurrentRelease_threadSafeCounter` | Fake delegate verified | 0.017 s | **PASS** | 10 concurrent threads fire 50 `release()` calls each (500 total). `AtomicInteger` increments without lost updates; `clear()` resets safely. |
+| `recordingHapticPlayer_delegateReceivesOriginalCueInstanceAndValues` | Fake delegate verified | 0.059 s | **PASS** | Delegate receives exact original `Waveform` instance and array references (`timings === delegateCue.timings`). |
+| `recordingHapticPlayer_waveformArrays_defensivelyCopied` | Fake delegate verified | 0.040 s | **PASS** | Mutating caller arrays after `vibrate()` does not alter recorded values. |
+| `recordingHapticPlayer_retrievedWaveformCue_mutationsDoNotCorruptHistoricalTelemetry` | Fake delegate verified | 0.018 s | **PASS** | Mutating arrays on retrieved `call.cue` does not alter underlying historical record. |
+| `recordingTonePlayer_recordsInvocationArguments_andDelegates` | Fake delegate verified | 0.030 s | **PASS** | Records tone type, duration, timestamp, and forwards call to delegate. |
+| `exceptionPropagation_delegateFailurePropagatesDirectly` | Fake delegate verified | 0.031 s | **PASS** | Exceptions thrown by delegate propagate to caller; call remains recorded. |
+| `snapshotIsolation_clearDoesNotAffectPreviouslyReturnedList` | Fake delegate verified | 0.019 s | **PASS** | Calling `clear()` does not alter previously returned `.recordedCalls` snapshots. |
+
+---
+
+## 5. Physical Feedback Device Test Execution (`PhysicalAudioFeedbackDeviceTest`)
+
+Executed via `connectedDebugAndroidTest` on physical hardware:
+- **Device:** Motorola Moto G85 5G (`moto g85 5G`)
+- **Android Version:** Android 16 (API 36)
+- **Command:** `gradlew -p DailyBattle connectedDebugAndroidTest -P "android.testInstrumentationRunnerArguments.class=com.sanket_satpute_20.dailybattle.core.feedback.PhysicalAudioFeedbackDeviceTest"`
+- **Result:** **PASS (10/10 passed, 0 failures, 0 skipped in 2.301s)**
+
+| Test ID | Method Name | Verification Level | Duration | Result | Behavioral Assertions & Verification Target |
+|---|---|---|---|---|---|
+| **D-01** | `d01_soundOn_hapticsOn_emitsAllCuesOnHardware` | Framework invocation recorded | 0.715 s | **PASS** | Asserts exactly 6 tone requests with exact constants/durations; asserts exactly 5 haptic requests with exact OneShot/Waveform parameters; verifies `SCORE_REVEAL` omits haptics. |
+| **D-02** | `d02_soundOn_hapticsOff_emitsSoundWithoutVibratorCrash` | Framework invocation recorded | 0.136 s | **PASS** | Asserts 3 tone requests with matching parameters; asserts 0 haptic requests (programmatic suppression verified; redundant assertions removed). |
+| **D-03** | `d03_soundOff_hapticsOn_emitsHapticsWithoutTone` | Framework invocation recorded | 0.208 s | **PASS** | Asserts 0 tone requests (audio suppression verified); asserts 3 haptic requests with exact patterns. |
+| **D-04** | `d04_soundOff_hapticsOff_silentAndVibrationFree` | Framework invocation recorded | 0.006 s | **PASS** | Asserts 0 tone requests and 0 haptic requests across all 6 events (dual suppression verified). |
+| **D-05** | `d05_mediaVolumeSubsystem_interactsSafely` | Framework invocation recorded | 0.389 s | **PASS** | Hardware driver smoke test: queries `STREAM_MUSIC` volume and emits `UI_TAP` without crash. (Volume slider not muted; retained limitation). |
+| **D-06** | `d06_hardwareWithoutVibrator_handlesGracefully` | Fake delegate verified | 0.132 s | **PASS** | Injects fake `HapticPlayer { hasVibrator() = false }` on real device; verifies graceful handling. |
+| **D-07** | `d07_backgroundForeground_handlesLifecycleSafely` | Framework invocation recorded | 0.097 s | **PASS** | Calls `feedback.release()` and emits without crash. (In-memory lifecycle only; retained limitation). |
+| **D-08** | `d08_activityRecreation_preservesFeedbackOperational` | Framework invocation recorded | 0.042 s | **PASS** | Emits two events sequentially. (No Android Activity rotation executed; retained limitation). |
+| **D-09** | `d09_rapidRepeatedTaps_stressTestUnderHardwareConcurrency` | Framework invocation recorded | 0.531 s | **PASS** | 4 threads fire 25 events each (100 total) into hardware drivers without AudioFlinger or IPC deadlocks. |
+| **D-10** | `d10_personalBestReveal_sequencingAndTiming` | Framework invocation recorded | 0.045 s | **PASS** | Asserts 2 tones (`SCORE_REVEAL` precedes `PERSONAL_BEST`), asserts 1 haptic (Waveform for PB only), asserts cross-channel request-dispatch ordering. |
+
+---
+
+## 6. Complete Verification Summary
+
+| Test Suite / Command | Verification Level | Discovered | Passed | Failed | Skipped | Duration | Status |
+|---|---|---|---|---|---|---|---|
+| `compileDebugAndroidTestKotlin` | **Compiled** | N/A | N/A | 0 | 0 | 55s | **PASS** |
+| `RecordingFeedbackPlayersTest` (on `moto g85 5G`) | **Instrumentation executed** / Fake delegate verified | 8 | 8 | 0 | 0 | 0.435s | **PASS** |
+| `PhysicalAudioFeedbackDeviceTest` (on `moto g85 5G`) | **Instrumentation executed** / Framework invocation recorded | 10 | 10 | 0 | 0 | 2.301s | **PASS** |
+| `AndroidInteractionFeedbackTest` (on JVM) | **JVM unit tested** | 17 | 17 | 0 | 0 | 1.206s | **PASS** |
+| `assembleDebug` | **Compiled** | N/A | N/A | 0 | 0 | 54s | **PASS** |
 
 ### Historical Distinguishability Note
-The physical on-device execution results reported under commit `37a699c` (10/10 passed on `moto g85 5G`, Android 16) verified **driver crash/smoke stability** on real hardware. The Phase 1 and Phase 1.1 behavioral assertions have been compiled and verified via JVM unit tests, but have not yet been executed on-device due to hardware disconnection.
+- **Commit `37a699c`:** Physical execution established hardware driver stability and crash-free operation on Android 16 (`moto g85 5G`), but 8/10 tests relied on `assertTrue(true)`.
+- **Commit `fdb4878` (Phase 1):** Introduced recording decorators and behavioral assertions for D-01, D-02, D-03, D-04, and D-10.
+- **Commit `4fe0f0d` (Phase 1.1):** Hardened decorator thread-safety (`AtomicInteger`), eliminated redundant assertions, and added decorator unit test structure.
+- **Phase 1.1.1:** Resolved deep waveform snapshot immutability, added caller/consumer mutation tests, corrected verification terminology, and executed the complete instrumentation suite (18/18 tests) directly on physical Android 16 hardware.
 
 ---
 
-## 6. Remaining Test-Quality Scope & Limitations
+## 7. Remaining Limitations
 
-Per the project roadmap, the following remain designated for future phases:
-1. **D-05 (Media Volume Muted):** Setting system media volume slider to 0 requires volume modification permissions or policy access.
-2. **D-06 (Missing Vibrator):** Real hardware test requires running on an emulator or tablet lacking a vibration motor.
-3. **D-07 & D-08 (Activity Recreation & Backgrounding):** Requires `ActivityScenario` or UI Automator transitions.
+1. **D-05 (Media Volume Muted):** Setting system volume slider to 0 requires volume modification policy access.
+2. **D-06 (Missing Vibrator):** True hardware verification requires execution on an emulator or tablet lacking a vibration motor.
+3. **D-07 & D-08 (Activity Recreation & Backgrounding):** Requires Android lifecycle transitions via `ActivityScenario`.
 4. **Subjective Sound Aesthetics:** Tones are generated via `ToneGenerator`; human sensory evaluation is deferred to authored audio asset introduction in post-MVP sprints.

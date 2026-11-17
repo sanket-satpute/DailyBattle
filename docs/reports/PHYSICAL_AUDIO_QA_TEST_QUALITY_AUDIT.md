@@ -401,54 +401,38 @@ Per the recommendations in Section 7, Phase 1 was executed:
 ## 11. Phase 1.1 Hardening & Recording Integrity Resolution (2026-11-17)
 
 Following an audit of the Phase 1 decorator implementation, Phase 1.1 hardens the test harness and corrects verification nomenclature:
+- Replaced non-atomic `@Volatile var releaseCount: Int` with `AtomicInteger(0)`.
+- Replaced redundant assertion pairs in D-02, D-03, and D-04 with single informative assertions.
+- Added informative diagnostic failure messages across all assertions in D-01, D-02, D-03, D-04, and D-10.
+- Clarified that D-10 timestamps establish request-dispatch ordering, not acoustic playback completion in AudioFlinger.
 
-1. **Recording Semantics Clarification:**
-   - KDoc and test documentation now explicitly define recorded calls as **framework delegate invocation requests**, not proofs of acoustic playback completion in AudioFlinger or physical tactile motor response.
-   - The underlying system delegates (`SystemTonePlayer`, `SystemHapticPlayer`) wrap asynchronous Android system services (`ToneGenerator.startTone()` and `Vibrator.vibrate()`), which return `Unit` (no synchronous return value indicating physical completion).
-   - Synchronous exception propagation is preserved: decorators do not catch exceptions from delegates.
+---
 
-2. **Thread-Safe Release Counter:**
-   - Replaced non-atomic `@Volatile var releaseCount: Int` with `AtomicInteger(0)`.
-   - Read-only property `val releaseCount: Int get() = _releaseCount.get()` exposed.
-   - Atomic increments via `_releaseCount.incrementAndGet()` under concurrency; thread-safe resets in `clear()`.
+## 12. Phase 1.1.1 Waveform Immutability & Hardware Instrumentation Execution (2026-11-17)
 
-3. **Defensive Waveform Array Isolation:**
-   - `RecordingHapticPlayer.vibrate()` defensively clones mutable `timings` and `amplitudes` arrays when recording `HapticCue.Waveform` instances.
-   - Subsequent mutations by callers or test harnesses cannot alter historical recorded telemetry.
+Following source review of the recording decorators, Phase 1.1.1 implements deep immutability for haptic waveform data, establishes strict verification terminology, and executes the complete instrumentation suite directly on physical hardware:
 
-4. **Snapshot Immutability:**
-   - `recordedCalls` returns an immutable list snapshot via `.toList()`.
-   - Validated that subsequent player emissions or `clear()` calls do not affect previously returned snapshots.
+1. **Haptic Waveform Snapshot Deep Immutability:**
+   - In `RecordedHapticCall`, caller arrays are defensively cloned at construction time into private `rawCue`.
+   - The public property `val cue: HapticCue` provides a custom getter that returns a fresh defensive clone of `timings` and `amplitudes` on every access.
+   - **Guarantees:**
+     - Original caller mutating arrays after `vibrate()` cannot alter the stored historical telemetry.
+     - Consumer mutating arrays on a retrieved `call.cue` cannot alter the stored historical telemetry.
+     - `RecordingHapticPlayer.vibrate(cue)` forwards the exact original cue instance and arrays to the underlying delegate (`timings === delegateCue.timings`).
+     - Zero changes to production `HapticCue` or `HapticPlayer` interfaces.
 
-5. **Assertion Quality & Diagnostic Cleanup:**
-   - Removed redundant assertion pairs in D-02, D-03, and D-04 (e.g., removing `assertTrue(isEmpty())` when followed by `assertEquals(0, size)`).
-   - Replaced with single `assertEquals("...", 0, size)` with informative failure messages.
-   - Added informative diagnostic failure messages across all assertions in D-01, D-02, D-03, D-04, and D-10.
-   - Clarified in D-10 code and comments that timestamps establish request-dispatch ordering to the framework delegate, NOT acoustic playback completion ordering in AudioFlinger.
+2. **Strict Verification Terminology:**
+   All findings and claims are categorized according to the 6 verification levels:
+   - **Compiled:** Source and tests compile (`compileDebugAndroidTestKotlin` SUCCESS, `assembleDebug` SUCCESS).
+   - **JVM unit tested:** JVM tests execute and pass (`AndroidInteractionFeedbackTest` 17/17 passed in 1.206s).
+   - **Instrumentation executed:** Android instrumentation tests execute on device (`moto g85 5G - 16`).
+   - **Fake delegate verified:** Tests verify decorator forwarding and immutability against fake implementations (`RecordingFeedbackPlayersTest` 8/8 passed in 0.435s).
+   - **Framework invocation recorded:** Tests verify request dispatch and arguments forwarded to Android system delegates (`PhysicalAudioFeedbackDeviceTest` 10/10 passed in 2.301s).
+   - **Physical sensory verification:** UNVERIFIED IN THIS SESSION (Deferred to post-MVP physical device QA with human sensory evaluation).
 
-6. **Dedicated Decorator Test Suite:**
-   - Created [RecordingFeedbackPlayersTest.kt](file:///DailyBattle/app/src/androidTest/java/com/sanket_satpute_20/dailybattle/core/feedback/RecordingFeedbackPlayersTest.kt) with 6 focused tests:
-     - Argument recording and framework delegation.
-     - Thread-safe `releaseCount` under 10 concurrent worker threads.
-     - Defensive array copying for `HapticCue.Waveform`.
-     - Snapshot immutability after `clear()`.
-     - Delegate exception propagation.
-
-7. **Verification Nomenclature Enforcement:**
-   - **Compiled:** SUCCESS (`compileDebugAndroidTestKotlin` passed in 16s).
-   - **JVM unit tested:** SUCCESS (`AndroidInteractionFeedbackTest` 17/17 passed in 2m 19s).
-   - **Instrumentation executed:** NOT EXECUTED (No hardware device attached via ADB; zero devices).
-   - **Framework delegate invoked:** PROVEN PROGRAMMATICALLY (Verified via decorator suite).
-   - **Physical sensory verification:** UNVERIFIED IN THIS SESSION (Requires connected hardware and human evaluation).
-   - Historical commit `37a699c` physical device execution remains distinguishable as a driver crash smoke test on `moto g85 5G`.
-
-8. **Status of Scoped Tests:**
-   - D-01: **ASSERTIONS STRENGTHENED & HARDENED** (Invocation request parameters verified)
-   - D-02: **ASSERTIONS STRENGTHENED & HARDENED** (Audio request verified; haptic suppression verified)
-   - D-03: **ASSERTIONS STRENGTHENED & HARDENED** (Audio suppression verified; haptic request verified)
-   - D-04: **ASSERTIONS STRENGTHENED & HARDENED** (Audio and haptic suppression verified)
-   - D-10: **ASSERTIONS STRENGTHENED & HARDENED** (Request-dispatch sequencing verified)
-   - D-05, D-06, D-07, D-08, D-09: Unchanged (deferred to subsequent phases).
-
-
-
+3. **Physical Hardware Instrumentation Results (`moto g85 5G - 16`):**
+   - Device: Motorola Moto G85 5G (`moto g85 5G`), Android 16 / API 36 (Build `malmo_g-user 16 W1UOS36H.35-39-8 6c8be1 release-keys`).
+   - `RecordingFeedbackPlayersTest`: **8/8 PASSED** in 0.435s.
+   - `PhysicalAudioFeedbackDeviceTest`: **10/10 PASSED** in 2.301s.
+   - D-01, D-02, D-03, D-04, and D-10 verified behaviorally with strict programmatic assertions.
+   - D-05, D-06, D-07, D-08, and D-09 retain their documented limitations and are outside Phase 1.1.1 scope.
