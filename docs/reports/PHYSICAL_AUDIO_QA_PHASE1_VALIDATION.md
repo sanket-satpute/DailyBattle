@@ -41,14 +41,24 @@ To ensure scientific accuracy and prevent misleading claims, all validation is s
 | **JVM unit tested** | JVM tests actually execute and pass on local host. | **CONFIRMED** (`AndroidInteractionFeedbackTest` 17/17 passed in 1.2s) |
 | **Instrumentation executed** | Android instrumentation tests actually execute on Android runtime. | **CONFIRMED** (18/18 tests passed on physical `moto g85 5G - 16`) |
 | **Fake delegate verified** | Test verifies forwarding to a fake implementation. | **CONFIRMED** (8/8 tests in `RecordingFeedbackPlayersTest`) |
-| **Framework invocation recorded** | Decorator records a request and forwards it to the Android implementation. | **CONFIRMED** (D-01 through D-04, D-10 in `PhysicalAudioFeedbackDeviceTest`) |
+| **Player invocation recorded; delegate forwarding attempted** | Decorator records player invocation request and attempts forwarding to underlying delegate. Does NOT prove successful framework API execution or physical output. | **CONFIRMED** (D-01 through D-04, D-10 in `PhysicalAudioFeedbackDeviceTest`) |
 | **Physical sensory verification** | Human confirms actual audible sound or physical vibration. | **NOT EXECUTED IN THIS SESSION** (Deferred to post-MVP physical QA) |
 
-### Strict Boundary Rules:
-- A **recorded request** does not prove successful audio playback or AudioFlinger buffer completion.
-- A **method invocation** does not prove that the speaker produced audible sound.
-- A **vibration API invocation** does not prove physical motor movement on skin.
-- A **timestamp** proves request-dispatch ordering to the framework delegate, NOT acoustic playback completion.
+### Strict Boundary Rules & Technical Distinctions:
+- **Decorator evidence establishes that:**
+  1. The recording player received an invocation from `AndroidInteractionFeedback`.
+  2. The decorator recorded the request arguments and dispatch timestamp.
+  3. Delegate forwarding to the underlying player was attempted.
+- **Decorator evidence does NOT establish that:**
+  1. `ToneGenerator.startTone()` successfully submitted or executed the Android framework request.
+  2. `Vibrator.vibrate()` successfully submitted or executed the Android framework request.
+  3. AudioFlinger or the audio output pipeline produced sound waves.
+  4. Sound was audible on the physical device speakers.
+  5. Physical vibration was felt by a human tester.
+- **Framework Error Isolation Limitation:**
+  In production, system players (`SystemTonePlayer`, `SystemHapticPlayer`) wrap all framework invocations inside `runCatching`, which can silently swallow framework exceptions or binder IPC failures. Therefore, player recording evidence cannot be interpreted as proof of successful Android framework API execution.
+- **Timestamp Limitation:**
+  A recorded timestamp proves request-dispatch ordering to the framework delegate, **not** acoustic playback completion ordering in AudioFlinger.
 - Never report tests as passed unless their execution reports confirm it.
 
 ---
@@ -127,16 +137,16 @@ Executed via `connectedDebugAndroidTest` on physical hardware:
 
 | Test ID | Method Name | Verification Level | Duration | Result | Behavioral Assertions & Verification Target |
 |---|---|---|---|---|---|
-| **D-01** | `d01_soundOn_hapticsOn_emitsAllCuesOnHardware` | Framework invocation recorded | 0.715 s | **PASS** | Asserts exactly 6 tone requests with exact constants/durations; asserts exactly 5 haptic requests with exact OneShot/Waveform parameters; verifies `SCORE_REVEAL` omits haptics. |
-| **D-02** | `d02_soundOn_hapticsOff_emitsSoundWithoutVibratorCrash` | Framework invocation recorded | 0.136 s | **PASS** | Asserts 3 tone requests with matching parameters; asserts 0 haptic requests (programmatic suppression verified; redundant assertions removed). |
-| **D-03** | `d03_soundOff_hapticsOn_emitsHapticsWithoutTone` | Framework invocation recorded | 0.208 s | **PASS** | Asserts 0 tone requests (audio suppression verified); asserts 3 haptic requests with exact patterns. |
-| **D-04** | `d04_soundOff_hapticsOff_silentAndVibrationFree` | Framework invocation recorded | 0.006 s | **PASS** | Asserts 0 tone requests and 0 haptic requests across all 6 events (dual suppression verified). |
-| **D-05** | `d05_mediaVolumeSubsystem_interactsSafely` | Framework invocation recorded | 0.389 s | **PASS** | Hardware driver smoke test: queries `STREAM_MUSIC` volume and emits `UI_TAP` without crash. (Volume slider not muted; retained limitation). |
+| **D-01** | `d01_soundOn_hapticsOn_emitsAllCuesOnHardware` | Player invocation recorded; delegate forwarding attempted | 0.715 s | **PASS** | Asserts exactly 6 tone requests with exact constants/durations; asserts exactly 5 haptic requests with exact OneShot/Waveform parameters; verifies `SCORE_REVEAL` omits haptics. |
+| **D-02** | `d02_soundOn_hapticsOff_emitsSoundWithoutVibratorCrash` | Player invocation recorded; delegate forwarding attempted | 0.136 s | **PASS** | Asserts 3 tone requests with matching parameters; asserts 0 haptic requests (programmatic suppression verified; redundant assertions removed). |
+| **D-03** | `d03_soundOff_hapticsOn_emitsHapticsWithoutTone` | Player invocation recorded; delegate forwarding attempted | 0.208 s | **PASS** | Asserts 0 tone requests (audio suppression verified); asserts 3 haptic requests with exact patterns. |
+| **D-04** | `d04_soundOff_hapticsOff_silentAndVibrationFree` | Player invocation recorded; delegate forwarding attempted | 0.006 s | **PASS** | Asserts 0 tone requests and 0 haptic requests across all 6 events (dual suppression verified). |
+| **D-05** | `d05_mediaVolumeSubsystem_interactsSafely` | Player invocation recorded; delegate forwarding attempted | 0.389 s | **PASS** | Hardware driver smoke test: queries `STREAM_MUSIC` volume and emits `UI_TAP` without crash. (Volume slider not muted; retained limitation). |
 | **D-06** | `d06_hardwareWithoutVibrator_handlesGracefully` | Fake delegate verified | 0.132 s | **PASS** | Injects fake `HapticPlayer { hasVibrator() = false }` on real device; verifies graceful handling. |
-| **D-07** | `d07_backgroundForeground_handlesLifecycleSafely` | Framework invocation recorded | 0.097 s | **PASS** | Calls `feedback.release()` and emits without crash. (In-memory lifecycle only; retained limitation). |
-| **D-08** | `d08_activityRecreation_preservesFeedbackOperational` | Framework invocation recorded | 0.042 s | **PASS** | Emits two events sequentially. (No Android Activity rotation executed; retained limitation). |
-| **D-09** | `d09_rapidRepeatedTaps_stressTestUnderHardwareConcurrency` | Framework invocation recorded | 0.531 s | **PASS** | 4 threads fire 25 events each (100 total) into hardware drivers without AudioFlinger or IPC deadlocks. |
-| **D-10** | `d10_personalBestReveal_sequencingAndTiming` | Framework invocation recorded | 0.045 s | **PASS** | Asserts 2 tones (`SCORE_REVEAL` precedes `PERSONAL_BEST`), asserts 1 haptic (Waveform for PB only), asserts cross-channel request-dispatch ordering. |
+| **D-07** | `d07_backgroundForeground_handlesLifecycleSafely` | Player invocation recorded; delegate forwarding attempted | 0.097 s | **PASS** | Calls `feedback.release()` and emits without crash. (In-memory lifecycle only; retained limitation). |
+| **D-08** | `d08_activityRecreation_preservesFeedbackOperational` | Player invocation recorded; delegate forwarding attempted | 0.042 s | **PASS** | Emits two events sequentially. (No Android Activity rotation executed; retained limitation). |
+| **D-09** | `d09_rapidRepeatedTaps_stressTestUnderHardwareConcurrency` | Player invocation recorded; delegate forwarding attempted | 0.531 s | **PASS** | 4 threads fire 25 events each (100 total) into hardware drivers without AudioFlinger or IPC deadlocks. |
+| **D-10** | `d10_personalBestReveal_sequencingAndTiming` | Player invocation recorded; delegate forwarding attempted | 0.045 s | **PASS** | Asserts 2 tones (`SCORE_REVEAL` precedes `PERSONAL_BEST`), asserts 1 haptic (Waveform for PB only), asserts cross-channel request-dispatch ordering. |
 
 ---
 
@@ -146,7 +156,7 @@ Executed via `connectedDebugAndroidTest` on physical hardware:
 |---|---|---|---|---|---|---|---|
 | `compileDebugAndroidTestKotlin` | **Compiled** | N/A | N/A | 0 | 0 | 55s | **PASS** |
 | `RecordingFeedbackPlayersTest` (on `moto g85 5G`) | **Instrumentation executed** / Fake delegate verified | 8 | 8 | 0 | 0 | 0.435s | **PASS** |
-| `PhysicalAudioFeedbackDeviceTest` (on `moto g85 5G`) | **Instrumentation executed** / Framework invocation recorded | 10 | 10 | 0 | 0 | 2.301s | **PASS** |
+| `PhysicalAudioFeedbackDeviceTest` (on `moto g85 5G`) | **Instrumentation executed** / Player invocation recorded; delegate forwarding attempted | 10 | 10 | 0 | 0 | 2.301s | **PASS** |
 | `AndroidInteractionFeedbackTest` (on JVM) | **JVM unit tested** | 17 | 17 | 0 | 0 | 1.206s | **PASS** |
 | `assembleDebug` | **Compiled** | N/A | N/A | 0 | 0 | 54s | **PASS** |
 

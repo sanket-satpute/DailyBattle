@@ -427,7 +427,7 @@ Following source review of the recording decorators, Phase 1.1.1 implements deep
    - **JVM unit tested:** JVM tests execute and pass (`AndroidInteractionFeedbackTest` 17/17 passed in 1.206s).
    - **Instrumentation executed:** Android instrumentation tests execute on device (`moto g85 5G - 16`).
    - **Fake delegate verified:** Tests verify decorator forwarding and immutability against fake implementations (`RecordingFeedbackPlayersTest` 8/8 passed in 0.435s).
-   - **Framework invocation recorded:** Tests verify request dispatch and arguments forwarded to Android system delegates (`PhysicalAudioFeedbackDeviceTest` 10/10 passed in 2.301s).
+   - **Player invocation recorded; delegate forwarding attempted:** Tests verify player invocation request dispatch and arguments forwarded toward Android system delegates (`PhysicalAudioFeedbackDeviceTest` 10/10 passed in 2.301s). Does NOT prove that `ToneGenerator.startTone()` or `Vibrator.vibrate()` successfully executed in the framework (calls are wrapped in `runCatching` by system players), that AudioFlinger produced sound, or physical sensory verification.
    - **Physical sensory verification:** UNVERIFIED IN THIS SESSION (Deferred to post-MVP physical device QA with human sensory evaluation).
 
 3. **Physical Hardware Instrumentation Results (`moto g85 5G - 16`):**

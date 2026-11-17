@@ -314,7 +314,7 @@ Manual validation runbook for physical Android hardware or emulator (API 30–35
   - Dedicated decorator test suite expanded to 8 tests in [RecordingFeedbackPlayersTest.kt](file:///DailyBattle/app/src/androidTest/java/com/sanket_satpute_20/dailybattle/core/feedback/RecordingFeedbackPlayersTest.kt).
   - **Physical Device Instrumentation Execution (`moto g85 5G - 16`):**
     - `RecordingFeedbackPlayersTest`: **8/8 PASSED** in 0.435s (`Instrumentation executed` / `Fake delegate verified`).
-    - `PhysicalAudioFeedbackDeviceTest`: **10/10 PASSED** in 2.301s (`Instrumentation executed` / `Framework invocation recorded`).
+    - `PhysicalAudioFeedbackDeviceTest`: **10/10 PASSED** in 2.301s (`Instrumentation executed` / `Player invocation recorded; delegate forwarding attempted`). (NOTE: Decorators record player requests and attempt delegate forwarding; does NOT prove successful `ToneGenerator`/`Vibrator` framework API execution or physical audible/tactile output).
   - **JVM Unit Test Execution:**
     - `AndroidInteractionFeedbackTest`: **17/17 PASSED** in 1.206s (`JVM unit tested`).
   - **Build Status:** `compileDebugAndroidTestKotlin` and `assembleDebug` SUCCESS.

@@ -9,10 +9,13 @@ import java.util.concurrent.atomic.AtomicInteger
  * Captures the request parameters and timestamp immediately before forwarding to
  * the underlying [TonePlayer] delegate.
  *
- * Verification Level: Framework invocation recorded.
- * NOTE: This record proves that an invocation request was dispatched to the framework delegate
- * with the recorded parameters; it does NOT prove successful acoustic playback completion
- * in AudioFlinger or physical sensory verification.
+ * Verification Level: Player invocation recorded; delegate forwarding attempted.
+ * NOTE: This record proves that an invocation request was intercepted by the decorator and
+ * that forwarding to the delegate was attempted with the recorded parameters; it does NOT prove
+ * that ToneGenerator.startTone() successfully executed in the framework, that AudioFlinger
+ * produced sound, that sound was audible on the device, or physical sensory verification.
+ * Because SystemTonePlayer wraps framework calls in runCatching, underlying framework failures
+ * may be swallowed without being observable here.
  *
  * @param toneType The [android.media.ToneGenerator] tone constant requested.
  * @param durationMs Duration of tone in milliseconds.
@@ -33,9 +36,13 @@ data class RecordedToneCall(
  * 2. Returns defensive copies of timing and amplitude arrays whenever [cue] is accessed so
  *    mutations performed on the exposed cue cannot alter the underlying historical record.
  *
- * Verification Level: Framework invocation recorded.
- * NOTE: This record proves that an invocation request was dispatched to the framework delegate
- * with the recorded cue; it does NOT prove physical motor movement or physical sensory verification.
+ * Verification Level: Player invocation recorded; delegate forwarding attempted.
+ * NOTE: This record proves that an invocation request was intercepted by the decorator and
+ * that forwarding to the delegate was attempted with the recorded cue; it does NOT prove
+ * that Vibrator.vibrate() successfully executed in the framework, that physical motor movement
+ * occurred, or physical sensory verification.
+ * Because SystemHapticPlayer wraps framework calls in runCatching, underlying framework failures
+ * may be swallowed without being observable here.
  *
  * @param timestampNs System nanotime when the request was intercepted before delegation.
  */
@@ -87,10 +94,11 @@ class RecordedHapticCall(
  * and delegates the exact call to the underlying Android [delegate].
  *
  * Telemetry boundary:
- * - Verification Level: Framework invocation recorded.
- * - Records: Framework invocation requests dispatched by [AndroidInteractionFeedback].
- * - Delegates: Exact calls forwarded to [SystemTonePlayer] / Android framework.
- * - Does NOT prove: Audible sound wave generation, AudioFlinger mixer completion, or speaker output.
+ * - Verification Level: Player invocation recorded; delegate forwarding attempted.
+ * - Records: Player invocation requests dispatched by [AndroidInteractionFeedback].
+ * - Delegates: Forwards exact calls to [SystemTonePlayer].
+ * - Does NOT prove: That ToneGenerator.startTone() succeeded in the framework, that AudioFlinger
+ *   produced audio, or that sound was audible on the device.
  * - Preserves: Synchronous exception propagation (failures in delegate are not swallowed).
  *
  * Thread-safety guarantees:
@@ -133,10 +141,11 @@ class RecordingTonePlayer(
  * and delegates to the underlying Android [delegate].
  *
  * Telemetry boundary:
- * - Verification Level: Framework invocation recorded.
- * - Records: Framework vibration requests dispatched by [AndroidInteractionFeedback].
- * - Delegates: Exact calls forwarded to [SystemHapticPlayer] / Android framework.
- * - Does NOT prove: Physical motor rotation, linear resonant actuator response, or skin tactile perception.
+ * - Verification Level: Player invocation recorded; delegate forwarding attempted.
+ * - Records: Player vibration requests dispatched by [AndroidInteractionFeedback].
+ * - Delegates: Forwards exact calls to [SystemHapticPlayer].
+ * - Does NOT prove: That Vibrator.vibrate() succeeded in the framework, that the vibration motor
+ *   actuated, or that physical tactile feedback was felt.
  * - Preserves: Synchronous exception propagation (failures in delegate are not swallowed).
  *
  * Immutability guarantees:
