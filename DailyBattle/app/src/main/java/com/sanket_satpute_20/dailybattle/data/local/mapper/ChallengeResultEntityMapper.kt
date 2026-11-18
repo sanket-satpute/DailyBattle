@@ -1,6 +1,7 @@
 package com.sanket_satpute_20.dailybattle.data.local.mapper
 
 import com.sanket_satpute_20.dailybattle.data.local.entity.ChallengeResultEntity
+import com.sanket_satpute_20.dailybattle.data.remote.serialization.DailyBattleJson
 import com.sanket_satpute_20.dailybattle.domain.battle.ChallengeResult
 import com.sanket_satpute_20.dailybattle.domain.identifier.BattleSessionId
 import com.sanket_satpute_20.dailybattle.domain.identifier.ChallengeId
@@ -16,7 +17,13 @@ fun ChallengeResultEntity.toDomain(): ChallengeResult = ChallengeResult(
     score = maxOf(0, score),
     maxScore = maxOf(0, maxScore),
     completedAt = maxOf(0L, completedAt),
-    metadata = null,
+    metadata = metadataJson?.let { json ->
+        try {
+            DailyBattleJson.decodeFromString<Map<String, String>>(json)
+        } catch (_: Exception) {
+            null
+        }
+    },
 )
 
 fun ChallengeResult.toEntity(): ChallengeResultEntity = ChallengeResultEntity(
@@ -26,5 +33,19 @@ fun ChallengeResult.toEntity(): ChallengeResultEntity = ChallengeResultEntity(
     score = score,
     maxScore = maxScore,
     completedAt = completedAt,
-    metadataJson = null,
+    metadataJson = metadata?.let { map ->
+        try {
+            DailyBattleJson.encodeToString(map)
+        } catch (_: Exception) {
+            null
+        }
+    },
 )
+
+/**
+ * Maps [ChallengeResult] into a [ChallengeResultEntity] with a deterministic primary key:
+ * `resultId = "${sessionId}_${challengeId}"`.
+ */
+fun ChallengeResult.toDeterministicEntity(
+    deterministicResultId: String = "${sessionId.value}_${challengeId.value}"
+): ChallengeResultEntity = toEntity().copy(resultId = deterministicResultId)

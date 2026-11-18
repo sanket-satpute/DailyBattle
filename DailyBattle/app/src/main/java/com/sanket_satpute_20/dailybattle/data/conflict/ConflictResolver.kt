@@ -50,9 +50,12 @@ interface ConflictResolver {
 }
 
 @Singleton
-class DefaultConflictResolver @Inject constructor(
-    private val json: Json = DailyBattleJson,
+class DefaultConflictResolver(
+    private val json: Json,
 ) : ConflictResolver {
+
+    @Inject
+    constructor() : this(DailyBattleJson)
 
     override fun isServerDataStale(cachedTimestamp: Long, remoteTimestamp: Long): Boolean {
         // Server response with older timestamp than local record indicates stale replication (§74)

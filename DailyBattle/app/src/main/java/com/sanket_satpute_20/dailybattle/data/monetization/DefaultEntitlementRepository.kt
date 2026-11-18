@@ -24,9 +24,12 @@ import javax.inject.Singleton
  * - Preserves free core experience by defaulting to [EntitlementState.Free].
  */
 @Singleton
-class DefaultEntitlementRepository @Inject constructor(
-    private val clock: Clock = Clock.systemDefaultZone()
+class DefaultEntitlementRepository(
+    private val clock: Clock,
 ) : EntitlementRepository {
+
+    @Inject
+    constructor() : this(Clock.systemDefaultZone())
 
     private val mutex = Mutex()
     private val entitlementsMap = mutableMapOf<String, Entitlement>()
