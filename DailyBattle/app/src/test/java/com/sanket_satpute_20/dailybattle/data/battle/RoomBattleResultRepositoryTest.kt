@@ -17,6 +17,8 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
+import com.sanket_satpute_20.dailybattle.data.local.entity.ChallengeResultEntity
+import com.sanket_satpute_20.dailybattle.data.local.fake.FakeChallengeResultDao
 import org.junit.Test
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -25,6 +27,7 @@ class RoomBattleResultRepositoryTest {
     private lateinit var fakeResultDao: FakeBattleResultDao
     private lateinit var fakeHistoryDao: FakeBattleHistoryDao
     private lateinit var fakeSessionDao: FakeBattleSessionDao
+    private lateinit var fakeChallengeDao: FakeChallengeResultDao
     private lateinit var repository: RoomBattleResultRepository
 
     @Before
@@ -32,7 +35,13 @@ class RoomBattleResultRepositoryTest {
         fakeResultDao = FakeBattleResultDao()
         fakeHistoryDao = FakeBattleHistoryDao()
         fakeSessionDao = FakeBattleSessionDao()
-        repository = RoomBattleResultRepository(fakeResultDao, fakeHistoryDao, fakeSessionDao)
+        fakeChallengeDao = FakeChallengeResultDao()
+        repository = RoomBattleResultRepository(
+            battleResultDao = fakeResultDao,
+            battleHistoryDao = fakeHistoryDao,
+            battleSessionDao = fakeSessionDao,
+            challengeResultDao = fakeChallengeDao,
+        )
     }
 
     @Test
@@ -51,17 +60,57 @@ class RoomBattleResultRepositoryTest {
             )
         )
 
+        fakeChallengeDao.insertResult(
+            ChallengeResultEntity(
+                resultId = "session_1_snap",
+                challengeId = "snap",
+                sessionId = "session_1",
+                score = 250,
+                maxScore = 300,
+                completedAt = 1100L,
+            )
+        )
+
         val result = repository.completeBattle(sessionId, "request_1")
         assertTrue(result is DomainResult.Success)
         val battleResult = (result as DomainResult.Success).value
         assertEquals("session_1", battleResult.sessionId.value)
         assertEquals("u1", battleResult.userId.value)
         assertEquals("b1", battleResult.battleId.value)
-        assertEquals(1000, battleResult.totalScore)
+        assertEquals(250, battleResult.totalScore)
 
         // Check DAO writes
         assertEquals(1, fakeResultDao.results.size)
+        assertEquals(250, fakeResultDao.results.values.first().totalScore)
         assertEquals(1, fakeHistoryDao.historyItems.size)
+        assertEquals(250, fakeHistoryDao.historyItems.first().score)
+    }
+
+    @Test
+    fun completeBattleWithoutRecordedChallengesYieldsZeroAndNeverFabricatesLegacyScore() = runTest {
+        val sessionId = BattleSessionId("session_empty")
+        fakeSessionDao.insertSession(
+            BattleSessionEntity(
+                sessionId = "session_empty",
+                userId = "u_empty",
+                battleId = "b_empty",
+                mode = "OFFICIAL",
+                status = "IN_PROGRESS",
+                currentChallenge = 1,
+                startedAt = 1000L,
+                completedAt = null,
+            )
+        )
+
+        val result = repository.completeBattle(sessionId, "req_empty")
+        assertTrue(result is DomainResult.Success)
+        val battleResult = (result as DomainResult.Success).value
+        org.junit.Assert.assertNotEquals(1000, battleResult.totalScore)
+        assertEquals(0, battleResult.totalScore)
+        assertEquals(0, battleResult.snapScore)
+        assertEquals(0, battleResult.shiftScore)
+        assertEquals(0, battleResult.crowdCallScore)
+        assertEquals(0, battleResult.consistencyScore)
     }
 
     @Test

@@ -19,6 +19,7 @@ import com.sanket_satpute_20.dailybattle.data.local.dao.RivalDao
 import com.sanket_satpute_20.dailybattle.data.local.dao.RivalMatchHistoryDao
 import com.sanket_satpute_20.dailybattle.data.local.dao.UserDao
 import com.sanket_satpute_20.dailybattle.data.local.database.DailyBattleDatabase
+import com.sanket_satpute_20.dailybattle.data.local.fake.FakeChallengeResultDao
 import com.sanket_satpute_20.dailybattle.domain.battle.BattleMode
 import com.sanket_satpute_20.dailybattle.domain.battle.BattleSession
 import com.sanket_satpute_20.dailybattle.domain.battle.BattleSessionStatus
@@ -154,6 +155,7 @@ class PartialWriteAndTransactionTest {
             battleResultDao = fakeResultDao,
             battleHistoryDao = failingHistoryDao,
             battleSessionDao = fakeSessionDao,
+            challengeResultDao = FakeChallengeResultDao(),
             database = fakeDb,
         )
 
@@ -183,6 +185,7 @@ class PartialWriteAndTransactionTest {
             battleResultDao = failingResultDao,
             battleHistoryDao = createDummyDao(),
             battleSessionDao = createDummyDao(),
+            challengeResultDao = FakeChallengeResultDao(),
         )
 
         val result = repository.getBattleResult(UserId("u-1"), BattleId("b-1"))

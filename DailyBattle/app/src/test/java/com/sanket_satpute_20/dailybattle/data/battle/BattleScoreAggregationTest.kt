@@ -251,20 +251,13 @@ class BattleScoreAggregationTest {
     }
 
     @Test
-    fun `fallback when challengeResultDao is null preserves legacy mock score behavior`() = runTest {
-        val legacyRepo = RoomBattleResultRepository(
-            battleResultDao = fakeResultDao,
-            battleHistoryDao = fakeHistoryDao,
-            battleSessionDao = fakeSessionDao,
-            challengeResultDao = null,
-        )
-
-        val sessionId = BattleSessionId("session_legacy")
+    fun `completeBattle never produces fabricated 1000 score when challenges are unrecorded`() = runTest {
+        val sessionId = BattleSessionId("session_unrecorded")
         fakeSessionDao.insertSession(
             BattleSessionEntity(
-                sessionId = "session_legacy",
-                userId = "user_legacy",
-                battleId = "battle_legacy",
+                sessionId = "session_unrecorded",
+                userId = "user_unrecorded",
+                battleId = "battle_unrecorded",
                 mode = "OFFICIAL",
                 status = "IN_PROGRESS",
                 currentChallenge = 3,
@@ -273,15 +266,17 @@ class BattleScoreAggregationTest {
             )
         )
 
-        val result = legacyRepo.completeBattle(sessionId, "req_legacy")
+        val result = repository.completeBattle(sessionId, "req_unrecorded")
         assertTrue(result is DomainResult.Success)
 
         val battleResult = (result as DomainResult.Success).value
-        assertEquals(300, battleResult.snapScore)
-        assertEquals(300, battleResult.shiftScore)
-        assertEquals(300, battleResult.crowdCallScore)
-        assertEquals(100, battleResult.consistencyScore)
-        assertEquals(1000, battleResult.totalScore)
+        // Regression: Ensure repository never produces the legacy fabricated 1,000-point score
+        org.junit.Assert.assertNotEquals(1000, battleResult.totalScore)
+        assertEquals(0, battleResult.snapScore)
+        assertEquals(0, battleResult.shiftScore)
+        assertEquals(0, battleResult.crowdCallScore)
+        assertEquals(0, battleResult.consistencyScore)
+        assertEquals(0, battleResult.totalScore)
     }
 
     private class FakeBattleResultDao : BattleResultDao {

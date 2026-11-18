@@ -17,11 +17,13 @@ import com.sanket_satpute_20.dailybattle.data.local.dao.UserDao
 import com.sanket_satpute_20.dailybattle.data.local.entity.BattleHistoryItemEntity
 import com.sanket_satpute_20.dailybattle.data.local.entity.BattleResultEntity
 import com.sanket_satpute_20.dailybattle.data.local.entity.BattleSessionEntity
+import com.sanket_satpute_20.dailybattle.data.local.entity.ChallengeResultEntity
 import com.sanket_satpute_20.dailybattle.data.local.entity.ChallengeSessionEntity
 import com.sanket_satpute_20.dailybattle.data.local.entity.ProfileEntity
 import com.sanket_satpute_20.dailybattle.data.local.entity.RivalEntity
 import com.sanket_satpute_20.dailybattle.data.local.entity.RivalMatchHistoryEntity
 import com.sanket_satpute_20.dailybattle.data.local.entity.UserEntity
+import com.sanket_satpute_20.dailybattle.data.local.fake.FakeChallengeResultDao
 import com.sanket_satpute_20.dailybattle.data.local.preferences.SettingsDataStore
 import com.sanket_satpute_20.dailybattle.data.profile.RoomProfileRepository
 import com.sanket_satpute_20.dailybattle.data.rival.RoomRivalRepository
@@ -87,7 +89,8 @@ class LocalStoragePersistenceComprehensiveTest {
         val resultDao = InMemoryBattleResultDao()
         val historyDao = InMemoryBattleHistoryDao()
         val sessionDao = InMemoryBattleSessionDao()
-        val repo = RoomBattleResultRepository(resultDao, historyDao, sessionDao)
+        val challengeDao = FakeChallengeResultDao()
+        val repo = RoomBattleResultRepository(resultDao, historyDao, sessionDao, challengeDao)
 
         sessionDao.insertSession(
             BattleSessionEntity(
@@ -102,13 +105,24 @@ class LocalStoragePersistenceComprehensiveTest {
             )
         )
 
+        challengeDao.insertResult(
+            ChallengeResultEntity(
+                resultId = "sess-100_snap",
+                challengeId = "snap",
+                sessionId = "sess-100",
+                score = 250,
+                maxScore = 300,
+                completedAt = 1100L,
+            )
+        )
+
         val completion = repo.completeBattle(BattleSessionId("sess-100"), "client-req-1")
         assertTrue("Completion must succeed", completion is DomainResult.Success)
         val result = (completion as DomainResult.Success).value
 
         assertEquals("user-100", result.userId.value)
         assertEquals("battle-2026-10-13", result.battleId.value)
-        assertEquals(1000, result.totalScore)
+        assertEquals(250, result.totalScore)
 
         // Verify write landed in both result and history tables
         assertEquals(1, resultDao.results.size)
@@ -123,7 +137,7 @@ class LocalStoragePersistenceComprehensiveTest {
         val resultDao = InMemoryBattleResultDao()
         val historyDao = InMemoryBattleHistoryDao()
         val sessionDao = InMemoryBattleSessionDao()
-        val repo = RoomBattleResultRepository(resultDao, historyDao, sessionDao)
+        val repo = RoomBattleResultRepository(resultDao, historyDao, sessionDao, FakeChallengeResultDao())
 
         val queryResult = repo.getBattleResult(UserId("unknown-user"), BattleId("unknown-battle"))
         assertTrue("Missing record must return Domain failure", queryResult is DomainResult.Failure)
@@ -139,7 +153,7 @@ class LocalStoragePersistenceComprehensiveTest {
         }
         val historyDao = InMemoryBattleHistoryDao()
         val sessionDao = InMemoryBattleSessionDao()
-        val repo = RoomBattleResultRepository(failingDao, historyDao, sessionDao)
+        val repo = RoomBattleResultRepository(failingDao, historyDao, sessionDao, FakeChallengeResultDao())
 
         val queryResult = repo.getBattleResult(UserId("user-1"), BattleId("battle-1"))
         assertTrue("Database failure must map to Persistence error", queryResult is DomainResult.Failure)

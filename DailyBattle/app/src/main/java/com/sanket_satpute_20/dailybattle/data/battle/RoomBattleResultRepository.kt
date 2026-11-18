@@ -39,7 +39,7 @@ class RoomBattleResultRepository @Inject constructor(
     private val battleResultDao: BattleResultDao,
     private val battleHistoryDao: BattleHistoryDao,
     private val battleSessionDao: BattleSessionDao,
-    private val challengeResultDao: ChallengeResultDao?,
+    private val challengeResultDao: ChallengeResultDao,
     private val database: DailyBattleDatabase?,
 ) : BattleResultRepository {
 
@@ -47,21 +47,8 @@ class RoomBattleResultRepository @Inject constructor(
         battleResultDao: BattleResultDao,
         battleHistoryDao: BattleHistoryDao,
         battleSessionDao: BattleSessionDao,
-    ) : this(battleResultDao, battleHistoryDao, battleSessionDao, null, null)
-
-    constructor(
-        battleResultDao: BattleResultDao,
-        battleHistoryDao: BattleHistoryDao,
-        battleSessionDao: BattleSessionDao,
-        challengeResultDao: ChallengeResultDao?,
+        challengeResultDao: ChallengeResultDao,
     ) : this(battleResultDao, battleHistoryDao, battleSessionDao, challengeResultDao, null)
-
-    constructor(
-        battleResultDao: BattleResultDao,
-        battleHistoryDao: BattleHistoryDao,
-        battleSessionDao: BattleSessionDao,
-        database: DailyBattleDatabase?,
-    ) : this(battleResultDao, battleHistoryDao, battleSessionDao, null, database)
 
     private val scoreAggregator = BattleScoreAggregator()
 
@@ -99,49 +86,36 @@ class RoomBattleResultRepository @Inject constructor(
                 return DomainResult.Success(domainResult)
             }
 
-            val (snapScore, shiftScore, crowdCallScore, consistencyScore, totalScore) = if (challengeResultDao != null) {
-                // Read actual challenge results for the specified session (never leaks across sessions)
-                val challengeEntities = challengeResultDao.getResultsForSession(sessionId.value)
-                val challengeResults = challengeEntities.map { it.toDomain() }
+            // Read actual challenge results for the specified session (never leaks across sessions)
+            val challengeEntities = challengeResultDao.getResultsForSession(sessionId.value)
+            val challengeResults = challengeEntities.map { it.toDomain() }
 
-                val snapResult = challengeResults.find {
-                    val id = it.challengeId.value.lowercase()
-                    id.contains("snap") || id == "c-1" || id == "1"
-                }
-                val shiftResult = challengeResults.find {
-                    val id = it.challengeId.value.lowercase()
-                    id.contains("shift") || id == "c-2" || id == "2"
-                }
-                val crowdCallResult = challengeResults.find {
-                    val id = it.challengeId.value.lowercase()
-                    id.contains("crowd") || id == "c-3" || id == "3"
-                }
-
-                // Aggregate scores: missing challenge results score 0; consistency requires all 3.
-                val aggregated = scoreAggregator.aggregate(
-                    mode = BattleMode.OFFICIAL,
-                    snapResult = snapResult,
-                    shiftResult = shiftResult,
-                    crowdCallResult = crowdCallResult,
-                )
-
-                AggregatedScoreHolder(
-                    snap = aggregated.snapScore,
-                    shift = aggregated.shiftScore,
-                    crowdCall = aggregated.crowdCallScore,
-                    consistency = aggregated.consistencyScore,
-                    total = aggregated.totalScore,
-                )
-            } else {
-                // Fallback for unit tests or legacy callers where ChallengeResultDao was not injected
-                AggregatedScoreHolder(
-                    snap = 300,
-                    shift = 300,
-                    crowdCall = 300,
-                    consistency = 100,
-                    total = 1000,
-                )
+            val snapResult = challengeResults.find {
+                val id = it.challengeId.value.lowercase()
+                id.contains("snap") || id == "c-1" || id == "1"
             }
+            val shiftResult = challengeResults.find {
+                val id = it.challengeId.value.lowercase()
+                id.contains("shift") || id == "c-2" || id == "2"
+            }
+            val crowdCallResult = challengeResults.find {
+                val id = it.challengeId.value.lowercase()
+                id.contains("crowd") || id == "c-3" || id == "3"
+            }
+
+            // Aggregate scores: missing challenge results score 0; consistency requires all 3.
+            val aggregated = scoreAggregator.aggregate(
+                mode = BattleMode.OFFICIAL,
+                snapResult = snapResult,
+                shiftResult = shiftResult,
+                crowdCallResult = crowdCallResult,
+            )
+
+            val snapScore = aggregated.snapScore
+            val shiftScore = aggregated.shiftScore
+            val crowdCallScore = aggregated.crowdCallScore
+            val consistencyScore = aggregated.consistencyScore
+            val totalScore = aggregated.totalScore
 
             val result = BattleResult(
                 resultId = BattleResultId(UUID.randomUUID().toString()),
@@ -217,11 +191,5 @@ class RoomBattleResultRepository @Inject constructor(
         }
     }
 
-    private data class AggregatedScoreHolder(
-        val snap: Int,
-        val shift: Int,
-        val crowdCall: Int,
-        val consistency: Int,
-        val total: Int,
-    )
+
 }

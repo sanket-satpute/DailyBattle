@@ -3,6 +3,8 @@ package com.sanket_satpute_20.dailybattle.integration
 import com.sanket_satpute_20.dailybattle.data.battle.RoomBattleResultRepository
 import com.sanket_satpute_20.dailybattle.data.battle.RoomBattleSessionRepository
 import com.sanket_satpute_20.dailybattle.data.local.entity.BattleResultEntity
+import com.sanket_satpute_20.dailybattle.data.local.entity.ChallengeResultEntity
+import com.sanket_satpute_20.dailybattle.data.local.fake.FakeChallengeResultDao
 import com.sanket_satpute_20.dailybattle.data.local.entity.BattleSessionEntity
 import com.sanket_satpute_20.dailybattle.domain.battle.BattleMode
 import com.sanket_satpute_20.dailybattle.domain.battle.BattleSession
@@ -49,6 +51,7 @@ class BattleResultsVerticalStackIntegrationTest {
     private lateinit var battleHistoryDao: InMemoryBattleHistoryDao
     private lateinit var battleSessionDao: InMemoryBattleSessionDao
     private lateinit var challengeSessionDao: InMemoryChallengeSessionDao
+    private lateinit var challengeResultDao: FakeChallengeResultDao
 
     private lateinit var battleResultRepository: RoomBattleResultRepository
     private lateinit var battleSessionRepository: RoomBattleSessionRepository
@@ -61,11 +64,13 @@ class BattleResultsVerticalStackIntegrationTest {
         battleHistoryDao = InMemoryBattleHistoryDao()
         battleSessionDao = InMemoryBattleSessionDao()
         challengeSessionDao = InMemoryChallengeSessionDao()
+        challengeResultDao = FakeChallengeResultDao()
 
         battleResultRepository = RoomBattleResultRepository(
             battleResultDao = battleResultDao,
             battleHistoryDao = battleHistoryDao,
             battleSessionDao = battleSessionDao,
+            challengeResultDao = challengeResultDao,
             database = null
         )
 
@@ -89,7 +94,7 @@ class BattleResultsVerticalStackIntegrationTest {
         val battleId = BattleId("battle-oct-13")
         val sessionId = BattleSessionId("session-xyz")
 
-        // 1. Pre-insert in-progress official battle in BattleSessionDao
+        // 1. Pre-insert in-progress official battle in BattleSessionDao and challenge results in ChallengeResultDao
         battleSessionDao.insertSession(
             BattleSessionEntity(
                 sessionId = sessionId.value,
@@ -100,6 +105,36 @@ class BattleResultsVerticalStackIntegrationTest {
                 currentChallenge = 3,
                 startedAt = 1000L,
                 completedAt = null
+            )
+        )
+        challengeResultDao.insertResult(
+            ChallengeResultEntity(
+                resultId = "${sessionId.value}_snap",
+                challengeId = "snap",
+                sessionId = sessionId.value,
+                score = 300,
+                maxScore = 300,
+                completedAt = 1000L,
+            )
+        )
+        challengeResultDao.insertResult(
+            ChallengeResultEntity(
+                resultId = "${sessionId.value}_shift",
+                challengeId = "shift",
+                sessionId = sessionId.value,
+                score = 300,
+                maxScore = 300,
+                completedAt = 1000L,
+            )
+        )
+        challengeResultDao.insertResult(
+            ChallengeResultEntity(
+                resultId = "${sessionId.value}_crowd_call",
+                challengeId = "crowd_call",
+                sessionId = sessionId.value,
+                score = 300,
+                maxScore = 300,
+                completedAt = 1000L,
             )
         )
 
@@ -163,6 +198,7 @@ class BattleResultsVerticalStackIntegrationTest {
             battleResultDao = failingDao,
             battleHistoryDao = battleHistoryDao,
             battleSessionDao = battleSessionDao,
+            challengeResultDao = FakeChallengeResultDao(),
             database = null
         )
         val vmWithFailingDao = ResultsViewModel(repoWithFailingDao)

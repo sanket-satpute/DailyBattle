@@ -9,6 +9,7 @@ import com.sanket_satpute_20.dailybattle.data.local.entity.BattleResultEntity
 import com.sanket_satpute_20.dailybattle.data.local.entity.BattleSessionEntity
 import com.sanket_satpute_20.dailybattle.data.local.entity.FriendEntity
 import com.sanket_satpute_20.dailybattle.data.local.entity.RivalMatchHistoryEntity
+import com.sanket_satpute_20.dailybattle.data.local.fake.FakeChallengeResultDao
 import com.sanket_satpute_20.dailybattle.data.local.mapper.toDomain
 import com.sanket_satpute_20.dailybattle.domain.battle.Battle
 import com.sanket_satpute_20.dailybattle.domain.battle.BattleEngine
@@ -141,7 +142,8 @@ class StateCorruptionE2ETest {
         val repo = RoomBattleResultRepository(
             battleResultDao = failingDao,
             battleHistoryDao = historyDao,
-            battleSessionDao = sessionDao
+            battleSessionDao = sessionDao,
+            challengeResultDao = FakeChallengeResultDao(),
         )
 
         val result = repo.completeBattle(BattleSessionId("sess-1"), "req-1")
@@ -354,7 +356,8 @@ class StateCorruptionE2ETest {
         val repo = RoomBattleResultRepository(
             battleResultDao = seededDao,
             battleHistoryDao = historyDao,
-            battleSessionDao = sessionDao
+            battleSessionDao = sessionDao,
+            challengeResultDao = FakeChallengeResultDao(),
         )
 
         val result = repo.completeBattle(BattleSessionId("sess-1"), "req-new-attempt")

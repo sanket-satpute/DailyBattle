@@ -2,6 +2,7 @@
 
 import androidx.lifecycle.SavedStateHandle
 import com.sanket_satpute_20.dailybattle.data.battle.RoomBattleResultRepository
+import com.sanket_satpute_20.dailybattle.data.local.fake.FakeChallengeResultDao
 import com.sanket_satpute_20.dailybattle.data.battle.RoomBattleSessionRepository
 import com.sanket_satpute_20.dailybattle.data.friend.RoomFriendRepository
 import com.sanket_satpute_20.dailybattle.data.local.entity.BattleResultEntity
@@ -101,6 +102,7 @@ class SocialVerticalStackIntegrationTest {
             battleResultDao = battleResultDao,
             battleHistoryDao = battleHistoryDao,
             battleSessionDao = battleSessionDao,
+            challengeResultDao = FakeChallengeResultDao(),
             database = null
         )
 

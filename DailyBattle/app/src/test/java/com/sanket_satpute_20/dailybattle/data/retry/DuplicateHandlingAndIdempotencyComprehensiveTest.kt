@@ -11,6 +11,7 @@ import com.sanket_satpute_20.dailybattle.data.local.entity.BattleHistoryItemEnti
 import com.sanket_satpute_20.dailybattle.data.local.entity.BattleResultEntity
 import com.sanket_satpute_20.dailybattle.data.local.entity.BattleSessionEntity
 import com.sanket_satpute_20.dailybattle.data.local.entity.FriendEntity
+import com.sanket_satpute_20.dailybattle.data.local.fake.FakeChallengeResultDao
 import com.sanket_satpute_20.dailybattle.data.sync.InMemorySyncQueueStore
 import com.sanket_satpute_20.dailybattle.data.sync.PendingOperation
 import com.sanket_satpute_20.dailybattle.data.sync.SyncOperationType
@@ -55,7 +56,7 @@ class DuplicateHandlingAndIdempotencyComprehensiveTest {
         val resultDao = FakeBattleResultDao()
         val historyDao = FakeBattleHistoryDao()
         val sessionDao = FakeBattleSessionDao()
-        val repo = RoomBattleResultRepository(resultDao, historyDao, sessionDao)
+        val repo = RoomBattleResultRepository(resultDao, historyDao, sessionDao, FakeChallengeResultDao())
 
         sessionDao.insertSession(
             BattleSessionEntity(
@@ -112,7 +113,7 @@ class DuplicateHandlingAndIdempotencyComprehensiveTest {
             )
         )
 
-        val repo = RoomBattleResultRepository(resultDao, historyDao, sessionDao)
+        val repo = RoomBattleResultRepository(resultDao, historyDao, sessionDao, FakeChallengeResultDao())
 
         // Attempting to complete using a NEW clientRequestId
         val call = repo.completeBattle(BattleSessionId("sess-pre-existing"), "req-new-id")

@@ -1,6 +1,7 @@
 ﻿package com.sanket_satpute_20.dailybattle.integration
 
 import com.sanket_satpute_20.dailybattle.data.battle.RoomBattleResultRepository
+import com.sanket_satpute_20.dailybattle.data.local.fake.FakeChallengeResultDao
 import com.sanket_satpute_20.dailybattle.data.local.entity.BattleResultEntity
 import com.sanket_satpute_20.dailybattle.data.local.entity.UserEntity
 import com.sanket_satpute_20.dailybattle.data.profile.RoomProfileRepository
@@ -74,6 +75,7 @@ class ProfileAndHistoryVerticalStackIntegrationTest {
             battleResultDao = battleResultDao,
             battleHistoryDao = battleHistoryDao,
             battleSessionDao = battleSessionDao,
+            challengeResultDao = FakeChallengeResultDao(),
             database = null
         )
 

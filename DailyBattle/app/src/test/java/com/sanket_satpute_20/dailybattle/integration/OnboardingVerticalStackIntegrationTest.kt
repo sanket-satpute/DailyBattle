@@ -7,6 +7,7 @@ import com.sanket_satpute_20.dailybattle.core.lifecycle.LifecycleBattlePreserver
 import com.sanket_satpute_20.dailybattle.core.lifecycle.ProcessDeathRecoverer
 import com.sanket_satpute_20.dailybattle.core.lifecycle.DefaultProcessDeathRecoverer
 import com.sanket_satpute_20.dailybattle.data.battle.RoomBattleResultRepository
+import com.sanket_satpute_20.dailybattle.data.local.fake.FakeChallengeResultDao
 import com.sanket_satpute_20.dailybattle.data.battle.RoomBattleSessionRepository
 import com.sanket_satpute_20.dailybattle.data.user.RoomUserRepository
 import com.sanket_satpute_20.dailybattle.domain.battle.ActiveBattleSessionManager
@@ -81,6 +82,7 @@ class OnboardingVerticalStackIntegrationTest {
             battleResultDao = battleResultDao,
             battleHistoryDao = battleHistoryDao,
             battleSessionDao = battleSessionDao,
+            challengeResultDao = FakeChallengeResultDao(),
             database = null
         )
     }
